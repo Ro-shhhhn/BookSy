@@ -3,6 +3,7 @@ const app = express();
 const mongoose = require('mongoose');
 const path = require("path");
 const session = require('express-session');
+const MongoStore = require('connect-mongo'); // You'll need to install this: npm install connect-mongo --save
 const cookieParser = require('cookie-parser');
 const fs = require('fs');
 const methodOverride = require('method-override');
@@ -15,13 +16,17 @@ require('dotenv').config();
 require('./config/passport');
 const cartRoutes = require('./routes/cartRoutes');
 
-// Updated MongoDB connection using environment variable
+// Updated MongoDB connection using environment variable with improved error handling
 mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/BookSy', {
     useNewUrlParser: true,
     useUnifiedTopology: true
 })
 .then(() => console.log("MongoDB Connected..."))
-.catch(err => console.log("MongoDB Connection Error:", err));
+.catch(err => {
+    console.log("MongoDB Connection Error:", err);
+    // Log more details about the connection
+    console.log("Connection URI:", process.env.MONGODB_URI ? "URI defined" : "URI undefined");
+});
 
 const uploadDir = path.join(__dirname, 'public/uploads/products');
 if (!fs.existsSync(uploadDir)) {
@@ -37,16 +42,23 @@ app.use(cookieParser());
 app.use(methodOverride('_method'));
 app.use(flash());
 
-// Session configuration
+// Updated session configuration with MongoStore for production
 app.use(session({
     secret: process.env.SESSION_SECRET || 'your-strong-secret-key',
     resave: false,
     saveUninitialized: false,
+    store: MongoStore.create({
+        mongoUrl: process.env.MONGODB_URI,
+        ttl: 14 * 24 * 60 * 60, // 14 days
+        autoRemove: 'native'
+    }),
     cookie: { 
         maxAge: 24 * 60 * 60 * 1000,
-        secure: process.env.NODE_ENV === 'production'
+        secure: process.env.NODE_ENV === 'production',
+        sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax'
     }
 }));
+
 app.use((req, res, next) => {
     res.locals.session = req.session;
     next();
@@ -114,15 +126,21 @@ app.use((req, res, next) => {
     res.locals.successMessage = req.flash('success');
     res.locals.errorMessage = req.flash('error');
     next();
-  });
+});
+
+// Status endpoint for health checks
+app.get('/status', (req, res) => {
+    res.status(200).json({ status: 'ok', mongoConnection: mongoose.connection.readyState === 1 });
+});
+
 app.use((req, res) => res.status(404).render('error', { message: 'Page not found' }));
 app.use((err, req, res, next) => {
     console.error(err.stack);
     res.status(500).render('error', { message: 'Server error' });
 });
 
-// Use environment variable for port or default to 3000
-const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => {
-    console.log(`Server running on http://localhost:${PORT}`);
+// Updated to listen on all interfaces for Render
+const PORT = process.env.PORT || 10000;
+app.listen(PORT, '0.0.0.0', () => {
+    console.log(`Server running on port ${PORT}`);
 });
