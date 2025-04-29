@@ -10,10 +10,16 @@ const bodyParser = require('body-parser');
 const passport = require('passport');
 const flash = require('connect-flash');
 
+// Load environment variables first to ensure they're available
 require('dotenv').config();
 require('./config/passport');
 const cartRoutes = require('./routes/cartRoutes');
-mongoose.connect('mongodb://localhost:27017/BookSy')
+
+// Updated MongoDB connection using environment variable
+mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/BookSy', {
+    useNewUrlParser: true,
+    useUnifiedTopology: true
+})
 .then(() => console.log("MongoDB Connected..."))
 .catch(err => console.log("MongoDB Connection Error:", err));
 
@@ -115,6 +121,8 @@ app.use((err, req, res, next) => {
     res.status(500).render('error', { message: 'Server error' });
 });
 
-app.listen(3000, () => {
-    console.log("Server running on http://localhost:3000");
+// Use environment variable for port or default to 3000
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, () => {
+    console.log(`Server running on http://localhost:${PORT}`);
 });
