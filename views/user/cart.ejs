@@ -1,0 +1,884 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>BookSy - Your Favorite Bookstore</title>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+       .page-gradient-bg {
+        background: linear-gradient(135deg, #f3e7d3 0%, #e6d7c3 25%, #d9c7b3 50%, #e6d7c3 75%, #f3e7d3 100%);
+    }
+    .book-card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+    }
+    .hero-section {
+      background-image: linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)), url('/api/placeholder/1200/400');
+      background-size: cover;
+      background-position: center;
+    }
+     /* Animation keyframes */
+  @keyframes fadeInUp {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  
+  @keyframes floatBook {
+    0% { transform: translateY(0) rotate(0deg); }
+    50% { transform: translateY(-10px) rotate(3deg); }
+    100% { transform: translateY(0) rotate(0deg); }
+  }
+  
+  /* Applied animations */
+  .animate-fadeInUp {
+    animation: fadeInUp 1s ease-out forwards;
+  }
+  
+  .animate-float {
+    animation: floatBook 3s ease-in-out infinite;
+  }
+  
+  /* Book styling */
+  .book-cover {
+    height: 220px;
+    width: 150px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+    transition: transform 0.3s ease;
+    border-radius: 4px;
+    overflow: hidden;
+  }
+  
+  .book-cover:hover {
+    transform: translateY(-10px) scale(1.05);
+  }
+  
+  /* Active slide */
+  .hero-slide.active {
+    opacity: 1;
+    z-index: 10;
+  }
+  
+  /* Active indicator */
+  .slide-indicator.active {
+    opacity: 1;
+    width: 24px;
+  }
+  @keyframes gradient-shift {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+  }
+  
+  .animate-gradient-shift {
+    background-size: 200% 200%;
+    animation: gradient-shift 10s ease infinite;
+  }
+  </style>
+</head>
+<body class="bg-gray-50">
+
+<!-- Navbar -->
+<!-- Navbar -->
+<nav class="bg-gradient-to-r from-[#C3A18B] to-[#A7886D] shadow-lg py-6 sticky top-0 z-50">
+    <div class="container mx-auto px-4">
+      <div class="flex justify-between items-center">
+        <!-- Logo -->
+        <div class="flex items-center">
+          <a href="/" class="flex items-center space-x-2 group">
+            <i class="fas fa-book-open text-amber-200 text-2xl group-hover:text-white transition-colors duration-300"></i>
+            <span class="text-white text-2xl font-extrabold tracking-wider group-hover:text-amber-200 transition-colors duration-300">BookSy</span>
+          </a>
+        </div>
+  
+        <!-- Desktop Navigation -->
+        <div class="hidden md:flex items-center space-x-8">
+          <a href="/" class="text-white hover:text-amber-200 transition-colors duration-300 font-medium relative group">
+            Home
+            <span class="absolute -bottom-1 left-0 w-0 h-0.5 bg-amber-200 group-hover:w-full transition-all duration-300"></span>
+          </a>
+          <a href="/products" class="text-white hover:text-amber-200 transition-colors duration-300 font-medium relative group">
+            Books
+            <span class="absolute -bottom-1 left-0 w-0 h-0.5 bg-amber-200 group-hover:w-full transition-all duration-300"></span>
+          </a>
+          <a href="/about" class="text-white hover:text-amber-200 transition-colors duration-300 font-medium relative group">
+            About
+            <span class="absolute -bottom-1 left-0 w-0 h-0.5 bg-amber-200 group-hover:w-full transition-all duration-300"></span>
+          </a>
+          <a href="/contact" class="text-white hover:text-amber-200 transition-colors duration-300 font-medium relative group">
+            Contact
+            <span class="absolute -bottom-1 left-0 w-0 h-0.5 bg-amber-200 group-hover:w-full transition-all duration-300"></span>
+          </a>
+        </div>
+  
+        <!-- Icons and Actions -->
+        <div class="flex items-center space-x-5">
+          <!-- Wishlist -->
+          <a href="/wishlist" class="text-white hover:text-amber-200 transition-colors duration-300 text-lg flex items-center">
+            <i class="far fa-heart text-xl mr-1"></i>
+            <span class="hidden md:inline">Wishlist</span>
+          </a>
+  
+          <!-- Cart Icon -->
+          <a href="/cart" class="text-white hover:text-amber-200 transition-colors duration-300 relative group">
+            <div class="relative">
+              <i class="fa-solid fa-cart-shopping text-xl"></i>
+              <span class="absolute -top-2 -right-2 bg-amber-200 text-[#AB8462] text-xs font-bold rounded-full h-5 w-5 flex items-center justify-center group-hover:bg-white transition-colors duration-300">
+                <%= locals.cartCount || 0 %>
+              </span>
+            </div>
+          </a>
+  
+          <!-- Profile/Sign In -->
+          <% if (locals.session && session.userId) { %>
+            <div class="relative group">
+              <button class="text-white hover:text-amber-200 transition-colors duration-300 focus:outline-none flex items-center">
+                <% if (locals.user && user.profilePicture) { %>
+                  <img src="<%= user.profilePicture %>" alt="Profile" class="w-8 h-8 rounded-full object-cover border-2 border-amber-200 hover:border-white transition-colors duration-300">
+                <% } else { %>
+                  <div class="w-8 h-8 rounded-full bg-amber-200 text-[#AB8462] flex items-center justify-center border-2 border-amber-200 hover:bg-white transition-colors duration-300">
+                    <i class="fa-solid fa-user"></i>
+                  </div>
+                <% } %>
+              </button>
+              <!-- Dropdown -->
+              <div class="absolute right-0 mt-2 w-64 bg-white rounded-lg shadow-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300 ease-in-out transform origin-top-right translate-y-2 group-hover:translate-y-0">
+                <div class="py-2 rounded-lg overflow-hidden">
+                  <div class="px-4 py-3 bg-[#AB8462] text-white">
+                    <% if (locals.user && user.name) { %>
+                      <p class="font-medium"><%= user.name %></p>
+                      <p class="text-sm text-gray-200 truncate"><%= user.email %></p>
+                    <% } else { %>
+                      <p class="font-medium">My Account</p>
+                    <% } %>
+                  </div>
+                  <a href="/profile" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition duration-200 flex items-center">
+                    <i class="fa-solid fa-user-circle mr-2 text-[#AB8462]"></i> My Profile
+                  </a>
+                  <a href="/orders" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition duration-200 flex items-center">
+                    <i class="fa-solid fa-shopping-bag mr-2 text-[#AB8462]"></i> My Orders
+                  </a>
+                  <a href="/addresses" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition duration-200 flex items-center">
+                    <i class="fa-solid fa-address-book mr-2 text-[#AB8462]"></i> Addresses
+                  </a>
+                  <a href="/wishlist" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition duration-200 flex items-center">
+                    <i class="fa-solid fa-heart mr-2 text-[#AB8462]"></i> Wishlist
+                  </a>
+                  <div class="border-t border-gray-200 my-1"></div>
+                  <a href="/logout" class="block px-4 py-2 text-sm text-red-600 hover:bg-red-50 transition duration-200 flex items-center">
+                    <i class="fa-solid fa-sign-out-alt mr-2"></i> Logout
+                  </a>
+                </div>
+              </div>
+            </div>
+          <% } else { %>
+            <a href="/login" class="bg-amber-200 hover:bg-white text-[#AB8462] font-medium py-2 px-4 rounded-full transition-colors duration-300 flex items-center shadow-md hover:shadow-lg">
+              <i class="fa-solid fa-sign-in-alt mr-2"></i> Sign In
+            </a>
+          <% } %>
+  
+          <!-- Mobile Menu Toggle -->
+          <button id="mobile-menu-toggle" class="md:hidden text-white hover:text-amber-200 focus:outline-none transition-colors duration-300">
+            <i class="fa-solid fa-bars text-xl"></i>
+          </button>
+        </div>
+      </div>
+    </div>
+  </nav>
+<div class="container mx-auto px-4 py-8">
+  <h1 class="text-3xl font-bold mb-8">Your Shopping Cart</h1>
+  
+  <% if (cart && ((cart.items && cart.items.length > 0) || (cart.unavailableItems && cart.unavailableItems.length > 0))) { %>
+    <% if (locals.itemsRestoredCount && locals.itemsRestoredCount > 0) { %>
+      <div class="bg-green-100 border-l-4 border-green-500 text-green-700 p-4 mb-6" role="alert">
+        <p class="font-bold">Good news!</p>
+        <p><%= locals.itemsRestoredCount %> <%= locals.itemsRestoredCount === 1 ? 'item' : 'items' %> in your cart <%= locals.itemsRestoredCount === 1 ? 'has' : 'have' %> become available again and can now be purchased.</p>
+      </div>
+    <% } %>
+    
+    <% if (cart.unavailableItems && cart.unavailableItems.length > 0) { %>
+      <div class="bg-yellow-100 border-l-4 border-yellow-500 text-yellow-700 p-4 mb-6" role="alert">
+        <p class="font-bold">Attention</p>
+        <p>One or more items in your cart are no longer available or out of stock. Please remove them to proceed to checkout.</p>
+      </div>
+    <% } %>
+    
+    <div class="flex flex-col lg:flex-row gap-8">
+      <!-- Cart Items -->
+      <div class="lg:w-2/3">
+        <div class="bg-white rounded-lg shadow-md">
+          <div class="border-b py-3 px-4 flex items-center font-medium text-gray-600">
+            <div class="w-full lg:w-2/5">Product</div>
+            <div class="hidden lg:block lg:w-1/5 text-center">Price</div>
+            <div class="hidden lg:block lg:w-1/5 text-center">Quantity</div>
+            <div class="hidden lg:block lg:w-1/5 text-center">Subtotal</div>
+          </div>
+          
+          <!-- Available Items -->
+          <% cart.items.forEach(item => { %>
+            <div class="p-4 border-b last:border-b-0 flex flex-col lg:flex-row items-center">
+              <!-- Product info -->
+              <div class="w-full lg:w-2/5 flex items-center mb-4 lg:mb-0">
+                <div class="w-20 h-20 flex-shrink-0">
+                  <img src="<%= item.product.coverImage %>" alt="<%= item.product.title %>" class="w-full h-full object-cover rounded">
+                </div>
+                <div class="ml-4">
+                  <h3 class="text-lg font-medium"><%= item.product.title %></h3>
+                  <p class="text-gray-600 text-sm">By <%= item.product.author %></p>
+                  
+                  <!-- Display offer information -->
+                  <% if (item.discountSource === 'category') { %>
+                    <p class="text-green-600 text-sm font-medium">Category offer: <%= item.discountPercentage %>% off</p>
+                  <% } else if (item.discountSource === 'product') { %>
+                    <p class="text-green-600 text-sm font-medium">Product offer: <%= item.discountPercentage %>% off</p>
+                  <% } %>
+                  
+                  <button type="button" class="text-red-500 text-sm mt-1 remove-item" data-item-id="<%= item.product._id %>">Remove</button>
+                </div>
+              </div>
+              
+              <!-- Price (mobile and desktop) -->
+              <div class="w-full lg:w-1/5 flex justify-between items-center lg:justify-center mb-3 lg:mb-0">
+                <span class="lg:hidden">Price:</span>
+                <div>
+                  <% if (item.discountSource && item.discountSource !== 'none') { %>
+                    <span class="line-through text-gray-500 text-sm">₹<%= item.product.price.toFixed(2) %></span>
+                    <span class="text-green-600">₹<%= item.price.toFixed(2) %></span>
+                  <% } else { %>
+                    <span>₹<%= item.price.toFixed(2) %></span>
+                  <% } %>
+                </div>
+              </div>
+              
+              <!-- Quantity controls -->
+              <div class="w-full lg:w-1/5 flex justify-between items-center lg:justify-center mb-3 lg:mb-0">
+                <span class="lg:hidden">Quantity:</span>
+                <div class="flex items-center">
+                  <!-- Modify the quantity buttons in your cart.ejs file -->
+                  <button type="button" class="quantity-btn bg-gray-200 px-3 py-1 rounded-l-md decrement-quantity" data-item-id="<%= item.product._id %>">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 12H4" />
+                    </svg>
+                  </button>
+                  <input type="number" class="quantity-input border text-center w-12 py-1" value="<%= item.quantity %>" min="1" max="<%= Math.min(4, item.product.stock) %>" data-item-id="<%= item.product._id %>" readonly>
+                  <button type="button" class="quantity-btn bg-gray-200 px-3 py-1 rounded-r-md increment-quantity" data-item-id="<%= item.product._id %>">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+                    </svg>
+                  </button>
+                </div>
+              </div>
+              
+              <!-- Subtotal (mobile and desktop) -->
+              <div class="w-full lg:w-1/5 flex justify-between items-center lg:justify-center">
+                <span class="lg:hidden">Subtotal:</span>
+                <span class="font-medium">₹<%= (item.price * item.quantity).toFixed(2) %></span>
+              </div>
+            </div>
+          <% }) %>
+          
+          <!-- Unavailable Items -->
+          <% if (cart.unavailableItems && cart.unavailableItems.length > 0) { %>
+            <div class="bg-gray-50 p-2 border-t">
+              <h3 class="text-md font-medium text-gray-700 px-4 py-2">Unavailable Items</h3>
+            </div>
+            
+            <% cart.unavailableItems.forEach(unavailableItem => { %>
+              <div class="p-4 border-b last:border-b-0 flex flex-col lg:flex-row items-center opacity-50">
+                <!-- Product info -->
+                <div class="w-full lg:w-2/5 flex items-center mb-4 lg:mb-0">
+                  <div class="w-20 h-20 flex-shrink-0">
+                    <img src="<%= unavailableItem.item.product.coverImage %>" alt="<%= unavailableItem.item.product.title %>" class="w-full h-full object-cover rounded">
+                  </div>
+                  <div class="ml-4">
+                    <h3 class="text-lg font-medium"><%= unavailableItem.item.product.title %></h3>
+                    <p class="text-gray-600 text-sm">By <%= unavailableItem.item.product.author %></p>
+                    <p class="text-red-500 text-sm mt-1">
+                      <% if (unavailableItem.reason === 'outOfStock') { %>
+                        Out of stock
+                      <% } else if (unavailableItem.reason === 'productUnavailable') { %>
+                        No longer available
+                      <% } else { %>
+                        Category unavailable
+                      <% } %>
+                    </p>
+                    <button type="button" class="text-red-500 text-sm mt-1 remove-item" data-item-id="<%= unavailableItem.item.product._id %>">Remove</button>
+                  </div>
+                </div>
+                
+                <!-- Price (mobile and desktop) -->
+                <div class="w-full lg:w-1/5 flex justify-between items-center lg:justify-center mb-3 lg:mb-0">
+                  <span class="lg:hidden">Price:</span>
+                  <span>₹<%= unavailableItem.item.price.toFixed(2) %></span>
+                </div>
+                
+                <!-- Quantity controls (disabled) -->
+                <div class="w-full lg:w-1/5 flex justify-between items-center lg:justify-center mb-3 lg:mb-0">
+                  <span class="lg:hidden">Quantity:</span>
+                  <div class="flex items-center">
+                    <button type="button" class="quantity-btn bg-gray-200 px-3 py-1 rounded-l-md" disabled>
+                      <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 12H4" />
+                      </svg>
+                    </button>
+                    <input type="number" class="quantity-input border text-center w-12 py-1" value="<%= unavailableItem.item.quantity %>" readonly disabled>
+                    <button type="button" class="quantity-btn bg-gray-200 px-3 py-1 rounded-r-md" disabled>
+                      <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+                      </svg>
+                    </button>
+                  </div>
+                </div>
+                
+                <!-- Subtotal (mobile and desktop) -->
+                <div class="w-full lg:w-1/5 flex justify-between items-center lg:justify-center">
+                  <span class="lg:hidden">Subtotal:</span>
+                  <span class="font-medium">₹<%= (unavailableItem.item.price * unavailableItem.item.quantity).toFixed(2) %></span>
+                </div>
+              </div>
+            <% }) %>
+          <% } %>
+        </div>
+      </div>
+      
+    <!-- Order Summary -->
+    <div class="lg:w-1/3">
+      <div class="bg-white rounded-lg shadow-md p-6">
+        <h2 class="text-xl font-bold mb-4">Order Summary</h2>
+        
+        <div class="border-t border-b py-4 mb-4">
+          <div class="flex justify-between mb-2">
+            <span>Subtotal</span>
+            <span>₹<%= cart.totalAmount.toFixed(2) %></span>
+          </div>
+          
+          <!-- Add this section to show offers -->
+          <%
+          // Initialize these flags in case items don't have discount info
+          let hasProductOffers = false;
+          let hasCategoryOffers = false;
+          
+          if (cart && cart.items) {
+            cart.items.forEach(item => {
+              if (item.discountSource === 'product') hasProductOffers = true;
+              if (item.discountSource === 'category') hasCategoryOffers = true;
+            });
+          }
+        %>
+          <% if (hasProductOffers || hasCategoryOffers) { %>
+            <div class="border-t pt-2 mt-2">
+              <div class="text-green-600 font-medium mb-1">Applied Offers:</div>
+              <% if (hasProductOffers) { %>
+                <div class="flex justify-between mb-1 text-sm">
+                  <span>Product Offers</span>
+                  <span>Applied</span>
+                </div>
+              <% } %>
+              <% if (hasCategoryOffers) { %>
+                <div class="flex justify-between mb-1 text-sm">
+                  <span>Category Offers</span>
+                  <span>Applied</span>
+                </div>
+              <% } %>
+            </div>
+          <% } %>
+          
+          <div class="flex justify-between">
+            <span>Shipping</span>
+            <span>Free</span>
+          </div>
+        </div>
+        
+        <div class="flex justify-between font-bold text-lg mb-6">
+          <span>Total</span>
+          <span>₹<%= cart.totalAmount.toFixed(2) %></span>
+        </div>
+        
+        <!-- Replace the "Proceed to Checkout" link with a button -->
+        <button id="proceed-to-checkout-btn" class="block text-center <%= cart.unavailableItems && cart.unavailableItems.length > 0 ? 'bg-gray-400 cursor-not-allowed' : 'bg-blue-600 hover:bg-blue-700' %> text-white py-3 px-4 rounded-md font-medium w-full" <%= cart.unavailableItems && cart.unavailableItems.length > 0 ? 'onclick="event.preventDefault(); showUnavailableItemsAlert();"' : '' %>>
+          Proceed to Checkout
+        </button>
+      </div>
+    </div>
+    </div>
+  <% } else { %>
+    <div class="text-center py-16 bg-white rounded-lg shadow">
+      <svg xmlns="http://www.w3.org/2000/svg" class="h-16 w-16 text-gray-400 mx-auto mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
+      </svg>
+      <h2 class="text-2xl font-bold mb-4">Your cart is empty</h2>
+      <p class="text-gray-600 mb-8">Looks like you haven't added any books to your cart yet.</p>
+      <a href="/products" class="inline-block bg-blue-600 text-white py-3 px-6 rounded-md font-medium hover:bg-blue-700">
+        Continue Shopping
+      </a>
+    </div>
+  <% } %>
+</div>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  // Add this function to show alert when checkout is attempted with unavailable items
+  window.showUnavailableItemsAlert = function() {
+    const toast = document.createElement('div');
+    toast.className = 'fixed top-4 right-4 bg-red-100 border-l-4 border-red-500 text-red-700 p-4 rounded shadow-md z-50';
+    toast.innerHTML = `
+      <div class="flex items-center">
+        <div class="mr-2">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+          </svg>
+        </div>
+        <p>Please remove unavailable items from your cart to proceed to checkout.</p>
+      </div>
+    `;
+    document.body.appendChild(toast);
+    
+    // Remove the toast after 4 seconds
+    setTimeout(() => {
+      document.body.removeChild(toast);
+    }, 4000);
+  };
+  
+  // Add validation check before proceeding to checkout
+  const checkoutButton = document.getElementById('proceed-to-checkout-btn');
+  if (checkoutButton) {
+    checkoutButton.addEventListener('click', function(event) {
+      // Only run validation if the button is not already disabled due to unavailable items
+      if (!this.classList.contains('cursor-not-allowed')) {
+        event.preventDefault();
+        validateCartBeforeCheckout();
+      }
+    });
+  }
+
+  // Function to validate cart before checkout
+  function validateCartBeforeCheckout() {
+    fetch('/cart/validate', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      }
+    })
+    .then(response => response.json())
+    .then(data => {
+      if (data.success) {
+        // If validation is successful, redirect to checkout
+        window.location.href = '/checkout';
+      } else {
+        // If validation fails, show error message
+        showValidationError(data);
+      }
+    })
+    .catch(error => {
+      console.error('Error validating cart:', error);
+      showToast('An error occurred while validating your cart', 'error');
+    });
+  }
+
+  // Function to show validation error
+  function showValidationError(data) {
+    // Create a modal to display invalid items
+    const modal = document.createElement('div');
+    modal.className = 'fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50';
+    
+    let invalidItemsHtml = '';
+    if (data.invalidItems && data.invalidItems.length > 0) {
+      invalidItemsHtml = `
+        <ul class="text-red-600 mt-2 mb-4">
+          ${data.invalidItems.map(item => `<li class="mb-2">• ${item.title} - ${item.reason}</li>`).join('')}
+        </ul>
+      `;
+    }
+    
+    modal.innerHTML = `
+      <div class="bg-white p-6 rounded-lg max-w-md mx-auto">
+        <div class="flex items-center mb-4">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-red-500 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+          </svg>
+          <h3 class="text-lg font-bold text-gray-900">Cart Update Required</h3>
+        </div>
+        <p class="mb-2">${data.message}</p>
+        ${invalidItemsHtml}
+        <p class="mb-4">Please refresh the page to update your cart before proceeding to checkout.</p>
+        <div class="flex justify-end space-x-4">
+          <button class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700" id="refreshCart">
+            Refresh Cart
+          </button>
+        </div>
+      </div>
+    `;
+    
+    document.body.appendChild(modal);
+    
+    // Add event listener to refresh button
+    document.getElementById('refreshCart').addEventListener('click', () => {
+      window.location.reload();
+    });
+  }
+  
+  // Rest of your existing JavaScript
+  // Handle quantity increment
+  document.querySelectorAll('.increment-quantity').forEach(button => {
+    button.addEventListener('click', function() {
+      const itemId = this.getAttribute('data-item-id');
+      updateCartItemQuantity(itemId, 1);
+    });
+  });
+  
+  // Handle quantity decrement
+  document.querySelectorAll('.decrement-quantity').forEach(button => {
+    button.addEventListener('click', function() {
+      const itemId = this.getAttribute('data-item-id');
+      updateCartItemQuantity(itemId, -1);
+    });
+  });
+  
+  // Make sure event listeners are added to all remove buttons
+  document.querySelectorAll('.remove-item').forEach(button => {
+    button.addEventListener('click', function() {
+      const itemId = this.getAttribute('data-item-id');
+      removeCartItem(itemId);
+    });
+  });
+  
+  // Updated function to update cart item quantity
+  function updateCartItemQuantity(productId, change) {
+    fetch('/cart/update', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ productId, change }),
+    })
+    .then(response => response.json())
+    .then(data => {
+      if (data.success) {
+        window.location.reload();
+      } else {
+        // Show the message regardless of whether the operation was successful
+        showToast(data.message, data.limitReached ? 'warning' : 'error');
+      }
+    })
+    .catch(error => {
+      showToast('An error occurred', 'error');
+    });
+  }
+  
+  // Updated function to remove item from cart
+  function removeCartItem(productId, confirmed = false) {
+    fetch('/cart/remove', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ productId, confirmed }),
+    })
+    .then(response => response.json())
+    .then(data => {
+      if (data.success) {
+        // Update cart count in the UI if provided
+        if (data.cartCount !== undefined) {
+          const cartCountEl = document.querySelector('.fa-cart-shopping + span');
+          if (cartCountEl) {
+            cartCountEl.textContent = data.cartCount;
+          }
+        }
+        window.location.reload();
+      } else if (data.requireConfirmation) {
+        // Create and show a modal for confirmation
+        const modal = document.createElement('div');
+        modal.className = 'fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50';
+        modal.innerHTML = `
+          <div class="bg-white p-6 rounded-lg max-w-md mx-auto">
+            <h3 class="text-lg font-bold mb-4">Confirm Removal</h3>
+            <p class="mb-6">${data.message}</p>
+            <div class="flex justify-end space-x-4">
+              <button class="px-4 py-2 bg-gray-200 rounded" id="cancelRemove">Cancel</button>
+              <button class="px-4 py-2 bg-red-600 text-white rounded" id="confirmRemove" 
+                data-item-id="${data.productId}">Remove</button>
+            </div>
+          </div>
+        `;
+        document.body.appendChild(modal);
+        
+        // Add event listeners to the modal buttons
+        document.getElementById('cancelRemove').addEventListener('click', () => {
+          document.body.removeChild(modal);
+        });
+        
+        document.getElementById('confirmRemove').addEventListener('click', () => {
+          const itemId = document.getElementById('confirmRemove').getAttribute('data-item-id');
+          document.body.removeChild(modal);
+          removeCartItem(itemId, true);
+        });
+      } else {
+        showToast(data.message || 'Failed to remove item', 'error');
+      }
+    })
+    .catch(error => {
+      console.error('Error removing item:', error);
+      showToast('An error occurred', 'error');
+    });
+  }
+  
+  // Enhanced toast function with better visibility and positioning
+  function showToast(message, type = 'info') {
+    const toast = document.createElement('div');
+    const colors = {
+      info: 'bg-blue-100 border-blue-500 text-blue-700',
+      warning: 'bg-amber-100 border-amber-500 text-amber-700',
+      error: 'bg-red-100 border-red-500 text-red-700',
+      success: 'bg-green-100 border-green-500 text-green-700'
+    };
+    
+    toast.className = `fixed top-4 inset-x-0 mx-auto max-w-md ${colors[type]} border-l-4 p-4 rounded shadow-md z-50`;
+    toast.innerHTML = `
+      <div class="flex items-center">
+        <div class="mr-2">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+          </svg>
+        </div>
+        <p>${message}</p>
+      </div>
+    `;
+    document.body.appendChild(toast);
+    
+    // Remove the toast after 3 seconds
+    setTimeout(() => {
+      document.body.removeChild(toast);
+    }, 3000);
+  }
+});
+</script>
+<footer class="bg-gradient-to-r from-[#AB8462] to-[#9A7355] text-white mt-12 relative">
+  <!-- Wave Decoration -->
+  <div class="absolute top-0 left-0 right-0 overflow-hidden w-full"
+    style="height: 30px; transform: translateY(-100%);">
+    <svg viewBox="0 0 1200 120" preserveAspectRatio="none" class="w-full h-full">
+      <path
+        d="M321.39,56.44c58-10.79,114.16-30.13,172-41.86,82.39-16.72,168.19-17.73,250.45-.39C823.78,31,906.67,72,985.66,92.83c70.05,18.48,146.53,26.09,214.34,3V120H0V0C115.39,0,168.49,41.42,321.39,56.44Z"
+        fill="#AB8462"></path>
+    </svg>
+  </div>
+
+  <!-- Main Footer Content -->
+  <div class="container mx-auto py-12 px-4">
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+      <!-- BookSy Info & Newsletter -->
+      <div class="space-y-6">
+        <div class="flex items-center space-x-2">
+          <i class="fas fa-book-open text-amber-200 text-3xl"></i>
+          <h2 class="text-2xl font-bold text-white">BookSy</h2>
+        </div>
+        <p class="text-gray-200">Your favorite online bookstore with a wide selection of books across all genres.
+          Discover new worlds through our carefully curated collection.</p>
+
+        <div class="bg-white bg-opacity-10 rounded-lg p-4 shadow-lg backdrop-blur-sm">
+          <h3 class="text-lg font-semibold text-amber-200 mb-2">Subscribe to Our Newsletter</h3>
+          <p class="text-sm text-gray-200 mb-3">Get the latest book releases and exclusive offers</p>
+          <div class="flex rounded-lg overflow-hidden shadow-md">
+            <input type="email" placeholder="Enter your email"
+              class="p-3 w-full focus:outline-none text-gray-800 bg-white border-2 border-transparent focus:border-amber-200">
+            <button
+              class="bg-amber-200 text-[#AB8462] px-4 hover:bg-white transition-colors duration-300 font-medium flex items-center">
+              <i class="fas fa-paper-plane mr-2"></i>
+              <span>Join</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Social Media Icons -->
+        <div class="pt-2">
+          <h3 class="text-lg font-semibold mb-3 text-amber-200">Connect With Us</h3>
+          <div class="flex space-x-3">
+            <a href="#"
+              class="bg-white bg-opacity-20 hover:bg-opacity-30 p-3 rounded-full transition-all duration-300 hover:transform hover:scale-110 w-10 h-10 flex items-center justify-center text-white hover:text-amber-200">
+              <i class="fab fa-facebook-f"></i>
+            </a>
+            <a href="#"
+              class="bg-white bg-opacity-20 hover:bg-opacity-30 p-3 rounded-full transition-all duration-300 hover:transform hover:scale-110 w-10 h-10 flex items-center justify-center text-white hover:text-amber-200">
+              <i class="fab fa-twitter"></i>
+            </a>
+            <a href="#"
+              class="bg-white bg-opacity-20 hover:bg-opacity-30 p-3 rounded-full transition-all duration-300 hover:transform hover:scale-110 w-10 h-10 flex items-center justify-center text-white hover:text-amber-200">
+              <i class="fab fa-instagram"></i>
+            </a>
+            <a href="#"
+              class="bg-white bg-opacity-20 hover:bg-opacity-30 p-3 rounded-full transition-all duration-300 hover:transform hover:scale-110 w-10 h-10 flex items-center justify-center text-white hover:text-amber-200">
+              <i class="fab fa-pinterest"></i>
+            </a>
+            <a href="#"
+              class="bg-white bg-opacity-20 hover:bg-opacity-30 p-3 rounded-full transition-all duration-300 hover:transform hover:scale-110 w-10 h-10 flex items-center justify-center text-white hover:text-amber-200">
+              <i class="fab fa-youtube"></i>
+            </a>
+          </div>
+        </div>
+      </div>
+
+      <!-- Links Columns -->
+      <div>
+        <h3 class="text-xl font-bold mb-6 text-amber-200 flex items-center">
+          <i class="fas fa-book-reader mr-2"></i> Explore
+        </h3>
+        <ul class="space-y-3">
+          <li><a href="/products"
+              class="text-gray-200 hover:text-white transition-colors duration-300 flex items-center group">
+              <span
+                class="w-0 h-0.5 bg-amber-200 group-hover:w-2 transition-all duration-300 mr-0 group-hover:mr-2"></span>
+              All Books
+            </a></li>
+          <li><a href="/bestsellers"
+              class="text-gray-200 hover:text-white transition-colors duration-300 flex items-center group">
+              <span
+                class="w-0 h-0.5 bg-amber-200 group-hover:w-2 transition-all duration-300 mr-0 group-hover:mr-2"></span>
+              Bestsellers
+            </a></li>
+          <li><a href="/new-releases"
+              class="text-gray-200 hover:text-white transition-colors duration-300 flex items-center group">
+              <span
+                class="w-0 h-0.5 bg-amber-200 group-hover:w-2 transition-all duration-300 mr-0 group-hover:mr-2"></span>
+              New Releases
+            </a></li>
+          <li><a href="/genres"
+              class="text-gray-200 hover:text-white transition-colors duration-300 flex items-center group">
+              <span
+                class="w-0 h-0.5 bg-amber-200 group-hover:w-2 transition-all duration-300 mr-0 group-hover:mr-2"></span>
+              Genres
+            </a></li>
+          <li><a href="/authors"
+              class="text-gray-200 hover:text-white transition-colors duration-300 flex items-center group">
+              <span
+                class="w-0 h-0.5 bg-amber-200 group-hover:w-2 transition-all duration-300 mr-0 group-hover:mr-2"></span>
+              Authors
+            </a></li>
+          <li><a href="/deals"
+              class="text-gray-200 hover:text-white transition-colors duration-300 flex items-center group">
+              <span
+                class="w-0 h-0.5 bg-amber-200 group-hover:w-2 transition-all duration-300 mr-0 group-hover:mr-2"></span>
+              Special Deals
+            </a></li>
+        </ul>
+      </div>
+
+      <!-- Account Column -->
+      <div>
+        <h3 class="text-xl font-bold mb-6 text-amber-200 flex items-center">
+          <i class="fas fa-user mr-2"></i> Your Account
+        </h3>
+        <ul class="space-y-3">
+          <li><a href="/profile"
+              class="text-gray-200 hover:text-white transition-colors duration-300 flex items-center group">
+              <span
+                class="w-0 h-0.5 bg-amber-200 group-hover:w-2 transition-all duration-300 mr-0 group-hover:mr-2"></span>
+              My Profile
+            </a></li>
+          <li><a href="/orders"
+              class="text-gray-200 hover:text-white transition-colors duration-300 flex items-center group">
+              <span
+                class="w-0 h-0.5 bg-amber-200 group-hover:w-2 transition-all duration-300 mr-0 group-hover:mr-2"></span>
+              Order History
+            </a></li>
+          <li><a href="/track"
+              class="text-gray-200 hover:text-white transition-colors duration-300 flex items-center group">
+              <span
+                class="w-0 h-0.5 bg-amber-200 group-hover:w-2 transition-all duration-300 mr-0 group-hover:mr-2"></span>
+              Track Order
+            </a></li>
+          <li><a href="/wishlist"
+              class="text-gray-200 hover:text-white transition-colors duration-300 flex items-center group">
+              <span
+                class="w-0 h-0.5 bg-amber-200 group-hover:w-2 transition-all duration-300 mr-0 group-hover:mr-2"></span>
+              Wishlist
+            </a></li>
+          <li><a href="/returns"
+              class="text-gray-200 hover:text-white transition-colors duration-300 flex items-center group">
+              <span
+                class="w-0 h-0.5 bg-amber-200 group-hover:w-2 transition-all duration-300 mr-0 group-hover:mr-2"></span>
+              Returns & Refunds
+            </a></li>
+        </ul>
+      </div>
+
+      <!-- Help Column -->
+      <div>
+        <h3 class="text-xl font-bold mb-6 text-amber-200 flex items-center">
+          <i class="fas fa-headset mr-2"></i> Help & Support
+        </h3>
+        <ul class="space-y-3">
+          <li><a href="/about"
+              class="text-gray-200 hover:text-white transition-colors duration-300 flex items-center group">
+              <span
+                class="w-0 h-0.5 bg-amber-200 group-hover:w-2 transition-all duration-300 mr-0 group-hover:mr-2"></span>
+              About Us
+            </a></li>
+          <li><a href="/contact"
+              class="text-gray-200 hover:text-white transition-colors duration-300 flex items-center group">
+              <span
+                class="w-0 h-0.5 bg-amber-200 group-hover:w-2 transition-all duration-300 mr-0 group-hover:mr-2"></span>
+              Contact Us
+            </a></li>
+          <li><a href="/faq"
+              class="text-gray-200 hover:text-white transition-colors duration-300 flex items-center group">
+              <span
+                class="w-0 h-0.5 bg-amber-200 group-hover:w-2 transition-all duration-300 mr-0 group-hover:mr-2"></span>
+              FAQ
+            </a></li>
+          <li><a href="/shipping"
+              class="text-gray-200 hover:text-white transition-colors duration-300 flex items-center group">
+              <span
+                class="w-0 h-0.5 bg-amber-200 group-hover:w-2 transition-all duration-300 mr-0 group-hover:mr-2"></span>
+              Shipping Info
+            </a></li>
+          <li><a href="/privacy"
+              class="text-gray-200 hover:text-white transition-colors duration-300 flex items-center group">
+              <span
+                class="w-0 h-0.5 bg-amber-200 group-hover:w-2 transition-all duration-300 mr-0 group-hover:mr-2"></span>
+              Privacy Policy
+            </a></li>
+          <li><a href="/terms"
+              class="text-gray-200 hover:text-white transition-colors duration-300 flex items-center group">
+              <span
+                class="w-0 h-0.5 bg-amber-200 group-hover:w-2 transition-all duration-300 mr-0 group-hover:mr-2"></span>
+              Terms of Service
+            </a></li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- Store Apps -->
+    <div class="mt-12 border-t border-[#8C6B48] pt-8">
+      <div class="flex flex-col md:flex-row items-center justify-between">
+        <div class="mb-6 md:mb-0">
+          <h3 class="text-lg font-semibold text-amber-200 mb-3">Download Our App</h3>
+          <div class="flex space-x-4">
+            <a href="#"
+              class="bg-black rounded-lg px-4 py-2 flex items-center space-x-2 hover:bg-gray-900 transition-colors duration-300">
+              <i class="fab fa-apple text-2xl text-white"></i>
+              <div>
+                <p class="text-xs text-gray-300">Download on the</p>
+                <p class="text-white font-medium">App Store</p>
+              </div>
+            </a>
+            <a href="#"
+              class="bg-black rounded-lg px-4 py-2 flex items-center space-x-2 hover:bg-gray-900 transition-colors duration-300">
+              <i class="fab fa-google-play text-2xl text-white"></i>
+              <div>
+                <p class="text-xs text-gray-300">GET IT ON</p>
+                <p class="text-white font-medium">Google Play</p>
+              </div>
+            </a>
+          </div>
+        </div>
+
+        <!-- Payment Methods with hover animations -->
+        <div class="flex flex-col items-center md:items-end">
+          <h3 class="text-lg font-semibold text-amber-200 mb-3">We Accept</h3>
+          <div class="flex space-x-3">
+            <i
+              class="fa-brands fa-cc-visa text-3xl text-white hover:text-amber-200 transition-colors duration-300 transform hover:scale-110"></i>
+            <i
+              class="fa-brands fa-cc-mastercard text-3xl text-white hover:text-amber-200 transition-colors duration-300 transform hover:scale-110"></i>
+
+</footer>

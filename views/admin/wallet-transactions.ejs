@@ -1,0 +1,310 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Wallet Transactions - BookSy Admin</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.3.0/css/all.min.css">
+</head>
+<body class="bg-gray-50">
+    <div class="min-h-screen flex">
+     <!-- Sidebar -->
+<div class="w-64 bg-gradient-to-b from-gray-50 to-gray-100 shadow-xl min-h-screen flex flex-col">
+    <!-- Logo Section -->
+    <div class="p-6 border-b border-gray-200 flex items-center space-x-3">
+        <i class="fas fa-book text-2xl text-blue-600"></i>
+        <span class="text-xl font-bold text-gray-800">BookSy Admin</span>
+    </div>
+
+    <!-- Navigation Links -->
+    <nav class="flex-grow py-4">
+        <ul class="space-y-1">
+            <li>
+                <a href="/admin/dashboard" class="sidebar-link flex items-center px-6 py-3 text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors duration-200 group">
+                    <i class="fas fa-home mr-4 text-gray-400 group-hover:text-blue-500"></i>
+                    <span class="font-medium">Dashboard</span>
+                </a>
+            </li>
+            <li>
+                <a href="/admin/products" class="sidebar-link flex items-center px-6 py-3 text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors duration-200 group">
+                    <i class="fas fa-box mr-4 text-gray-400 group-hover:text-blue-500"></i>
+                    <span class="font-medium">Products</span>
+                </a>
+            </li>
+            <li>
+                <a href="/admin/users" class="sidebar-link flex items-center px-6 py-3 text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors duration-200 group">
+                    <i class="fas fa-users mr-4 text-gray-400 group-hover:text-blue-500"></i>
+                    <span class="font-medium">Users</span>
+                </a>
+            </li>
+            <li>
+                <a href="/admin/orders" class="sidebar-link flex items-center px-6 py-3 text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors duration-200 group">
+                    <i class="fas fa-shopping-cart mr-4 text-gray-400 group-hover:text-blue-500"></i>
+                    <span class="font-medium">Orders</span>
+                </a>
+            </li>
+            <li>
+                <a href="/admin/category" class="sidebar-link flex items-center px-6 py-3 text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors duration-200 group">
+                    <i class="fas fa-tags mr-4 text-gray-400 group-hover:text-blue-500"></i>
+                    <span class="font-medium">Category</span>
+                </a>
+            </li>
+            <li>
+                <a href="/admin/return-requests" class="sidebar-link flex items-center px-6 py-3 text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors duration-200 group">
+                    <i class="fas fa-undo mr-4 text-gray-400 group-hover:text-blue-500"></i>
+                    <span class="font-medium">Return Requests</span>
+                </a>
+            </li>
+            <li>
+                <a href="/admin/coupons" class="sidebar-link flex items-center px-6 py-3 text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors duration-200 group">
+                    <i class="fas fa-ticket-alt mr-4 text-gray-400 group-hover:text-blue-500"></i>
+                    <span class="font-medium">Coupons</span>
+                </a>
+            </li>
+            <li>
+                <a href="/admin/wallet/transactions" class="sidebar-link flex items-center px-6 py-3 text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors duration-200 group">
+                    <i class="fas fa-wallet mr-4 text-gray-400 group-hover:text-blue-500"></i>
+                    <span class="font-medium">Wallet Management</span>
+                </a>
+            </li>
+            <li>
+                <a href="/admin/category-offers" class="sidebar-link flex items-center px-6 py-3 text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors duration-200 group">
+                    <i class="fas fa-gift mr-4 text-gray-400 group-hover:text-blue-500"></i>
+                    <span class="font-medium">Category Offers</span>
+                </a>
+            </li>
+          
+            <li>
+                <a href="/admin/sales-report" class="sidebar-link flex items-center px-6 py-3 text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors duration-200 group">
+                    <i class="fas fa-chart-bar mr-4 text-gray-400 group-hover:text-blue-500"></i>
+                    <span class="font-medium">Sales Report</span>
+                </a>
+            </li>
+        </ul>
+    </nav>
+
+    <!-- Logout Section -->
+    <div class="p-6 border-t border-gray-200">
+        <a href="/admin/logout" class="flex items-center justify-center w-full py-3 bg-blue-600 text-white rounded-lg 
+            hover:bg-blue-700 transition-colors duration-300 shadow-md">
+            <i class="fas fa-sign-out-alt mr-3"></i>
+            Logout
+        </a>
+    </div>
+
+    <!-- Add this script at the end of the sidebar -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const currentPath = window.location.pathname;
+            const sidebarLinks = document.querySelectorAll('.sidebar-link');
+            
+            sidebarLinks.forEach(link => {
+                if (link.getAttribute('href') === currentPath) {
+                    link.classList.add('bg-blue-100', 'text-blue-700');
+                    link.querySelector('i').classList.remove('text-gray-400', 'group-hover:text-blue-500');
+                    link.querySelector('i').classList.add('text-blue-600');
+                }
+            });
+        });
+    </script>
+</div>
+        <!-- Main Content -->
+        <div class="flex-1 p-8">
+            <div class="flex justify-between items-center mb-6">
+                <h1 class="text-2xl font-bold text-gray-800">Wallet Transactions</h1>
+            </div>
+            
+            <!-- Search and Filter Bar -->
+            <div class="bg-white p-4 rounded-lg shadow mb-6">
+                <div class="flex flex-col md:flex-row gap-4">
+                    <form action="/admin/wallet/transactions/search" method="GET" class="flex-1">
+                        <div class="flex">
+                            <input 
+                                type="text" 
+                                name="search" 
+                                placeholder="Search by user or description..." 
+                                class="w-full px-4 py-2 rounded-l-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                value="<%= locals.searchTerm || '' %>"
+                            >
+                            <button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded-r-lg hover:bg-blue-700 transition-colors">
+                                <i class="fas fa-search"></i>
+                            </button>
+                        </div>
+                    </form>
+                    
+                    <div class="flex space-x-2">
+                        <div class="flex items-center">
+                            <label for="sortBy" class="text-sm text-gray-600 mr-2">Sort by:</label>
+                            <select id="sortBy" class="border border-gray-300 rounded px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                <option value="date" <%= (locals.sortBy === 'date') ? 'selected' : '' %>>Date</option>
+                                <option value="amount" <%= (locals.sortBy === 'amount') ? 'selected' : '' %>>Amount</option>
+                                <option value="type" <%= (locals.sortBy === 'type') ? 'selected' : '' %>>Type</option>
+                            </select>
+                        </div>
+                        
+                        <div class="flex items-center">
+                            <label for="sortOrder" class="text-sm text-gray-600 mr-2">Order:</label>
+                            <select id="sortOrder" class="border border-gray-300 rounded px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                <option value="desc" <%= (locals.sortOrder === 'desc') ? 'selected' : '' %>>Descending</option>
+                                <option value="asc" <%= (locals.sortOrder === 'asc') ? 'selected' : '' %>>Ascending</option>
+                            </select>
+                        </div>
+                        
+                        <button id="applySort" class="bg-gray-100 border border-gray-300 text-gray-700 px-3 py-2 rounded text-sm hover:bg-gray-200 transition-colors">
+                            Apply
+                        </button>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Transactions Table -->
+            <div class="bg-white rounded-lg shadow overflow-hidden">
+                <div class="overflow-x-auto">
+                    <table class="min-w-full divide-y divide-gray-200">
+                        <thead class="bg-gray-50">
+                            <tr>
+                                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    Transaction ID
+                                </th>
+                                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    Date
+                                </th>
+                                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    User
+                                </th>
+                                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    Type
+                                </th>
+                                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    Amount
+                                </th>
+                                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    Actions
+                                </th>
+                            </tr>
+                        </thead>
+                        <tbody class="bg-white divide-y divide-gray-200">
+                            <% if (transactions && transactions.length > 0) { %>
+                                <% transactions.forEach(transaction => { %>
+                                    <tr class="hover:bg-gray-50">
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                                            <%= transaction.transactionId.toString().substring(0, 10) %>...
+                                        </td>
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                            <%= new Date(transaction.date).toLocaleString() %>
+                                        </td>
+                                        <td class="px-6 py-4 whitespace-nowrap">
+                                            <div class="flex items-center">
+                                                <div class="ml-4">
+                                                    <div class="text-sm font-medium text-gray-900">
+                                                        <%= transaction.user.name %>
+                                                    </div>
+                                                    <div class="text-sm text-gray-500">
+                                                        <%= transaction.user.email %>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td class="px-6 py-4 whitespace-nowrap">
+                                            <% if (transaction.type === 'credit') { %>
+                                                <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">
+                                                    Credit
+                                                </span>
+                                            <% } else { %>
+                                                <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-red-100 text-red-800">
+                                                    Debit
+                                                </span>
+                                            <% } %>
+                                        </td>
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                            <% if (transaction.type === 'credit') { %>
+                                                <span class="text-green-600">+₹<%= transaction.amount.toFixed(2) %></span>
+                                            <% } else { %>
+                                                <span class="text-red-600">-₹<%= transaction.amount.toFixed(2) %></span>
+                                            <% } %>
+                                        </td>
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                                            <a href="/admin/wallet/transactions/<%= transaction.transactionId %>" class="text-blue-600 hover:text-blue-900">
+                                                View Details
+                                            </a>
+                                        </td>
+                                    </tr>
+                                <% }) %>
+                            <% } else { %>
+                                <tr>
+                                    <td colspan="6" class="px-6 py-4 text-center text-sm text-gray-500">
+                                        No transactions found
+                                    </td>
+                                </tr>
+                            <% } %>
+                        </tbody>
+                    </table>
+                </div>
+                
+                <!-- Pagination -->
+                <% if (locals.totalPages > 1) { %>
+                    <div class="bg-white px-4 py-3 flex items-center justify-between border-t border-gray-200 sm:px-6">
+                        <div class="hidden sm:flex-1 sm:flex sm:items-center sm:justify-between">
+                            <div>
+                                <p class="text-sm text-gray-700">
+                                    Showing page <span class="font-medium"><%= currentPage %></span> of <span class="font-medium"><%= totalPages %></span>
+                                </p>
+                            </div>
+                            <div>
+                                <nav class="relative z-0 inline-flex rounded-md shadow-sm -space-x-px" aria-label="Pagination">
+                                    <% if (currentPage > 1) { %>
+                                        <a href="?page=<%= currentPage - 1 %><%= locals.sortBy ? `&sortBy=${sortBy}` : '' %><%= locals.sortOrder ? `&sortOrder=${sortOrder}` : '' %><%= locals.searchTerm ? `&search=${searchTerm}` : '' %>" class="relative inline-flex items-center px-2 py-2 rounded-l-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50">
+                                            <span class="sr-only">Previous</span>
+                                            <i class="fas fa-chevron-left h-5 w-5"></i>
+                                        </a>
+                                    <% } %>
+                                    
+                                    <% for(let i = 1; i <= totalPages; i++) { %>
+                                        <a href="?page=<%= i %><%= locals.sortBy ? `&sortBy=${sortBy}` : '' %><%= locals.sortOrder ? `&sortOrder=${sortOrder}` : '' %><%= locals.searchTerm ? `&search=${searchTerm}` : '' %>" class="relative inline-flex items-center px-4 py-2 border border-gray-300 bg-white text-sm font-medium <%= currentPage === i ? 'text-blue-600 bg-blue-50' : 'text-gray-700 hover:bg-gray-50' %>">
+                                            <%= i %>
+                                        </a>
+                                    <% } %>
+                                    
+                                    <% if (currentPage < totalPages) { %>
+                                        <a href="?page=<%= currentPage + 1 %><%= locals.sortBy ? `&sortBy=${sortBy}` : '' %><%= locals.sortOrder ? `&sortOrder=${sortOrder}` : '' %><%= locals.searchTerm ? `&search=${searchTerm}` : '' %>" class="relative inline-flex items-center px-2 py-2 rounded-r-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50">
+                                            <span class="sr-only">Next</span>
+                                            <i class="fas fa-chevron-right h-5 w-5"></i>
+                                        </a>
+                                    <% } %>
+                                </nav>
+                            </div>
+                        </div>
+                    </div>
+                <% } %>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const sortBySelect = document.getElementById('sortBy');
+            const sortOrderSelect = document.getElementById('sortOrder');
+            const applyButton = document.getElementById('applySort');
+            
+            applyButton.addEventListener('click', function() {
+                const sortBy = sortBySelect.value;
+                const sortOrder = sortOrderSelect.value;
+                const currentUrl = new URL(window.location.href);
+                
+                // Update or add sort parameters
+                currentUrl.searchParams.set('sortBy', sortBy);
+                currentUrl.searchParams.set('sortOrder', sortOrder);
+                
+                // Keep the page parameter if it exists
+                if (!currentUrl.searchParams.has('page')) {
+                    currentUrl.searchParams.set('page', '1');
+                }
+                
+                // Redirect to the new URL
+                window.location.href = currentUrl.toString();
+            });
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BookSy - Sales Report</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Add Chart.js -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
+</head>
+<body class="bg-gray-100">
+    <div class="flex h-screen">
+        <!-- Sidebar -->
+<div class="w-64 bg-gradient-to-b from-gray-50 to-gray-100 shadow-xl min-h-screen flex flex-col">
+    <!-- Logo Section -->
+    <div class="p-6 border-b border-gray-200 flex items-center space-x-3">
+        <i class="fas fa-book text-2xl text-blue-600"></i>
+        <span class="text-xl font-bold text-gray-800">BookSy Admin</span>
+    </div>
+
+    <!-- Navigation Links -->
+    <nav class="flex-grow py-4">
+        <ul class="space-y-1">
+            <li>
+                <a href="/admin/dashboard" class="sidebar-link flex items-center px-6 py-3 text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors duration-200 group">
+                    <i class="fas fa-home mr-4 text-gray-400 group-hover:text-blue-500"></i>
+                    <span class="font-medium">Dashboard</span>
+                </a>
+            </li>
+            <li>
+                <a href="/admin/products" class="sidebar-link flex items-center px-6 py-3 text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors duration-200 group">
+                    <i class="fas fa-box mr-4 text-gray-400 group-hover:text-blue-500"></i>
+                    <span class="font-medium">Products</span>
+                </a>
+            </li>
+            <li>
+                <a href="/admin/users" class="sidebar-link flex items-center px-6 py-3 text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors duration-200 group">
+                    <i class="fas fa-users mr-4 text-gray-400 group-hover:text-blue-500"></i>
+                    <span class="font-medium">Users</span>
+                </a>
+            </li>
+            <li>
+                <a href="/admin/orders" class="sidebar-link flex items-center px-6 py-3 text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors duration-200 group">
+                    <i class="fas fa-shopping-cart mr-4 text-gray-400 group-hover:text-blue-500"></i>
+                    <span class="font-medium">Orders</span>
+                </a>
+            </li>
+            <li>
+                <a href="/admin/category" class="sidebar-link flex items-center px-6 py-3 text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors duration-200 group">
+                    <i class="fas fa-tags mr-4 text-gray-400 group-hover:text-blue-500"></i>
+                    <span class="font-medium">Category</span>
+                </a>
+            </li>
+            <li>
+                <a href="/admin/return-requests" class="sidebar-link flex items-center px-6 py-3 text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors duration-200 group">
+                    <i class="fas fa-undo mr-4 text-gray-400 group-hover:text-blue-500"></i>
+                    <span class="font-medium">Return Requests</span>
+                </a>
+            </li>
+            <li>
+                <a href="/admin/coupons" class="sidebar-link flex items-center px-6 py-3 text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors duration-200 group">
+                    <i class="fas fa-ticket-alt mr-4 text-gray-400 group-hover:text-blue-500"></i>
+                    <span class="font-medium">Coupons</span>
+                </a>
+            </li>
+            <li>
+                <a href="/admin/wallet/transactions" class="sidebar-link flex items-center px-6 py-3 text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors duration-200 group">
+                    <i class="fas fa-wallet mr-4 text-gray-400 group-hover:text-blue-500"></i>
+                    <span class="font-medium">Wallet Management</span>
+                </a>
+            </li>
+            <li>
+                <a href="/admin/category-offers" class="sidebar-link flex items-center px-6 py-3 text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors duration-200 group">
+                    <i class="fas fa-gift mr-4 text-gray-400 group-hover:text-blue-500"></i>
+                    <span class="font-medium">Category Offers</span>
+                </a>
+            </li>
+            <!-- Add this to your sidebar navigation -->
+<li>
+    <a href="/admin/sales-report" class="sidebar-link flex items-center px-6 py-3 text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors duration-200 group">
+        <i class="fas fa-chart-bar mr-4 text-gray-400 group-hover:text-blue-500"></i>
+        <span class="font-medium">Sales Report</span>
+    </a>
+</li>
+        </ul>
+    </nav>
+
+    <!-- Logout Section -->
+    <div class="p-6 border-t border-gray-200">
+        <a href="/admin/logout" class="flex items-center justify-center w-full py-3 bg-blue-600 text-white rounded-lg 
+            hover:bg-blue-700 transition-colors duration-300 shadow-md">
+            <i class="fas fa-sign-out-alt mr-3"></i>
+            Logout
+        </a>
+    </div>
+
+    <!-- Add this script at the end of the sidebar -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const currentPath = window.location.pathname;
+            const sidebarLinks = document.querySelectorAll('.sidebar-link');
+            
+            sidebarLinks.forEach(link => {
+                if (link.getAttribute('href') === currentPath) {
+                    link.classList.add('bg-blue-100', 'text-blue-700');
+                    link.querySelector('i').classList.remove('text-gray-400', 'group-hover:text-blue-500');
+                    link.querySelector('i').classList.add('text-blue-600');
+                }
+            });
+        });
+    </script>
+</div>
+<div class="container mx-auto px-4 py-8">
+    <div class="mb-6">
+        <h1 class="text-2xl font-bold text-gray-800"><%= categoryOffer._id ? 'Edit' : 'Add' %> Category Offer</h1>
+        <p class="text-gray-600 mt-1"><%= categoryOffer._id ? 'Update' : 'Create new' %> discount offer details for category products</p>
+    </div>
+
+    <% if (error && error.length > 0) { %>
+        <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative mb-4" role="alert">
+            <span class="block sm:inline"><%= error %></span>
+        </div>
+    <% } %>
+
+    <div class="bg-white shadow-md rounded-lg p-6">     
+        <form action="<%= categoryOffer._id ? `/admin/category-offers/edit/${categoryOffer._id}` : '/admin/category-offers/add' %>" method="POST">
+            <div class="mb-4">
+                <label for="category" class="block text-gray-700 text-sm font-bold mb-2">Category *</label>
+                <select 
+                    id="category" 
+                    name="category" 
+                    class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+                    required
+                >
+                    <option value="">Select Category</option>
+                    <% categories.forEach(category => { %>
+                        <option 
+                            value="<%= category._id %>"
+                            <%= (categoryOffer.category && categoryOffer.category.toString() === category._id.toString()) ? 'selected' : '' %>
+                        >
+                            <%= category.name %>
+                        </option>
+                    <% }); %>
+                </select>
+            </div>
+
+            <div class="mb-4">
+                <label for="discountPercentage" class="block text-gray-700 text-sm font-bold mb-2">Discount Percentage (%) *</label>
+                <input 
+                    type="number" 
+                    id="discountPercentage" 
+                    name="discountPercentage" 
+                    min="1"
+                    max="90"
+                    step="0.1"
+                    class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+                    value="<%= categoryOffer.discountPercentage || '' %>"
+                    required
+                >
+                <p class="text-gray-500 text-xs italic mt-1">Enter a value between 1 and 90</p>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                <div>
+                    <label for="startDate" class="block text-gray-700 text-sm font-bold mb-2">Start Date *</label>
+                    <input 
+                        type="date" 
+                        id="startDate" 
+                        name="startDate" 
+                        class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+                        value="<%= categoryOffer.startDate || '' %>"
+                        required
+                    >
+                </div>
+                <div>
+                    <label for="endDate" class="block text-gray-700 text-sm font-bold mb-2">End Date *</label>
+                    <input 
+                        type="date" 
+                        id="endDate" 
+                        name="endDate" 
+                        class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+                        value="<%= categoryOffer.endDate || '' %>"
+                        required
+                    >
+                </div>
+            </div>
+
+            <div class="mb-4">
+                <label for="description" class="block text-gray-700 text-sm font-bold mb-2">Description</label>
+                <textarea 
+                    id="description" 
+                    name="description" 
+                    class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+                    rows="3"
+                ><%= categoryOffer.description || '' %></textarea>
+                <p class="text-gray-500 text-xs italic mt-1">Optional: Add details about this offer</p>
+            </div>
+
+            
+            <div class="flex items-center justify-between">
+                <button 
+                    type="submit" 
+                    class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
+                >
+                    <%= categoryOffer._id ? 'Update Offer' : 'Add Offer' %>
+                </button>
+                <a 
+                    href="/admin/category-offers" 
+                    class="inline-block align-baseline font-bold text-sm text-blue-600 hover:text-blue-800"
+                >
+                    Cancel
+                </a>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Set minimum date for endDate to be at least startDate
+        document.getElementById('startDate').addEventListener('change', function() {
+            document.getElementById('endDate').min = this.value;
+            
+            // If endDate is now less than startDate, update it
+            const endDate = document.getElementById('endDate');
+            if (endDate.value && endDate.value < this.value) {
+                endDate.value = this.value;
+            }
+        });
+        
+        // Trigger change event to set initial state
+        document.getElementById('startDate').dispatchEvent(new Event('change'));
+    });
+</script>
+</body>
+</html>

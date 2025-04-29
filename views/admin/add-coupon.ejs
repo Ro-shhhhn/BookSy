@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BookSy - Sales Report</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Add Chart.js -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
+</head>
+<body class="bg-gray-100">
+    <div class="flex h-screen">
+        <!-- Sidebar -->
+<div class="w-64 bg-gradient-to-b from-gray-50 to-gray-100 shadow-xl min-h-screen flex flex-col">
+    <!-- Logo Section -->
+    <div class="p-6 border-b border-gray-200 flex items-center space-x-3">
+        <i class="fas fa-book text-2xl text-blue-600"></i>
+        <span class="text-xl font-bold text-gray-800">BookSy Admin</span>
+    </div>
+
+    <!-- Navigation Links -->
+    <nav class="flex-grow py-4">
+        <ul class="space-y-1">
+            <li>
+                <a href="/admin/dashboard" class="sidebar-link flex items-center px-6 py-3 text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors duration-200 group">
+                    <i class="fas fa-home mr-4 text-gray-400 group-hover:text-blue-500"></i>
+                    <span class="font-medium">Dashboard</span>
+                </a>
+            </li>
+            <li>
+                <a href="/admin/products" class="sidebar-link flex items-center px-6 py-3 text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors duration-200 group">
+                    <i class="fas fa-box mr-4 text-gray-400 group-hover:text-blue-500"></i>
+                    <span class="font-medium">Products</span>
+                </a>
+            </li>
+            <li>
+                <a href="/admin/users" class="sidebar-link flex items-center px-6 py-3 text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors duration-200 group">
+                    <i class="fas fa-users mr-4 text-gray-400 group-hover:text-blue-500"></i>
+                    <span class="font-medium">Users</span>
+                </a>
+            </li>
+            <li>
+                <a href="/admin/orders" class="sidebar-link flex items-center px-6 py-3 text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors duration-200 group">
+                    <i class="fas fa-shopping-cart mr-4 text-gray-400 group-hover:text-blue-500"></i>
+                    <span class="font-medium">Orders</span>
+                </a>
+            </li>
+            <li>
+                <a href="/admin/category" class="sidebar-link flex items-center px-6 py-3 text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors duration-200 group">
+                    <i class="fas fa-tags mr-4 text-gray-400 group-hover:text-blue-500"></i>
+                    <span class="font-medium">Category</span>
+                </a>
+            </li>
+            <li>
+                <a href="/admin/return-requests" class="sidebar-link flex items-center px-6 py-3 text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors duration-200 group">
+                    <i class="fas fa-undo mr-4 text-gray-400 group-hover:text-blue-500"></i>
+                    <span class="font-medium">Return Requests</span>
+                </a>
+            </li>
+            <li>
+                <a href="/admin/coupons" class="sidebar-link flex items-center px-6 py-3 text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors duration-200 group">
+                    <i class="fas fa-ticket-alt mr-4 text-gray-400 group-hover:text-blue-500"></i>
+                    <span class="font-medium">Coupons</span>
+                </a>
+            </li>
+            <li>
+                <a href="/admin/wallet/transactions" class="sidebar-link flex items-center px-6 py-3 text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors duration-200 group">
+                    <i class="fas fa-wallet mr-4 text-gray-400 group-hover:text-blue-500"></i>
+                    <span class="font-medium">Wallet Management</span>
+                </a>
+            </li>
+            <li>
+                <a href="/admin/category-offers" class="sidebar-link flex items-center px-6 py-3 text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors duration-200 group">
+                    <i class="fas fa-gift mr-4 text-gray-400 group-hover:text-blue-500"></i>
+                    <span class="font-medium">Category Offers</span>
+                </a>
+            </li>
+            <!-- Add this to your sidebar navigation -->
+<li>
+    <a href="/admin/sales-report" class="sidebar-link flex items-center px-6 py-3 text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors duration-200 group">
+        <i class="fas fa-chart-bar mr-4 text-gray-400 group-hover:text-blue-500"></i>
+        <span class="font-medium">Sales Report</span>
+    </a>
+</li>
+        </ul>
+    </nav>
+
+    <!-- Logout Section -->
+    <div class="p-6 border-t border-gray-200">
+        <a href="/admin/logout" class="flex items-center justify-center w-full py-3 bg-blue-600 text-white rounded-lg 
+            hover:bg-blue-700 transition-colors duration-300 shadow-md">
+            <i class="fas fa-sign-out-alt mr-3"></i>
+            Logout
+        </a>
+    </div>
+
+    <!-- Add this script at the end of the sidebar -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const currentPath = window.location.pathname;
+            const sidebarLinks = document.querySelectorAll('.sidebar-link');
+            
+            sidebarLinks.forEach(link => {
+                if (link.getAttribute('href') === currentPath) {
+                    link.classList.add('bg-blue-100', 'text-blue-700');
+                    link.querySelector('i').classList.remove('text-gray-400', 'group-hover:text-blue-500');
+                    link.querySelector('i').classList.add('text-blue-600');
+                }
+            });
+        });
+    </script>
+</div>
+  <!-- Main Content -->
+  <div class="flex-1 flex flex-col overflow-hidden">
+    <!-- Header -->
+    <header class="bg-white shadow-sm py-4 px-6 flex justify-between items-center">
+        <h1 class="text-2xl font-semibold text-gray-800">Setting</h1>
+        <div class="flex items-center space-x-4">
+            <div class="relative">
+                <input type="text" placeholder="Search for something" class="pl-10 pr-4 py-2 border border-gray-300 rounded-full text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                <div class="absolute left-3 top-2.5 text-gray-400">
+                    <i class="fas fa-search"></i>
+                </div>
+            </div>
+            <div class="w-10 h-10 rounded-full overflow-hidden">
+                <img src="/assets/img/admin/profile.jpg" alt="Profile" class="w-full h-full object-cover">
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content Area -->
+    <main class="flex-1 overflow-x-hidden overflow-y-auto bg-gray-50 p-6">
+        <div class="container mx-auto">
+            <!-- Back Button and Title -->
+            <div class="flex items-center mb-6">
+                <a href="/admin/coupons" class="text-gray-500 hover:text-gray-700 mr-4">
+                    <i class="fas fa-arrow-left text-xl"></i>
+                </a>
+                <h2 class="text-xl font-semibold text-gray-800">Add Coupons</h2>
+            </div>
+
+            <!-- Coupon List Table (For Reference) -->
+            <div class="bg-white rounded-lg shadow overflow-hidden mb-8">
+                <table class="min-w-full divide-y divide-gray-200">
+                    <thead class="bg-gray-50">
+                        <tr>
+                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">NO</th>
+                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">CODE</th>
+                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">DISCOUNT</th>
+                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">MIN AMOUNT</th>
+                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">MAX AMOUNT</th>
+                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">ACTIONS</th>
+                        </tr>
+                    </thead>
+                    <tbody class="bg-white divide-y divide-gray-200">
+                        <% if (coupons && coupons.length > 0) { %>
+                            <% coupons.forEach((coupon, index) => { %>
+                                <tr>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500"><%= index + 1 %></td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900"><%= coupon.code %></td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500"><%= coupon.discount %>%</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500"><%= coupon.minAmount %></td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500"><%= coupon.maxAmount %></td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium flex items-center space-x-3">
+                                        <div>
+                                            <button 
+                                                class="<%= coupon.isActive ? 'bg-green-500' : 'bg-red-500' %> text-white text-xs px-3 py-1 rounded-md">
+                                                <%= coupon.isActive ? 'Active' : 'Inactive' %>
+                                            </button>
+                                        </div>
+                                        <a href="/admin/coupons/edit/<%= coupon._id %>" class="text-gray-400 hover:text-blue-500">
+                                            <i class="fas fa-edit"></i>
+                                        </a>
+                                    </td>
+                                </tr>
+                            <% }); %>
+                        <% } else { %>
+                            <tr>
+                                <td colspan="7" class="px-6 py-4 text-center text-sm text-gray-500">No coupons found</td>
+                            </tr>
+                        <% } %>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Add Coupon Form -->
+            <div class="bg-white rounded-lg shadow p-6">
+                <% if (errorMessage && errorMessage.length > 0) { %>
+                    <div class="mb-6 bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative" role="alert">
+                        <span class="block sm:inline"><%= errorMessage %></span>
+                    </div>
+                <% } %>
+                
+                <form action="/admin/coupons/add" method="POST" class="grid grid-cols-2 gap-6">
+                    <!-- Left Column -->
+                    <div class="space-y-6">
+                        <!-- Code -->
+                        <div>
+                            <label for="code" class="block text-sm font-medium text-gray-700 mb-1">Code</label>
+                            <input 
+                                type="text" 
+                                id="code" 
+                                name="code" 
+                                class="block w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500" 
+                                placeholder="Enter the code"
+                                required
+                            >
+                        </div>
+                        
+                        <!-- Discount -->
+                        <div>
+                            <label for="discount" class="block text-sm font-medium text-gray-700 mb-1">Discount</label>
+                            <input 
+                                type="number" 
+                                id="discount" 
+                                name="discount" 
+                                min="1" 
+                                max="100" 
+                                class="block w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500" 
+                                placeholder="Enter the discount percentage"
+                                required
+                            >
+                        </div>
+                        
+                        <!-- Min Amount -->
+                        <div>
+                            <label for="minAmount" class="block text-sm font-medium text-gray-700 mb-1">Min amount</label>
+                            <input 
+                                type="number" 
+                                id="minAmount" 
+                                name="minAmount" 
+                                min="0" 
+                                class="block w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500" 
+                                placeholder="Enter min amount"
+                                required
+                            >
+                        </div>
+                    </div>
+                    
+                    <!-- Right Column -->
+                    <div class="space-y-6">
+                        <!-- Max Amount -->
+                        <div>
+                            <label for="maxAmount" class="block text-sm font-medium text-gray-700 mb-1">Max amount</label>
+                            <input 
+                                type="number" 
+                                id="maxAmount" 
+                                name="maxAmount" 
+                                min="1" 
+                                class="block w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500" 
+                                placeholder="Enter max amount"
+                                required
+                            >
+                        </div>
+                        
+                        
+                        <!-- Expiration Date -->
+                        <div>
+                            <label for="expirationDate" class="block text-sm font-medium text-gray-700 mb-1">Expiration Date</label>
+                            <input 
+                                type="date" 
+                                id="expirationDate" 
+                                name="expirationDate" 
+                                class="block w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500" 
+                                required
+                            >
+                        </div>
+                    </div>
+                    
+                    <!-- Submit Button (Centered at the bottom) -->
+                    <div class="col-span-2 flex justify-center mt-6">
+                        <button type="submit" class="bg-black text-white px-6 py-3 rounded-md hover:bg-gray-800 transition-colors w-full md:w-1/3">
+                            Add
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </main>
+</div>
+</div>
+
+<script>
+// Set minimum date for expiration to today
+document.addEventListener('DOMContentLoaded', function() {
+    const today = new Date().toISOString().split('T')[0];
+    document.getElementById('expirationDate').min = today;
+    
+    // Form validation (you can expand this)
+    const form = document.querySelector('form');
+    form.addEventListener('submit', function(event) {
+        const code = document.getElementById('code').value.trim();
+        const discount = parseInt(document.getElementById('discount').value);
+        const minAmount = parseInt(document.getElementById('minAmount').value);
+        const maxAmount = parseInt(document.getElementById('maxAmount').value);
+        
+        if (!code) {
+            alert('Coupon code cannot be empty or space');
+            event.preventDefault();
+            return;
+        }
+        
+        if (discount < 1 || discount > 100) {
+            alert('Discount must be between 1 and 100');
+            event.preventDefault();
+            return;
+        }
+        
+        if (minAmount >= maxAmount) {
+            alert('Minimum amount must be less than maximum amount');
+            event.preventDefault();
+            return;
+        }
+    });
+});
+</script>
+</body>
+</html>

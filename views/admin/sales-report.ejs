@@ -1,0 +1,673 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BookSy - Sales Report</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Add Chart.js -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
+</head>
+
+<body class="bg-gray-100">
+    <div class="flex h-screen">
+        <!-- Sidebar -->
+        <div class="w-64 bg-gradient-to-b from-gray-50 to-gray-100 shadow-xl min-h-screen flex flex-col">
+            <!-- Logo Section -->
+            <div class="p-6 border-b border-gray-200 flex items-center space-x-3">
+                <i class="fas fa-book text-2xl text-blue-600"></i>
+                <span class="text-xl font-bold text-gray-800">BookSy Admin</span>
+            </div>
+
+            <!-- Navigation Links -->
+            <nav class="flex-grow py-4">
+                <ul class="space-y-1">
+                    <li>
+                        <a href="/admin/dashboard"
+                            class="sidebar-link flex items-center px-6 py-3 text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors duration-200 group">
+                            <i class="fas fa-home mr-4 text-gray-400 group-hover:text-blue-500"></i>
+                            <span class="font-medium">Dashboard</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="/admin/products"
+                            class="sidebar-link flex items-center px-6 py-3 text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors duration-200 group">
+                            <i class="fas fa-box mr-4 text-gray-400 group-hover:text-blue-500"></i>
+                            <span class="font-medium">Products</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="/admin/users"
+                            class="sidebar-link flex items-center px-6 py-3 text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors duration-200 group">
+                            <i class="fas fa-users mr-4 text-gray-400 group-hover:text-blue-500"></i>
+                            <span class="font-medium">Users</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="/admin/orders"
+                            class="sidebar-link flex items-center px-6 py-3 text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors duration-200 group">
+                            <i class="fas fa-shopping-cart mr-4 text-gray-400 group-hover:text-blue-500"></i>
+                            <span class="font-medium">Orders</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="/admin/category"
+                            class="sidebar-link flex items-center px-6 py-3 text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors duration-200 group">
+                            <i class="fas fa-tags mr-4 text-gray-400 group-hover:text-blue-500"></i>
+                            <span class="font-medium">Category</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="/admin/return-requests"
+                            class="sidebar-link flex items-center px-6 py-3 text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors duration-200 group">
+                            <i class="fas fa-undo mr-4 text-gray-400 group-hover:text-blue-500"></i>
+                            <span class="font-medium">Return Requests</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="/admin/coupons"
+                            class="sidebar-link flex items-center px-6 py-3 text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors duration-200 group">
+                            <i class="fas fa-ticket-alt mr-4 text-gray-400 group-hover:text-blue-500"></i>
+                            <span class="font-medium">Coupons</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="/admin/wallet/transactions" class="sidebar-link flex items-center px-6 py-3 text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors duration-200 group">
+                            <i class="fas fa-wallet mr-4 text-gray-400 group-hover:text-blue-500"></i>
+                            <span class="font-medium">Wallet Management</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="/admin/category-offers"
+                            class="sidebar-link flex items-center px-6 py-3 text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors duration-200 group">
+                            <i class="fas fa-gift mr-4 text-gray-400 group-hover:text-blue-500"></i>
+                            <span class="font-medium">Category Offers</span>
+                        </a>
+                    </li>
+                    <!-- Add this to your sidebar navigation -->
+                    <li>
+                        <a href="/admin/sales-report"
+                            class="sidebar-link flex items-center px-6 py-3 text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors duration-200 group">
+                            <i class="fas fa-chart-bar mr-4 text-gray-400 group-hover:text-blue-500"></i>
+                            <span class="font-medium">Sales Report</span>
+                        </a>
+                    </li>
+                </ul>
+            </nav>
+
+            <!-- Logout Section -->
+            <div class="p-6 border-t border-gray-200">
+                <a href="/admin/logout" class="flex items-center justify-center w-full py-3 bg-blue-600 text-white rounded-lg 
+            hover:bg-blue-700 transition-colors duration-300 shadow-md">
+                    <i class="fas fa-sign-out-alt mr-3"></i>
+                    Logout
+                </a>
+            </div>
+
+            <!-- Add this script at the end of the sidebar -->
+            <script>
+                document.addEventListener('DOMContentLoaded', function () {
+                    const currentPath = window.location.pathname;
+                    const sidebarLinks = document.querySelectorAll('.sidebar-link');
+
+                    sidebarLinks.forEach(link => {
+                        if (link.getAttribute('href') === currentPath) {
+                            link.classList.add('bg-blue-100', 'text-blue-700');
+                            link.querySelector('i').classList.remove('text-gray-400', 'group-hover:text-blue-500');
+                            link.querySelector('i').classList.add('text-blue-600');
+                        }
+                    });
+                });
+            </script>
+        </div>
+        <!-- Main Content -->
+        <div class="flex-1 overflow-auto">
+            <div class="p-6 bg-white shadow-md mb-6">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <h1 class="text-2xl font-bold text-gray-800">Sales Report</h1>
+                        <p class="text-sm text-gray-500">View and analyze sales performance</p>
+                    </div>
+                    <div class="flex items-center space-x-2">
+                        <button id="downloadPdf" class="bg-red-500 text-white px-4 py-2 rounded-md flex items-center">
+                            <i class="fas fa-file-pdf mr-2"></i> PDF
+                        </button>
+                        <button id="downloadExcel"
+                            class="bg-green-500 text-white px-4 py-2 rounded-md flex items-center">
+                            <i class="fas fa-file-excel mr-2"></i> Excel
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Date Filters -->
+            <div class="px-6 mb-6">
+                <form id="filterForm" class="bg-white p-4 rounded-lg shadow-md">
+                    <div class="flex flex-wrap items-center gap-4">
+                        <div class="flex items-center space-x-2">
+                            <label class="text-sm font-medium text-gray-700">Filter:</label>
+                            <select name="filterType" class="p-2 border rounded-md"
+                                onchange="updateDateInputs(this.value)">
+                                <option value="custom" <%=filterType==='custom' ? 'selected' : '' %>>Custom Range
+                                </option>
+                                <option value="daily" <%=filterType==='daily' ? 'selected' : '' %>>Daily</option>
+                                <option value="weekly" <%=filterType==='weekly' ? 'selected' : '' %>>Weekly</option>
+                                <option value="monthly" <%=filterType==='monthly' ? 'selected' : '' %>>Monthly</option>
+                                <option value="yearly" <%=filterType==='yearly' ? 'selected' : '' %>>Yearly</option>
+                            </select>
+                        </div>
+                        <div class="flex items-center space-x-2 date-inputs">
+                            <label class="text-sm font-medium text-gray-700">From:</label>
+                            <input type="date" name="startDate" value="<%= startDate %>" class="p-2 border rounded-md">
+                        </div>
+                        <div class="flex items-center space-x-2 date-inputs">
+                            <label class="text-sm font-medium text-gray-700">To:</label>
+                            <input type="date" name="endDate" value="<%= endDate %>" class="p-2 border rounded-md">
+                        </div>
+                        <div class="flex items-center space-x-2">
+                            <label class="text-sm font-medium text-gray-700">Status:</label>
+                            <select name="orderStatus" class="p-2 border rounded-md">
+                                <option value="all" <%=orderStatusFilter==='all' ? 'selected' : '' %>>All Orders
+                                </option>
+                                <option value="Delivered" <%=orderStatusFilter==='Delivered' ? 'selected' : '' %>
+                                    >Delivered</option>
+                                <option value="Processing" <%=orderStatusFilter==='Processing' ? 'selected' : '' %>
+                                    >Processing</option>
+                                <option value="Shipped" <%=orderStatusFilter==='Shipped' ? 'selected' : '' %>>Shipped
+                                </option>
+                                <option value="Cancelled" <%=orderStatusFilter==='Cancelled' ? 'selected' : '' %>
+                                    >Cancelled</option>
+                                <option value="Returned" <%=orderStatusFilter==='Returned' ? 'selected' : '' %>>Returned
+                                </option>
+                            </select>
+                        </div>
+                        <button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded-md flex items-center">
+                            <i class="fas fa-filter mr-2"></i> Apply Filters
+                        </button>
+                    </div>
+                </form>
+            </div>
+            <!-- Stats Cards -->
+            <div class="px-6 mb-6">
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                    <!-- Total Sales -->
+                    <div class="bg-white p-6 rounded-lg shadow-md">
+                        <div class="flex justify-between items-center mb-3">
+                            <h3 class="text-sm font-medium text-gray-500">Total Sales</h3>
+                            <div class="bg-blue-100 p-2 rounded-full">
+                                <i class="fas fa-chart-line text-blue-600"></i>
+                            </div>
+                        </div>
+                        <div class="flex items-baseline">
+                            <h2 class="text-3xl font-bold text-gray-800">
+                                <%= formatCurrency(stats.totalSales) %>
+                            </h2>
+                        </div>
+                    </div>
+
+                    <!-- Total Orders -->
+                    <div class="bg-white p-6 rounded-lg shadow-md">
+                        <div class="flex justify-between items-center mb-3">
+                            <h3 class="text-sm font-medium text-gray-500">Total Orders</h3>
+                            <div class="bg-yellow-100 p-2 rounded-full">
+                                <i class="fas fa-shopping-bag text-yellow-600"></i>
+                            </div>
+                        </div>
+                        <div class="flex items-baseline">
+                            <h2 class="text-3xl font-bold text-gray-800">
+                                <%= stats.totalOrders %>
+                            </h2>
+                        </div>
+                    </div>
+
+                    <!-- Products Sold -->
+                    <div class="bg-white p-6 rounded-lg shadow-md">
+                        <div class="flex justify-between items-center mb-3">
+                            <h3 class="text-sm font-medium text-gray-500">Products Sold</h3>
+                            <div class="bg-green-100 p-2 rounded-full">
+                                <i class="fas fa-book text-green-600"></i>
+                            </div>
+                        </div>
+                        <div class="flex items-baseline">
+                            <h2 class="text-3xl font-bold text-gray-800">
+                                <%= stats.totalProducts %>
+                            </h2>
+                        </div>
+                    </div>
+
+                    <!-- Average Order Value -->
+                    <div class="bg-white p-6 rounded-lg shadow-md">
+                        <div class="flex justify-between items-center mb-3">
+                            <h3 class="text-sm font-medium text-gray-500">Avg. Order Value</h3>
+                            <div class="bg-purple-100 p-2 rounded-full">
+                                <i class="fas fa-tags text-purple-600"></i>
+                            </div>
+                        </div>
+                        <div class="flex items-baseline">
+                            <h2 class="text-3xl font-bold text-gray-800">
+                                <%= formatCurrency(stats.avgOrderValue) %>
+                            </h2>
+                        </div>
+                    </div>
+                    <!-- Total Discount -->
+                    <div class="bg-white p-6 rounded-lg shadow-md">
+                        <div class="flex justify-between items-center mb-3">
+                            <h3 class="text-sm font-medium text-gray-500">Total Discount</h3>
+                            <div class="bg-red-100 p-2 rounded-full">
+                                <i class="fas fa-tags text-red-600"></i>
+                            </div>
+                        </div>
+                        <div class="flex items-baseline">
+                            <h2 class="text-3xl font-bold text-gray-800">
+                                <%= formatCurrency(stats.totalDiscount) %>
+                            </h2>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Charts -->
+            <div class="px-6 mb-6">
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    <!-- Sales Trend -->
+                    <div class="bg-white p-4 rounded-lg shadow-md">
+                        <h3 class="text-lg font-semibold text-gray-700 mb-4">Sales Trend</h3>
+                        <div class="h-80">
+                            <canvas id="salesChart"></canvas>
+                        </div>
+                    </div>
+
+                    <!-- Category Distribution -->
+                    <div class="bg-white p-4 rounded-lg shadow-md">
+                        <h3 class="text-lg font-semibold text-gray-700 mb-4">Category Distribution</h3>
+                        <div class="h-80">
+                            <canvas id="categoryChart"></canvas>
+                        </div>
+                    </div>
+                    <!-- Discount Chart -->
+<div class="px-6 mb-6">
+    <div class="bg-white p-4 rounded-lg shadow-md">
+        <h3 class="text-lg font-semibold text-gray-700 mb-4">Discount Analysis</h3>
+        <div class="h-80">
+            <canvas id="discountChart"></canvas>
+        </div>
+    </div>
+</div>
+                </div>
+            </div>
+
+            <!-- Recent Orders -->
+            <div class="px-6 mb-6">
+                <div class="bg-white rounded-lg shadow-md overflow-hidden">
+                    <div class="p-4 border-b border-gray-200">
+                        <h3 class="text-lg font-semibold text-gray-700">Recent Orders</h3>
+                    </div>
+                    <div class="overflow-x-auto">
+                        <table class="min-w-full divide-y divide-gray-200">
+                            <thead class="bg-gray-50">
+                                <tr>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Order ID</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Customer</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Items</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Subtotal</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Coupon(if applied)</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Final Amount</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                                </tr>
+                            </thead>
+                            <tbody class="bg-white divide-y divide-gray-200">
+                                <% if (orders && orders.length > 0) { %>
+                                    <% orders.forEach(order => { %>
+                                        <tr>
+                                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                                <a href="/admin/orders/details/<%= order._id %>" class="text-blue-600 hover:underline">
+                                                    <%= order.uniqueOrderId %>
+                                                </a>
+                                            </td>
+                                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                                <%= order.user ? order.user.email : 'Unknown' %>
+                                            </td>
+                                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                                <%= formatDate(order.createdAt) %>
+                                            </td>
+                                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                                <%= order.items.length %>
+                                            </td>
+                                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                                <%= formatCurrency(order.subtotal) %>
+                                            </td>
+                                            <td class="px-6 py-4 whitespace-nowrap text-sm text-red-500">
+                                                <% if (order.discount && order.discount > 0) { %>
+                                                    <%= formatCurrency(order.discount) %>
+                                                    <% if (order.couponCode) { %>
+                                                        <span class="text-xs bg-red-100 text-red-800 px-2 py-1 rounded-full">
+                                                            <%= order.couponCode %>
+                                                        </span>
+                                                    <% } %>
+                                                <% } else { %>
+                                                    <%= formatCurrency(0) %>
+                                                <% } %>
+                                            </td>
+                                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                                <%= formatCurrency(order.total) %>
+                                            </td>
+                                            <td class="px-6 py-4 whitespace-nowrap">
+                                                <% if (order.orderStatus === 'Delivered') { %>
+                                                    <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">
+                                                        <%= order.orderStatus %>
+                                                    </span>
+                                                <% } else if (order.orderStatus === 'Cancelled') { %>
+                                                    <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-red-100 text-red-800">
+                                                        <%= order.orderStatus %>
+                                                    </span>
+                                                <% } else if (order.orderStatus === 'Pending') { %>
+                                                    <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-yellow-100 text-yellow-800">
+                                                        <%= order.orderStatus %>
+                                                    </span>
+                                                <% } else if (order.orderStatus === 'Shipped') { %>
+                                                    <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-blue-100 text-blue-800">
+                                                        <%= order.orderStatus %>
+                                                    </span>
+                                                <% } else { %>
+                                                    <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-gray-100 text-gray-800">
+                                                        <%= order.orderStatus %>
+                                                    </span>
+                                                <% } %>
+                                            </td>
+                                        </tr>
+                                    <% }); %>
+                                <% } else { %>
+                                    <tr>
+                                        <td colspan="8" class="px-6 py-4 text-center text-sm text-gray-500">
+                                            No orders found for the selected period.
+                                        </td>
+                                    </tr>
+                                <% } %>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+       document.addEventListener('DOMContentLoaded', function () {
+    // Parse the data from server (fix for the NaN issue)
+    let dailySalesData;
+    let categoryStats;
+    let discountData;
+
+    try {
+        dailySalesData = JSON.parse('<%= dailySalesData %>'.replace(/&quot;/g, '"').replace(/&#34;/g, '"'));
+        categoryStats = JSON.parse('<%= categoryStats %>'.replace(/&quot;/g, '"').replace(/&#34;/g, '"'));
+        // Add parsing for discount data
+        discountData = JSON.parse('<%= discountData %>'.replace(/&quot;/g, '"').replace(/&#34;/g, '"'));
+    } catch (e) {
+        console.error("Error parsing data:", e);
+        dailySalesData = [];
+        categoryStats = [];
+        discountData = [];
+    }
+
+    // Sales Chart
+    const salesCtx = document.getElementById('salesChart').getContext('2d');
+
+    // Process data for sales chart
+    const salesLabels = [];
+    const salesValues = [];
+
+    if (Array.isArray(dailySalesData)) {
+        dailySalesData.forEach(day => {
+            if (day && day.date) {
+                // Format date for display - e.g., "Mar 15"
+                const dateObj = new Date(day.date);
+                const formattedDate = dateObj.toLocaleDateString('en-US', {
+                    month: 'short',
+                    day: 'numeric'
+                });
+
+                salesLabels.push(formattedDate);
+                salesValues.push(parseFloat(day.sales) || 0); // Ensure numeric values
+            }
+        });
+    }
+
+    // Create sales chart with gradient background
+    const salesChart = new Chart(salesCtx, {
+        type: 'line',
+        data: {
+            labels: salesLabels,
+            datasets: [{
+                label: 'Daily Sales',
+                data: salesValues,
+                fill: true,
+                backgroundColor: function (context) {
+                    const chart = context.chart;
+                    const { ctx, chartArea } = chart;
+                    if (!chartArea) {
+                        return null;
+                    }
+                    const gradient = ctx.createLinearGradient(0, chartArea.bottom, 0, chartArea.top);
+                    gradient.addColorStop(0, 'rgba(59, 130, 246, 0.0)');
+                    gradient.addColorStop(1, 'rgba(59, 130, 246, 0.2)');
+                    return gradient;
+                },
+                borderColor: 'rgba(59, 130, 246, 1)',
+                borderWidth: 2,
+                pointBackgroundColor: 'rgba(59, 130, 246, 1)',
+                pointRadius: 4,
+                pointHoverRadius: 6,
+                tension: 0.4
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    grid: {
+                        color: 'rgba(0, 0, 0, 0.05)'
+                    },
+                    ticks: {
+                        // Add currency format to y-axis
+                        callback: function (value) {
+                            return '₹' + value.toFixed(0);
+                        }
+                    }
+                },
+                x: {
+                    grid: {
+                        display: false
+                    }
+                }
+            },
+            plugins: {
+                legend: {
+                    display: false
+                },
+                tooltip: {
+                    callbacks: {
+                        label: function (context) {
+                            return '₹' + context.parsed.y.toFixed(2);
+                        }
+                    }
+                }
+            }
+        }
+    });
+
+    // Category Chart
+    const categoryCtx = document.getElementById('categoryChart').getContext('2d');
+
+    // Process data for category chart
+    const categoryLabels = [];
+    const categoryValues = [];
+
+    if (Array.isArray(categoryStats)) {
+        categoryStats.forEach(cat => {
+            if (cat && cat.categoryName) {
+                categoryLabels.push(cat.categoryName);
+                categoryValues.push(parseFloat(cat.totalSales) || 0); // Ensure numeric values
+            }
+        });
+    }
+
+    // Colors for category chart
+    const categoryColors = [
+        'rgba(59, 130, 246, 0.8)',  // Blue
+        'rgba(16, 185, 129, 0.8)',  // Green
+        'rgba(245, 158, 11, 0.8)',  // Yellow
+        'rgba(239, 68, 68, 0.8)',   // Red
+        'rgba(139, 92, 246, 0.8)',  // Purple
+        'rgba(236, 72, 153, 0.8)',  // Pink
+        'rgba(14, 165, 233, 0.8)',  // Light Blue
+        'rgba(20, 184, 166, 0.8)',  // Teal
+        'rgba(99, 102, 241, 0.8)',  // Indigo
+        'rgba(217, 70, 239, 0.8)'   // Fuchsia
+    ];
+
+    // Create category chart
+    const categoryChart = new Chart(categoryCtx, {
+        type: 'doughnut',
+        data: {
+            labels: categoryLabels,
+            datasets: [{
+                data: categoryValues,
+                backgroundColor: categoryColors.slice(0, categoryLabels.length),
+                borderWidth: 1,
+                borderColor: '#fff'
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            cutout: '65%',
+            plugins: {
+                legend: {
+                    position: 'right',
+                    labels: {
+                        boxWidth: 12,
+                        padding: 15,
+                        font: {
+                            size: 11
+                        }
+                    }
+                },
+                tooltip: {
+                    callbacks: {
+                        label: function (context) {
+                            const value = context.parsed;
+                            const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                            const percentage = Math.round((value / total) * 100);
+                            return context.label + ': ₹' + value.toFixed(2) + ' (' + percentage + '%)';
+                        }
+                    }
+                }
+            }
+        }
+    });
+
+    // Discount Chart - New addition
+    if (document.getElementById('discountChart')) {
+        const discountCtx = document.getElementById('discountChart').getContext('2d');
+        
+        // Process data for discount chart
+        const discountLabels = [];
+        const discountValues = [];
+        
+        if (Array.isArray(discountData)) {
+            discountData.forEach(item => {
+                if (item && item.date) {
+                    const dateObj = new Date(item.date);
+                    const formattedDate = dateObj.toLocaleDateString('en-US', {
+                        month: 'short',
+                        day: 'numeric'
+                    });
+                    
+                    discountLabels.push(formattedDate);
+                    discountValues.push(parseFloat(item.discount) || 0);
+                }
+            });
+        }
+        
+        // Create discount chart
+        const discountChart = new Chart(discountCtx, {
+            type: 'bar',
+            data: {
+                labels: discountLabels,
+                datasets: [{
+                    label: 'Daily Discounts',
+                    data: discountValues,
+                    backgroundColor: 'rgba(239, 68, 68, 0.6)',
+                    borderColor: 'rgba(239, 68, 68, 1)',
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        grid: {
+                            color: 'rgba(0, 0, 0, 0.05)'
+                        },
+                        ticks: {
+                            callback: function(value) {
+                                return '₹' + value.toFixed(0);
+                            }
+                        }
+                    },
+                    x: {
+                        grid: {
+                            display: false
+                        }
+                    }
+                },
+                plugins: {
+                    legend: {
+                        display: false
+                    },
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                return '₹' + context.parsed.y.toFixed(2);
+                            }
+                        }
+                    }
+                }
+            }
+        });
+    }
+
+    // PDF Download button
+    document.getElementById('downloadPdf').addEventListener('click', function () {
+        window.location.href = '/admin/sales-report/download-pdf' + window.location.search;
+    });
+
+    // Excel Download button
+    document.getElementById('downloadExcel').addEventListener('click', function () {
+        window.location.href = '/admin/sales-report/download-excel' + window.location.search;
+    });
+
+    // Update date inputs visibility based on filter type
+    updateDateInputs(document.querySelector('select[name="filterType"]').value);
+});
+
+function updateDateInputs(filterType) {
+    const dateInputs = document.querySelectorAll('.date-inputs');
+    if (filterType === 'custom') {
+        dateInputs.forEach(el => el.style.display = 'flex');
+    } else {
+        dateInputs.forEach(el => el.style.display = 'none');
+    }
+}
+    </script>
+</body>
+
+</html>

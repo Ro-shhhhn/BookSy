@@ -1,0 +1,653 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BookSy - Sales Report</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.1/cropper.min.css">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Add Chart.js -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
+    
+    <!-- Toast Notification Styles -->
+    <style>
+        .toast-notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 1000;
+            min-width: 300px;
+            max-width: 450px;
+            transform: translateX(150%);
+            transition: transform 0.3s ease-in-out;
+            animation: slideIn 0.3s forwards, slideOut 0.3s 5s forwards;
+        }
+
+        @keyframes slideIn {
+            to { transform: translateX(0); }
+        }
+
+        @keyframes slideOut {
+            to { transform: translateX(150%); }
+        }
+    </style>
+</head>
+<body class="bg-gray-100">
+    <!-- Error Toast Notification -->
+    <div id="errorToast" class="toast-notification bg-red-100 border-l-4 border-red-500 text-red-700 p-4 rounded shadow-lg hidden">
+        <div class="flex items-center">
+            <div class="flex-shrink-0">
+                <i class="fas fa-exclamation-circle text-red-500"></i>
+            </div>
+            <div class="ml-3">
+                <p class="text-sm font-medium" id="errorMessage"></p>
+            </div>
+            <div class="ml-auto pl-3">
+                <div class="-mx-1.5 -my-1.5">
+                    <button type="button" onclick="hideErrorToast()" class="inline-flex rounded-md p-1.5 text-red-500 hover:bg-red-200 focus:outline-none">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="flex h-screen">
+        <!-- Sidebar -->
+        <div class="w-64 bg-gradient-to-b from-gray-50 to-gray-100 shadow-xl min-h-screen flex flex-col">
+            <!-- Logo Section -->
+            <div class="p-6 border-b border-gray-200 flex items-center space-x-3">
+                <i class="fas fa-book text-2xl text-blue-600"></i>
+                <span class="text-xl font-bold text-gray-800">BookSy Admin</span>
+            </div>
+
+            <!-- Navigation Links -->
+            <nav class="flex-grow py-4">
+                <ul class="space-y-1">
+                    <li>
+                        <a href="/admin/dashboard" class="sidebar-link flex items-center px-6 py-3 text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors duration-200 group">
+                            <i class="fas fa-home mr-4 text-gray-400 group-hover:text-blue-500"></i>
+                            <span class="font-medium">Dashboard</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="/admin/products" class="sidebar-link flex items-center px-6 py-3 text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors duration-200 group">
+                            <i class="fas fa-box mr-4 text-gray-400 group-hover:text-blue-500"></i>
+                            <span class="font-medium">Products</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="/admin/users" class="sidebar-link flex items-center px-6 py-3 text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors duration-200 group">
+                            <i class="fas fa-users mr-4 text-gray-400 group-hover:text-blue-500"></i>
+                            <span class="font-medium">Users</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="/admin/orders" class="sidebar-link flex items-center px-6 py-3 text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors duration-200 group">
+                            <i class="fas fa-shopping-cart mr-4 text-gray-400 group-hover:text-blue-500"></i>
+                            <span class="font-medium">Orders</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="/admin/category" class="sidebar-link flex items-center px-6 py-3 text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors duration-200 group">
+                            <i class="fas fa-tags mr-4 text-gray-400 group-hover:text-blue-500"></i>
+                            <span class="font-medium">Category</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="/admin/return-requests" class="sidebar-link flex items-center px-6 py-3 text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors duration-200 group">
+                            <i class="fas fa-undo mr-4 text-gray-400 group-hover:text-blue-500"></i>
+                            <span class="font-medium">Return Requests</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="/admin/coupons" class="sidebar-link flex items-center px-6 py-3 text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors duration-200 group">
+                            <i class="fas fa-ticket-alt mr-4 text-gray-400 group-hover:text-blue-500"></i>
+                            <span class="font-medium">Coupons</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="/admin/wallet/transactions" class="sidebar-link flex items-center px-6 py-3 text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors duration-200 group">
+                            <i class="fas fa-wallet mr-4 text-gray-400 group-hover:text-blue-500"></i>
+                            <span class="font-medium">Wallet Management</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="/admin/category-offers" class="sidebar-link flex items-center px-6 py-3 text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors duration-200 group">
+                            <i class="fas fa-gift mr-4 text-gray-400 group-hover:text-blue-500"></i>
+                            <span class="font-medium">Category Offers</span>
+                        </a>
+                    </li>
+                    <!-- Add this to your sidebar navigation -->
+                    <li>
+                        <a href="/admin/sales-report" class="sidebar-link flex items-center px-6 py-3 text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors duration-200 group">
+                            <i class="fas fa-chart-bar mr-4 text-gray-400 group-hover:text-blue-500"></i>
+                            <span class="font-medium">Sales Report</span>
+                        </a>
+                    </li>
+                </ul>
+            </nav>
+
+            <!-- Logout Section -->
+            <div class="p-6 border-t border-gray-200">
+                <a href="/admin/logout" class="flex items-center justify-center w-full py-3 bg-blue-600 text-white rounded-lg 
+                    hover:bg-blue-700 transition-colors duration-300 shadow-md">
+                    <i class="fas fa-sign-out-alt mr-3"></i>
+                    Logout
+                </a>
+            </div>
+
+      <!-- Add this script at the end of the sidebar -->
+      <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const currentPath = window.location.pathname;
+            const sidebarLinks = document.querySelectorAll('.sidebar-link');
+            
+            sidebarLinks.forEach(link => {
+                if (link.getAttribute('href') === currentPath) {
+                    link.classList.add('bg-blue-100', 'text-blue-700');
+                    link.querySelector('i').classList.remove('text-gray-400', 'group-hover:text-blue-500');
+                    link.querySelector('i').classList.add('text-blue-600');
+                }
+            });
+        });
+    </script>
+</div>
+        <!-- Main Content -->
+        <div class="flex-1 overflow-auto">
+            <div class="p-6">
+                <!-- Header -->
+                <div class="flex justify-between items-center mb-6">
+                    <div class="flex items-center">
+                        <a href="/admin/products" class="mr-2">
+                            <i class="fas fa-arrow-left"></i>
+                        </a>
+                        <h1 class="text-2xl font-semibold text-gray-800">
+                            <%= isEdit ? 'Edit Product' : 'Add New Product' %>
+                        </h1>
+                    </div>
+                    <div class="flex items-center">
+                        <div class="relative mr-4">
+                            <input type="text" placeholder="Search products..." class="w-64 py-2 pl-10 pr-4 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400">
+                            <div class="absolute left-3 top-2.5 text-gray-400">
+                                <i class="fas fa-search"></i>
+                            </div>
+                        </div>
+                        <div class="w-10 h-10 rounded-full overflow-hidden">
+                            <img src="/admin/images/profile.jpg" alt="Admin Profile" class="w-full h-full object-cover">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Product Form -->
+                <div class="bg-white rounded-lg shadow-md p-6">
+                    <h2 class="text-xl font-semibold mb-6"><%= isEdit ? 'Edit Product Details' : 'Add New Product' %></h2>
+                    
+                    <form id="productForm" 
+                    action="<%= isEdit ? `/admin/products/edit/${product._id}` : '/admin/products/add' %>" 
+                    method="POST"
+                    enctype="multipart/form-data"
+                    class="space-y-6">
+
+                       
+                        <!-- Image Upload Section -->
+                        <div class="space-y-4">
+                            <label class="block text-sm font-medium text-gray-700">Product Images (Max 4)</label>
+                            <div class="flex flex-col space-y-4" id="fileInputsContainer">
+                                <% if (isEdit && product.images.length > 0) { %>
+                                    <div class="grid grid-cols-2 md:grid-cols-4 gap-4" id="previewContainer">
+                                        <% product.images.forEach((image, index) => { %>
+                                            <div class="relative group">
+                                                <div class="relative h-48 bg-gray-200 rounded-lg overflow-hidden">
+                                                    <img src="<%= image %>" class="object-cover w-full h-full" id="existing-<%= index %>">
+                                                    <div class="absolute inset-0 bg-black bg-opacity-50 hidden group-hover:flex items-center justify-center">
+                                                        <button type="button" onclick="openCrop('existing-<%= index %>')" 
+                                                                class="px-4 py-2 bg-white text-gray-800 rounded-lg hover:bg-gray-100">
+                                                            <i class="fas fa-crop"></i> Crop
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                                <button type="button" onclick="removeExistingImage('<%= index %>')" 
+                                                        class="absolute -top-2 -right-2 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center hover:bg-red-600">
+                                                    <i class="fas fa-times"></i>
+                                                </button>
+                                            </div>
+                                        <% }); %>
+                                    </div>
+                                <% } %>
+                                
+                                <!-- Upload Area -->
+                                <% if (isEdit) { %>
+                                    <div class="flex items-center justify-center w-full" id="fileInputWrapper" 
+                                      style="<%=product.images.length >= 4 ? 'display: none;' : '' %>">
+                                <% } else { %>
+                                    <div class="flex items-center justify-center w-full" id="fileInputWrapper">
+                                <% } %>
+                                    <label class="flex flex-col items-center px-4 py-6 bg-white text-blue-500 rounded-lg shadow-md tracking-wide border border-blue-500 cursor-pointer hover:bg-blue-50">
+                                        <i class="fas fa-cloud-upload-alt fa-2x"></i>
+                                        <span class="mt-2 text-base">Choose Images</span>
+                                        <input type="file" name="productImages" id="fileInput" class="hidden" accept="image/*" multiple>
+                                    </label>
+                                </div>
+                                
+                                <!-- New Previews -->
+                                <div class="grid grid-cols-2 md:grid-cols-4 gap-4" id="newPreviewContainer"></div>
+                            </div>
+                        </div>
+
+                        <!-- Product Info -->
+                        <div class="grid grid-cols-2 gap-6">
+                            <!-- Product Name -->
+                            <div>
+                                <label for="productName" class="block text-sm text-gray-600 mb-1">Product Name</label>
+                                <input type="text" id="productName" name="productName" 
+                                       value="<%= product ? product.title : '' %>"
+                                       class="w-full p-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400" required>
+                            </div>
+
+                            <!-- Category Dropdown -->
+                            <div>
+                                <label for="category" class="block text-sm text-gray-600 mb-1">Category</label>
+                                <select id="category" name="category" class="w-full p-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400" required>
+                                    <option value="">Select Category</option>
+                                    <% categories.forEach(category => { %>
+                                        <option value="<%= category._id %>" 
+                                            <%= product && product.category.toString() === category._id.toString() ? 'selected' : '' %>>
+                                            <%= category.name %>
+                                        </option>
+                                    <% }); %>
+                                </select>
+                            </div>
+                            <!-- Price and Discount Price -->
+<div class="grid grid-cols-2 gap-6">
+    <!-- Price -->
+    <div>
+        <label for="price" class="block text-sm text-gray-600 mb-1">Regular Price</label>
+        <input type="number" id="price" name="price" 
+               value="<%= product ? product.price : '' %>"
+               class="w-full p-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400" required>
+    </div>
+
+    <!-- Discount Price -->
+    <div>
+        <label for="discountPrice" class="block text-sm text-gray-600 mb-1">Discount Amount</label>
+        <input type="number" id="discountPrice" name="discountPrice" 
+               value="<%= product ? product.discountPrice : '0' %>"
+               placeholder="0 for no discount"
+               class="w-full p-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400">
+        <p class="text-xs text-gray-500 mt-1">Enter amount to subtract from regular price</p>
+    </div>
+</div>
+
+                            <!-- Description -->
+                            <div>
+                                <label for="description" class="block text-sm text-gray-600 mb-1">Description</label>
+                                <textarea id="description" name="description" 
+                                          class="w-full p-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400" rows="3" required><%= product ? product.description : '' %></textarea>
+                            </div>
+
+                            <!-- Language -->
+                            <div>
+                                <label for="language" class="block text-sm text-gray-600 mb-1">Language</label>
+                                <select id="language" name="language" class="w-full p-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400" required>
+                                    <option value="en">English</option>
+                                    <option value="hi">Hindi</option>
+                                    <option value="ml">Malayalam</option>
+                                    <option value="ta">Tamil</option>
+                                    <option value="fr">French</option>
+                                    <option value="es">Spanish</option>
+                                    <option value="ru">Russian</option>
+                                    <option value="ar">Arabic</option>
+                                    <option value="ja">Japanese</option>
+                                    <option value="zh">Chinese</option>
+                                </select>
+                            </div>
+
+                            <!-- Author -->
+                            <div>
+                                <label for="author" class="block text-sm text-gray-600 mb-1">Author</label>
+                                <input type="text" id="author" name="author" 
+                                       value="<%= product ? product.author : '' %>"
+                                       class="w-full p-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400" required>
+                            </div>
+
+                            <!-- Stock Count -->
+                            <div>
+                                <label for="stockCount" class="block text-sm text-gray-600 mb-1">Stock Count</label>
+                                <input type="number" id="stockCount" name="stockCount" 
+                                       value="<%= product ? product.stock : '' %>"
+                                       class="w-full p-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400" required>
+                            </div>
+                        </div>
+
+                        <!-- Submit Button -->
+                        <div class="flex justify-center mt-6">
+                            <button type="submit" class="bg-black text-white py-2 px-6 rounded-md hover:bg-gray-800">
+                                <%= isEdit ? 'Update Product' : 'Add Now' %>
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Cropper Modal -->
+    <div id="cropModal" class="fixed inset-0 bg-black bg-opacity-50 hidden z-50">
+        <div class="flex items-center justify-center min-h-screen">
+            <div class="bg-white rounded-lg p-4 max-w-3xl w-full">
+                <div class="flex justify-between mb-4">
+                    <h3 class="text-lg font-semibold">Crop Image</h3>
+                    <button onclick="document.getElementById('cropModal').classList.add('hidden')" 
+                            class="text-gray-500 hover:text-gray-700">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+                <div class="h-96">
+                    <img id="cropImage" class="max-w-full max-h-full">
+                </div>
+                <div class="mt-4 flex justify-end space-x-2">
+                    <button onclick="document.getElementById('cropModal').classList.add('hidden')" 
+                            class="px-4 py-2 bg-gray-500 text-white rounded hover:bg-gray-600">
+                        Cancel
+                    </button>
+                    <button onclick="applyCrop()" 
+                            class="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600">
+                        Apply Crop
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.1/cropper.min.js"></script>
+    <script>
+    const maxFiles = 4;
+    let fileCount = 0;
+    let cropper = null;
+    let currentPreviewId = null;
+    let croppedImages = {};
+
+    // Initialize existing images
+    document.addEventListener('DOMContentLoaded', function() {
+        const existingImages = document.querySelectorAll('#previewContainer img');
+        existingImages.forEach((img, index) => {
+            const previewId = `existing-${index}`;
+            img.id = previewId;
+            fileCount++;
+        });
+        
+        // Initialize file input visibility
+        updateUploadVisibility();
+    });
+
+    // File Input Handler
+    document.getElementById('fileInput')?.addEventListener('change', function(e) {
+        const files = Array.from(e.target.files);
+        
+        if (files.length + fileCount > maxFiles) {
+            showErrorToast(`Maximum ${maxFiles} images allowed`);
+            this.value = '';
+            return;
+        }
+
+        files.forEach(file => {
+            if (fileCount >= maxFiles) return;
+            
+            const reader = new FileReader();
+            reader.onload = (event) => {
+                const previewId = `preview-${Date.now()}-${Math.random().toString(36).substr(2,9)}`;
+                createPreview(event.target.result, previewId);
+                fileCount++;
+            };
+            reader.readAsDataURL(file);
+        });
+
+        updateUploadVisibility();
+        this.value = ''; // Clear the input after processing to prevent duplicate uploads
+    });
+
+    // Create Image Preview
+    function createPreview(imgSrc, previewId) {
+        const previewContainer = document.getElementById('newPreviewContainer');
+        
+        const previewItem = document.createElement('div');
+        previewItem.className = 'relative group';
+        previewItem.innerHTML = `
+            <div class="relative h-48 bg-gray-200 rounded-lg overflow-hidden">
+                <img id="${previewId}" src="${imgSrc}" class="object-cover w-full h-full">
+                <div class="absolute inset-0 bg-black bg-opacity-50 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity">
+                    <button type="button" onclick="openCrop('${previewId}')" 
+                            class="px-4 py-2 bg-white text-gray-800 rounded-lg hover:bg-gray-100">
+                        <i class="fas fa-crop"></i> Crop
+                    </button>
+                </div>
+            </div>
+            <button type="button" onclick="removeImage('${previewId}')" 
+                    class="absolute -top-2 -right-2 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center hover:bg-red-600">
+                <i class="fas fa-times"></i>
+            </button>
+        `;
+        
+        previewContainer.appendChild(previewItem);
+    }
+
+    // Remove Image
+    function removeImage(previewId) {
+        const element = document.getElementById(previewId);
+        if (element && element.parentElement && element.parentElement.parentElement) {
+            element.parentElement.parentElement.remove();
+            fileCount--;
+            
+            // Remove from croppedImages if exists
+            if (croppedImages[previewId]) {
+                delete croppedImages[previewId];
+            }
+        }
+        
+        updateUploadVisibility();
+    }
+
+    // Remove Existing Image
+    function removeExistingImage(index) {
+        const imageElements = document.querySelectorAll('#previewContainer .relative.group');
+        if (imageElements.length <= 1) {
+            showErrorToast('At least one image is required');
+            return;
+        }
+        
+        imageElements[index].remove();
+        fileCount--;
+        
+        // Add a hidden input to track removed images
+        const form = document.getElementById('productForm');
+        const hiddenInput = document.createElement('input');
+        hiddenInput.type = 'hidden';
+        hiddenInput.name = 'removedImages';
+        hiddenInput.value = index;
+        form.appendChild(hiddenInput);
+        
+        updateUploadVisibility();
+    }
+
+    function updateUploadVisibility() {
+        const fileInputWrapper = document.getElementById('fileInputWrapper');
+        if (!fileInputWrapper) return;
+
+        if (fileCount < maxFiles) {
+            fileInputWrapper.style.display = 'flex';
+        } else {
+            fileInputWrapper.style.display = 'none';
+        }
+    }
+
+    // Crop Functionality
+    function openCrop(previewId) {
+        currentPreviewId = previewId;
+        const imageElement = document.getElementById(previewId);
+        const modal = document.getElementById('cropModal');
+        const cropImage = document.getElementById('cropImage');
+        
+        if (!imageElement || !modal || !cropImage) return;
+        
+        cropImage.src = imageElement.src;
+        modal.classList.remove('hidden');
+
+        if (cropper) {
+            cropper.destroy();
+            cropper = null;
+        }
+        
+        setTimeout(() => {
+            cropper = new Cropper(cropImage, {
+                aspectRatio: 3/4,
+                viewMode: 1,
+                autoCropArea: 0.8,
+                responsive: true,
+                checkCrossOrigin: false,
+                guides: true,
+                highlight: true,
+                cropBoxResizable: true,
+                dragMode: 'move'
+            });
+        }, 100);
+    }
+
+    // Apply Crop
+    function applyCrop() {
+        if (cropper && currentPreviewId) {
+            const croppedCanvas = cropper.getCroppedCanvas({
+                width: 800,
+                height: 1000,
+                imageSmoothingEnabled: true,
+                imageSmoothingQuality: 'high'
+            });
+            
+            const previewImage = document.getElementById(currentPreviewId);
+            
+            if (previewImage) {
+                const croppedImageUrl = croppedCanvas.toDataURL('image/jpeg', 0.8);
+                previewImage.src = croppedImageUrl;
+                
+                // Store cropped image data
+                croppedImages[currentPreviewId] = croppedImageUrl;
+            }
+
+            cropper.destroy();
+            document.getElementById('cropModal').classList.add('hidden');
+            currentPreviewId = null;
+        }
+    }
+
+    // Toast Notification Functions
+    function showErrorToast(message) {
+        const toast = document.getElementById('errorToast');
+        const errorMessage = document.getElementById('errorMessage');
+        
+        // Set message and show toast
+        errorMessage.textContent = message;
+        toast.classList.remove('hidden');
+        
+        // Remove animation classes if they exist
+        toast.style.animation = 'none';
+        toast.offsetHeight; // Trigger reflow
+        toast.style.animation = 'slideIn 0.3s forwards, slideOut 0.3s 5s forwards';
+        
+        // Auto hide after 5 seconds
+        setTimeout(hideErrorToast, 5000);
+    }
+    
+    function hideErrorToast() {
+        const toast = document.getElementById('errorToast');
+        toast.classList.add('hidden');
+    }
+
+    // Form Submission
+    document.getElementById('productForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const form = e.target;
+        const submitBtn = form.querySelector('button[type="submit"]');
+        const isEdit = <%= typeof isEdit !== 'undefined' && isEdit %>;
+        
+        if (fileCount === 0) {
+            showErrorToast('At least one product image is required');
+            return;
+        }
+
+        try {
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Processing...';
+
+            const formData = new FormData(form);
+            
+            // Remove unnecessary file inputs
+            formData.delete('productImages');
+            formData.delete('existingImages');
+
+            // Track existing images to keep
+            if (isEdit) {
+                const existingImageIds = [];
+                document.querySelectorAll('#previewContainer img').forEach((img, idx) => {
+                    existingImageIds.push(idx);
+                });
+                
+                // Get removed images from hidden inputs
+                const removedInputs = form.querySelectorAll('input[name="removedImages"]');
+                const removedIndices = Array.from(removedInputs).map(input => parseInt(input.value));
+                
+                // Filter out removed images
+                const imagesToKeep = existingImageIds.filter(idx => !removedIndices.includes(idx));
+                formData.append('imageIdsToKeep', imagesToKeep.join(','));
+            }
+
+            // Add all cropped images
+            Object.entries(croppedImages).forEach(([id, dataUrl]) => {
+                const blob = dataURLtoBlob(dataUrl);
+                formData.append('croppedImages', blob, `cropped-${Date.now()}-${Math.random().toString(36).substr(2, 9)}.jpg`);
+            });
+            
+            // Add new uncropped images
+            document.querySelectorAll('#newPreviewContainer img').forEach(img => {
+                if (!croppedImages[img.id] && img.src.startsWith('data:')) {
+                    const blob = dataURLtoBlob(img.src);
+                    formData.append('croppedImages', blob, `new-${Date.now()}-${Math.random().toString(36).substr(2, 9)}.jpg`);
+                }
+            });
+
+            const response = await fetch(form.action, {
+                method: 'POST',
+                body: formData
+            });
+
+            const responseData = await response.json();
+
+            if (response.ok) {
+                window.location.href = '/admin/products?success=Product ' + 
+                    (isEdit ? 'updated' : 'added') + ' successfully';
+            } else {
+                showErrorToast(responseData.error || 'Error processing request');
+            }
+        } catch (error) {
+            console.error('Submission error:', error);
+            showErrorToast('Server error. Please try again.');
+        } finally {
+            submitBtn.disabled = false;
+            submitBtn.innerHTML = isEdit ? 'Update Product' : 'Add Now';
+        }
+    });
+
+    function dataURLtoBlob(dataurl) {
+        const arr = dataurl.split(',');
+        const mime = arr[0].match(/:(.*?);/)[1];
+        const bstr = atob(arr[1]);
+        const n = bstr.length;
+        const u8arr = new Uint8Array(n);
+        for (let i = 0; i < n; i++) u8arr[i] = bstr.charCodeAt(i);
+        return new Blob([u8arr], { type: mime });
+    }
+    </script>
+</body>
+</html>

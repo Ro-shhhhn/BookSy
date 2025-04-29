@@ -1,0 +1,478 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BookSy Admin Dashboard</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.3.0/css/all.min.css">
+</head>
+<body class="bg-gray-50">
+    <div class="min-h-screen flex">
+        <!-- Include your sidebar here -->
+<!-- Sidebar -->
+<div class="w-64 bg-gradient-to-b from-gray-50 to-gray-100 shadow-xl min-h-screen flex flex-col">
+    <!-- Logo Section -->
+    <div class="p-6 border-b border-gray-200 flex items-center space-x-3">
+        <i class="fas fa-book text-2xl text-blue-600"></i>
+        <span class="text-xl font-bold text-gray-800">BookSy Admin</span>
+    </div>
+
+    <!-- Navigation Links -->
+    <nav class="flex-grow py-4">
+        <ul class="space-y-1">
+            <li>
+                <a href="/admin/dashboard"
+                    class="sidebar-link flex items-center px-6 py-3 text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors duration-200 group">
+                    <i class="fas fa-home mr-4 text-gray-400 group-hover:text-blue-500"></i>
+                    <span class="font-medium">Dashboard</span>
+                </a>
+            </li>
+            <li>
+                <a href="/admin/products"
+                    class="sidebar-link flex items-center px-6 py-3 text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors duration-200 group">
+                    <i class="fas fa-box mr-4 text-gray-400 group-hover:text-blue-500"></i>
+                    <span class="font-medium">Products</span>
+                </a>
+            </li>
+            <li>
+                <a href="/admin/users"
+                    class="sidebar-link flex items-center px-6 py-3 text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors duration-200 group">
+                    <i class="fas fa-users mr-4 text-gray-400 group-hover:text-blue-500"></i>
+                    <span class="font-medium">Users</span>
+                </a>
+            </li>
+            <li>
+                <a href="/admin/orders"
+                    class="sidebar-link flex items-center px-6 py-3 text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors duration-200 group">
+                    <i class="fas fa-shopping-cart mr-4 text-gray-400 group-hover:text-blue-500"></i>
+                    <span class="font-medium">Orders</span>
+                </a>
+            </li>
+            <li>
+                <a href="/admin/category"
+                    class="sidebar-link flex items-center px-6 py-3 text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors duration-200 group">
+                    <i class="fas fa-tags mr-4 text-gray-400 group-hover:text-blue-500"></i>
+                    <span class="font-medium">Category</span>
+                </a>
+            </li>
+            <li>
+                <a href="/admin/return-requests"
+                    class="sidebar-link flex items-center px-6 py-3 text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors duration-200 group">
+                    <i class="fas fa-undo mr-4 text-gray-400 group-hover:text-blue-500"></i>
+                    <span class="font-medium">Return Requests</span>
+                </a>
+            </li>
+            <li>
+                <a href="/admin/coupons"
+                    class="sidebar-link flex items-center px-6 py-3 text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors duration-200 group">
+                    <i class="fas fa-ticket-alt mr-4 text-gray-400 group-hover:text-blue-500"></i>
+                    <span class="font-medium">Coupons</span>
+                </a>
+            </li>
+            <li>
+                <a href="/admin/wallet/transactions" class="sidebar-link flex items-center px-6 py-3 text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors duration-200 group">
+                    <i class="fas fa-wallet mr-4 text-gray-400 group-hover:text-blue-500"></i>
+                    <span class="font-medium">Wallet Management</span>
+                </a>
+            </li>
+            <li>
+                <a href="/admin/category-offers"
+                    class="sidebar-link flex items-center px-6 py-3 text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors duration-200 group">
+                    <i class="fas fa-gift mr-4 text-gray-400 group-hover:text-blue-500"></i>
+                    <span class="font-medium">Category Offers</span>
+                </a>
+            </li>
+            <!-- Add this to your sidebar navigation -->
+            <li>
+                <a href="/admin/sales-report"
+                    class="sidebar-link flex items-center px-6 py-3 text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors duration-200 group">
+                    <i class="fas fa-chart-bar mr-4 text-gray-400 group-hover:text-blue-500"></i>
+                    <span class="font-medium">Sales Report</span>
+                </a>
+            </li>
+        </ul>
+    </nav>
+
+    <!-- Logout Section -->
+    <div class="p-6 border-t border-gray-200">
+        <a href="/admin/logout" class="flex items-center justify-center w-full py-3 bg-blue-600 text-white rounded-lg 
+    hover:bg-blue-700 transition-colors duration-300 shadow-md">
+            <i class="fas fa-sign-out-alt mr-3"></i>
+            Logout
+        </a>
+    </div>
+
+    <!-- Add this script at the end of the sidebar -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const currentPath = window.location.pathname;
+            const sidebarLinks = document.querySelectorAll('.sidebar-link');
+
+            sidebarLinks.forEach(link => {
+                if (link.getAttribute('href') === currentPath) {
+                    link.classList.add('bg-blue-100', 'text-blue-700');
+                    link.querySelector('i').classList.remove('text-gray-400', 'group-hover:text-blue-500');
+                    link.querySelector('i').classList.add('text-blue-600');
+                }
+            });
+        });
+    </script>
+</div>        
+        <!-- Main Content -->
+        <div class="flex-1 p-8">
+            <h1 class="text-2xl font-bold mb-6">Admin Dashboard</h1>
+            
+            <!-- Stats Overview Cards -->
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+                <!-- Total Users Card -->
+                <div class="bg-white rounded-lg shadow p-6 flex items-center">
+                    <div class="rounded-full bg-indigo-100 p-3 mr-4">
+                        <i class="fas fa-users text-indigo-600 text-xl"></i>
+                    </div>
+                    <div>
+                        <h3 class="text-gray-500 text-sm font-medium">Total Users</h3>
+                        <p class="text-2xl font-bold" id="totalUsers"><%= stats.totalUsers %></p>
+                        <p class="text-xs text-green-500 mt-1 user-change">
+                            <i class="fas fa-arrow-up mr-1"></i><span id="userChangePercent">0.0</span>% from yesterday
+                        </p>
+                    </div>
+                </div>
+                
+                <!-- Total Orders Card -->
+                <div class="bg-white rounded-lg shadow p-6 flex items-center">
+                    <div class="rounded-full bg-yellow-100 p-3 mr-4">
+                        <i class="fas fa-shopping-cart text-yellow-600 text-xl"></i>
+                    </div>
+                    <div>
+                        <h3 class="text-gray-500 text-sm font-medium">Total Orders</h3>
+                        <p class="text-2xl font-bold" id="totalOrders"><%= stats.totalOrders %></p>
+                        <p class="text-xs text-green-500 mt-1 order-change">
+                            <i class="fas fa-arrow-up mr-1"></i><span id="orderChangePercent">0.0</span>% from last week
+                        </p>
+                    </div>
+                </div>
+                
+                <!-- Total Revenue Card -->
+                <div class="bg-white rounded-lg shadow p-6 flex items-center">
+                    <div class="rounded-full bg-green-100 p-3 mr-4">
+                        <i class="fas fa-dollar-sign text-green-600 text-xl"></i>
+                    </div>
+                    <div>
+                        <h3 class="text-gray-500 text-sm font-medium">Total Revenue</h3>
+                        <p class="text-2xl font-bold" id="totalSales">₹<%= stats.totalRevenue.toLocaleString() %></p>
+                        <p class="text-xs text-red-500 mt-1 sales-change">
+                            <i class="fas fa-arrow-down mr-1"></i><span id="salesChangePercent">0.0</span>% from yesterday
+                        </p>
+                    </div>
+                </div>
+                
+                <!-- Pending Orders Card -->
+                <div class="bg-white rounded-lg shadow p-6 flex items-center">
+                    <div class="rounded-full bg-red-100 p-3 mr-4">
+                        <i class="fas fa-clock text-red-600 text-xl"></i>
+                    </div>
+                    <div>
+                        <h3 class="text-gray-500 text-sm font-medium">Pending Orders</h3>
+                        <p class="text-2xl font-bold" id="pendingOrders"><%= stats.pendingOrders %></p>
+                        <p class="text-xs text-green-500 mt-1 pending-change">
+                            <i class="fas fa-arrow-up mr-1"></i><span id="pendingChangePercent">0.0</span>% from yesterday
+                        </p>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Sales Chart Section -->
+            <div class="bg-white rounded-lg shadow p-6 mb-8">
+                <div class="flex justify-between items-center mb-4">
+                    <h2 class="text-xl font-semibold">Sales Overview</h2>
+                    <div class="flex space-x-2">
+                        <select id="timeFilter" class="border border-gray-300 rounded px-3 py-1 text-sm">
+                            <option value="daily">Daily</option>
+                            <option value="weekly">Weekly</option>
+                            <option value="monthly" selected>Monthly</option>
+                            <option value="yearly">Yearly</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="h-80">
+                    <canvas id="salesChart"></canvas>
+                </div>
+            </div>
+            
+            <!-- Top Products and Categories Section -->
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                <!-- Top Products -->
+                <div class="bg-white rounded-lg shadow p-6">
+                    <h2 class="text-xl font-semibold mb-4">Best Selling Products (Top 10)</h2>
+                    <div class="overflow-x-auto">
+                        <table class="min-w-full divide-y divide-gray-200">
+                            <thead>
+                                <tr>
+                                    <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Product</th>
+                                    <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Units Sold</th>
+                                    <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Revenue</th>
+                                </tr>
+                            </thead>
+                            <tbody id="topProductsTable" class="divide-y divide-gray-200">
+                                <!-- Products will be dynamically loaded here -->
+                                <tr>
+                                    <td colspan="3" class="px-4 py-4 text-center text-sm text-gray-500">Loading...</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                
+                <!-- Top Categories -->
+                <div class="bg-white rounded-lg shadow p-6">
+                    <h2 class="text-xl font-semibold mb-4">Best Selling Categories (Top 10)</h2>
+                    <div class="overflow-x-auto">
+                        <table class="min-w-full divide-y divide-gray-200">
+                            <thead>
+                                <tr>
+                                    <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Category</th>
+                                    <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Units Sold</th>
+                                    <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Revenue</th>
+                                </tr>
+                            </thead>
+                            <tbody id="topCategoriesTable" class="divide-y divide-gray-200">
+                                <!-- Categories will be dynamically loaded here -->
+                                <tr>
+                                    <td colspan="3" class="px-4 py-4 text-center text-sm text-gray-500">Loading...</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- JavaScript for Chart and Dashboard -->
+    <script>
+        // Initialize variables
+        let salesChart;
+        
+        // Helper function to format currency
+        function formatCurrency(amount) {
+            return '₹' + parseFloat(amount).toLocaleString('en-IN');
+        }
+        
+        // Fetch dashboard data based on time filter
+        async function fetchDashboardData(timeFilter = 'monthly') {
+            try {
+                const response = await fetch(`/admin/api/dashboard-data?timeFilter=${timeFilter}`);
+                const data = await response.json();
+                
+                if (response.ok) {
+                    updateDashboard(data);
+                } else {
+                    console.error('Error fetching dashboard data:', data.error);
+                }
+            } catch (error) {
+                console.error('Failed to fetch dashboard data:', error);
+            }
+        }
+        
+        // Update dashboard with fetched data
+        function updateDashboard(data) {
+            // Update stats
+            document.getElementById('totalUsers').textContent = data.stats.totalUsers;
+            document.getElementById('totalOrders').textContent = data.stats.totalOrders;
+            document.getElementById('totalSales').textContent = formatCurrency(data.stats.totalSales);
+            document.getElementById('pendingOrders').textContent = data.stats.pendingOrders;
+            
+            // Random percentage changes (in a real app, you'd calculate these)
+            document.getElementById('userChangePercent').textContent = (Math.random() * 5).toFixed(1);
+            document.getElementById('orderChangePercent').textContent = (Math.random() * 4).toFixed(1);
+            document.getElementById('salesChangePercent').textContent = (Math.random() * 6).toFixed(1);
+            document.getElementById('pendingChangePercent').textContent = (Math.random() * 3).toFixed(1);
+            
+            // Update sales chart
+            updateSalesChart(data.salesData);
+            
+            // Update top products table
+            updateTopProductsTable(data.topProducts);
+            
+            // Update top categories table
+            updateTopCategoriesTable(data.topCategories);
+        }
+        
+        // Update sales chart
+        function updateSalesChart(salesData) {
+            const labels = salesData.map(item => item._id);
+            const salesValues = salesData.map(item => item.totalSales);
+            const orderCounts = salesData.map(item => item.orderCount);
+            
+            const ctx = document.getElementById('salesChart').getContext('2d');
+            
+            // Destroy existing chart if it exists
+            if (salesChart) {
+                salesChart.destroy();
+            }
+            
+            // Create new chart
+            salesChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: labels,
+                    datasets: [
+                        {
+                            label: 'Revenue',
+                            data: salesValues,
+                            borderColor: 'rgb(59, 130, 246)',
+                            backgroundColor: 'rgba(59, 130, 246, 0.1)',
+                            fill: true,
+                            tension: 0.4
+                        },
+                        {
+                            label: 'Orders',
+                            data: orderCounts,
+                            borderColor: 'rgb(249, 115, 22)',
+                            backgroundColor: 'rgba(249, 115, 22, 0.0)',
+                            borderDash: [5, 5],
+                            tension: 0.4,
+                            yAxisID: 'y1'
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    interaction: {
+                        mode: 'index',
+                        intersect: false,
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            title: {
+                                display: true,
+                                text: 'Revenue (₹)'
+                            },
+                            ticks: {
+                                callback: function(value) {
+                                    return '₹' + value.toLocaleString();
+                                }
+                            }
+                        },
+                        y1: {
+                            beginAtZero: true,
+                            position: 'right',
+                            title: {
+                                display: true,
+                                text: 'Order Count'
+                            },
+                            grid: {
+                                drawOnChartArea: false
+                            }
+                        }
+                    },
+                    plugins: {
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    let label = context.dataset.label || '';
+                                    if (label) {
+                                        label += ': ';
+                                    }
+                                    if (context.datasetIndex === 0) {
+                                        label += '₹' + context.parsed.y.toLocaleString();
+                                    } else {
+                                        label += context.parsed.y;
+                                    }
+                                    return label;
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+        
+        // Update top products table
+        function updateTopProductsTable(products) {
+            const tableBody = document.getElementById('topProductsTable');
+            
+            // Clear existing rows
+            tableBody.innerHTML = '';
+            
+            // Add product rows
+            if (products.length === 0) {
+                tableBody.innerHTML = `
+                    <tr>
+                        <td colspan="3" class="px-4 py-4 text-center text-sm text-gray-500">No data available</td>
+                    </tr>
+                `;
+                return;
+            }
+            
+            products.forEach(product => {
+                const row = document.createElement('tr');
+                row.className = "hover:bg-gray-50";
+                
+                row.innerHTML = `
+                    <td class="px-4 py-4 whitespace-nowrap">
+                        <div class="flex items-center">
+                            <div class="flex-shrink-0 h-10 w-10">
+                                <img class="h-10 w-10 rounded-md object-cover" src="${product.coverImage}" alt="${product.title}">
+                            </div>
+                            <div class="ml-4">
+                                <div class="text-sm font-medium text-gray-900">${product.title}</div>
+                                <div class="text-sm text-gray-500">${product.author}</div>
+                            </div>
+                        </div>
+                    </td>
+                    <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-500">${product.totalSold}</td>
+                    <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-500">${formatCurrency(product.totalRevenue)}</td>
+                `;
+                
+                tableBody.appendChild(row);
+            });
+        }
+        
+        // Update top categories table
+        function updateTopCategoriesTable(categories) {
+            const tableBody = document.getElementById('topCategoriesTable');
+            
+            // Clear existing rows
+            tableBody.innerHTML = '';
+            
+            // Add category rows
+            if (categories.length === 0) {
+                tableBody.innerHTML = `
+                    <tr>
+                        <td colspan="3" class="px-4 py-4 text-center text-sm text-gray-500">No data available</td>
+                    </tr>
+                `;
+                return;
+            }
+            
+            categories.forEach(category => {
+                const row = document.createElement('tr');
+                row.className = "hover:bg-gray-50";
+                
+                row.innerHTML = `
+                    <td class="px-4 py-4 whitespace-nowrap text-sm font-medium text-gray-900">${category.name}</td>
+                    <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-500">${category.totalSold}</td>
+                    <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-500">${formatCurrency(category.totalRevenue)}</td>
+                `;
+                
+                tableBody.appendChild(row);
+            });
+        }
+        
+        // Event listener for time filter changes
+        document.getElementById('timeFilter').addEventListener('change', function() {
+            fetchDashboardData(this.value);
+        });
+        
+        // Initialize dashboard
+        document.addEventListener('DOMContentLoaded', function() {
+            fetchDashboardData('monthly');
+        });
+    </script>
+</body>
+</html>

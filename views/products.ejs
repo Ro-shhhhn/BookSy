@@ -1,0 +1,1022 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>BookSy - Your Favorite Bookstore</title>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    .book-card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+    }
+    .hero-section {
+      background-image: linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)), url('/api/placeholder/1200/400');
+      background-size: cover;
+      background-position: center;
+    }
+  </style>
+</head>
+<body class="bg-gray-50">
+
+<!-- Navbar -->
+<!-- Navbar -->
+<nav class="bg-gradient-to-r from-[#C3A18B] to-[#A7886D] shadow-lg py-6 sticky top-0 z-50">
+    <div class="container mx-auto px-4">
+      <div class="flex justify-between items-center">
+        <!-- Logo -->
+        <div class="flex items-center">
+          <a href="/" class="flex items-center space-x-2 group">
+            <i class="fas fa-book-open text-amber-200 text-2xl group-hover:text-white transition-colors duration-300"></i>
+            <span class="text-white text-2xl font-extrabold tracking-wider group-hover:text-amber-200 transition-colors duration-300">BookSy</span>
+          </a>
+        </div>
+  
+        <!-- Desktop Navigation -->
+        <div class="hidden md:flex items-center space-x-8">
+          <a href="/" class="text-white hover:text-amber-200 transition-colors duration-300 font-medium relative group">
+            Home
+            <span class="absolute -bottom-1 left-0 w-0 h-0.5 bg-amber-200 group-hover:w-full transition-all duration-300"></span>
+          </a>
+          <a href="/products" class="text-white hover:text-amber-200 transition-colors duration-300 font-medium relative group">
+            Books
+            <span class="absolute -bottom-1 left-0 w-0 h-0.5 bg-amber-200 group-hover:w-full transition-all duration-300"></span>
+          </a>
+          <a href="/about" class="text-white hover:text-amber-200 transition-colors duration-300 font-medium relative group">
+            About
+            <span class="absolute -bottom-1 left-0 w-0 h-0.5 bg-amber-200 group-hover:w-full transition-all duration-300"></span>
+          </a>
+          <a href="/contact" class="text-white hover:text-amber-200 transition-colors duration-300 font-medium relative group">
+            Contact
+            <span class="absolute -bottom-1 left-0 w-0 h-0.5 bg-amber-200 group-hover:w-full transition-all duration-300"></span>
+          </a>
+        </div>
+  
+        <!-- Icons and Actions -->
+        <div class="flex items-center space-x-5">
+          <!-- Wishlist -->
+          <a href="/wishlist" class="text-white hover:text-amber-200 transition-colors duration-300 text-lg flex items-center">
+            <i class="far fa-heart text-xl mr-1"></i>
+            <span class="hidden md:inline">Wishlist</span>
+          </a>
+  
+          <!-- Cart Icon -->
+          <a href="/cart" class="text-white hover:text-amber-200 transition-colors duration-300 relative group">
+            <div class="relative">
+              <i class="fa-solid fa-cart-shopping text-xl"></i>
+              <span class="absolute -top-2 -right-2 bg-amber-200 text-[#AB8462] text-xs font-bold rounded-full h-5 w-5 flex items-center justify-center group-hover:bg-white transition-colors duration-300">
+                <%= locals.cartCount || 0 %>
+              </span>
+            </div>
+          </a>
+  
+          <!-- Profile/Sign In -->
+          <% if (locals.session && session.userId) { %>
+            <div class="relative group">
+              <button class="text-white hover:text-amber-200 transition-colors duration-300 focus:outline-none flex items-center">
+                <% if (locals.user && user.profilePicture) { %>
+                  <img src="<%= user.profilePicture %>" alt="Profile" class="w-8 h-8 rounded-full object-cover border-2 border-amber-200 hover:border-white transition-colors duration-300">
+                <% } else { %>
+                  <div class="w-8 h-8 rounded-full bg-amber-200 text-[#AB8462] flex items-center justify-center border-2 border-amber-200 hover:bg-white transition-colors duration-300">
+                    <i class="fa-solid fa-user"></i>
+                  </div>
+                <% } %>
+              </button>
+              <!-- Dropdown -->
+              <div class="absolute right-0 mt-2 w-64 bg-white rounded-lg shadow-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300 ease-in-out transform origin-top-right translate-y-2 group-hover:translate-y-0">
+                <div class="py-2 rounded-lg overflow-hidden">
+                  <div class="px-4 py-3 bg-[#AB8462] text-white">
+                    <% if (locals.user && user.name) { %>
+                      <p class="font-medium"><%= user.name %></p>
+                      <p class="text-sm text-gray-200 truncate"><%= user.email %></p>
+                    <% } else { %>
+                      <p class="font-medium">My Account</p>
+                    <% } %>
+                  </div>
+                  <a href="/profile" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition duration-200 flex items-center">
+                    <i class="fa-solid fa-user-circle mr-2 text-[#AB8462]"></i> My Profile
+                  </a>
+                  <a href="/orders" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition duration-200 flex items-center">
+                    <i class="fa-solid fa-shopping-bag mr-2 text-[#AB8462]"></i> My Orders
+                  </a>
+                  <a href="/addresses" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition duration-200 flex items-center">
+                    <i class="fa-solid fa-address-book mr-2 text-[#AB8462]"></i> Addresses
+                  </a>
+                  <a href="/wishlist" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition duration-200 flex items-center">
+                    <i class="fa-solid fa-heart mr-2 text-[#AB8462]"></i> Wishlist
+                  </a>
+                  <div class="border-t border-gray-200 my-1"></div>
+                  <a href="/logout" class="block px-4 py-2 text-sm text-red-600 hover:bg-red-50 transition duration-200 flex items-center">
+                    <i class="fa-solid fa-sign-out-alt mr-2"></i> Logout
+                  </a>
+                </div>
+              </div>
+            </div>
+          <% } else { %>
+            <a href="/login" class="bg-amber-200 hover:bg-white text-[#AB8462] font-medium py-2 px-4 rounded-full transition-colors duration-300 flex items-center shadow-md hover:shadow-lg">
+              <i class="fa-solid fa-sign-in-alt mr-2"></i> Sign In
+            </a>
+          <% } %>
+  
+          <!-- Mobile Menu Toggle -->
+          <button id="mobile-menu-toggle" class="md:hidden text-white hover:text-amber-200 focus:outline-none transition-colors duration-300">
+            <i class="fa-solid fa-bars text-xl"></i>
+          </button>
+        </div>
+      </div>
+    </div>
+  </nav>
+  
+    <div class="container mx-auto px-4 py-8">
+        <div class="flex flex-col md:flex-row gap-6">
+            <!-- Filters Sidebar -->
+            <div class="w-full md:w-1/4 bg-white p-4 rounded-lg shadow">
+                <div class="mb-6">
+                    <h3 class="text-lg font-semibold mb-4 text-gray-800">Search</h3>
+                    <form id="searchForm" action="/products" method="GET" class="flex flex-col gap-2">
+                        <input 
+                            type="text" 
+                            name="search" 
+                            value="<%= search || '' %>" 
+                            placeholder="Search books..." 
+                            class="w-full p-2 border border-gray-300 rounded"
+                        >
+                        <!-- Updated hidden inputs to handle multiple categories -->
+                        <% if (Array.isArray(category) && category.length > 0) { %>
+                            <% category.forEach(cat => { %>
+                                <input type="hidden" name="category" value="<%= cat %>">
+                            <% }) %>
+                        <% } else if (category) { %>
+                            <input type="hidden" name="category" value="<%= category %>">
+                        <% } %>
+                        <input type="hidden" name="minPrice" value="<%= minPrice || '' %>">
+                        <input type="hidden" name="maxPrice" value="<%= maxPrice || '' %>">
+                        <input type="hidden" name="sort" value="<%= sort || '' %>">
+                        <input type="hidden" name="page" value="1">
+                        
+                        <div class="flex space-x-2">
+                            <button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 flex-grow">
+                                <i class="fas fa-search mr-2"></i> Search
+                            </button>
+                            <% if (search) { %>
+                                <a href="/products?<%= new URLSearchParams(
+                                    Object.fromEntries(
+                                        Object.entries({ 
+                                            category: Array.isArray(category) ? category : [category], 
+                                            minPrice, 
+                                            maxPrice, 
+                                            sort, 
+                                            page: 1 
+                                        })
+                                        .filter(([_, v]) => v !== undefined && v !== '')
+                                    )
+                                ).toString() %>" 
+                                class="bg-gray-300 text-gray-700 px-3 py-2 rounded hover:bg-gray-400">
+                                    <i class="fas fa-times"></i>
+                                </a>
+                            <% } %>
+                        </div>
+                    </form>
+                </div>
+                <div class="mb-6">
+                    <h3 class="text-lg font-semibold mb-4 text-gray-800">Categories</h3>
+                    <form id="categoryForm" action="/products" method="GET">
+                        <input type="hidden" name="search" value="<%= search || '' %>">
+                        <input type="hidden" name="minPrice" value="<%= minPrice || '' %>">
+                        <input type="hidden" name="maxPrice" value="<%= maxPrice || '' %>">
+                        <input type="hidden" name="sort" value="<%= sort || '' %>">
+                        <input type="hidden" name="page" value="1">
+                        
+                        <div class="space-y-2">
+                            <div class="flex items-center">
+                                <input 
+                                    type="checkbox" 
+                                    id="all-categories" 
+                                    name="all_categories" 
+                                    <%= !category || category.length === 0 ? 'checked' : '' %> 
+                                    class="mr-2"
+                                    onchange="handleAllCategoriesChange(this)"
+                                >
+                                <label for="all-categories" class="text-gray-700">All Categories</label>
+                            </div>
+                            
+                            <% categories.forEach(cat => { %>
+                                <div class="flex items-center">
+                                    <input 
+                                        type="checkbox" 
+                                        id="category-<%= cat._id %>" 
+                                        name="category" 
+                                        value="<%= cat._id %>" 
+                                        <%= Array.isArray(category) && category.includes(cat._id.toString()) ? 'checked' : '' %> 
+                                        class="mr-2 category-checkbox"
+                                        onchange="handleCategoryChange()"
+                                    >
+                                    <label for="category-<%= cat._id %>" class="text-gray-700"><%= cat.name %></label>
+                                </div>
+                            <% }) %>
+                        </div>
+                        
+                        <div class="mt-4">
+                            <button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 w-full">
+                                Apply Filters
+                            </button>
+                        </div>
+                    </form>
+                </div>
+
+                <div class="mb-6">
+                    <h3 class="text-lg font-semibold mb-4 text-gray-800">Price Range</h3>
+                    <form id="priceForm" action="/products" method="GET" class="space-y-3">
+                        <input type="hidden" name="search" value="<%= search || '' %>">
+                        
+                        <!-- ✅ Corrected handling for multiple categories -->
+                        <% if (Array.isArray(category) && category.length > 0) { %>
+                            <% category.forEach(cat => { %>
+                                <input type="hidden" name="category" value="<%= cat %>">
+                            <% }) %>
+                        <% } else if (category) { %>
+                            <input type="hidden" name="category" value="<%= category %>">
+                        <% } %>
+                        
+                        <input type="hidden" name="sort" value="<%= sort || '' %>">
+                        <input type="hidden" name="page" value="1">
+                    
+                        <div class="flex space-x-2">
+                            <div class="w-1/2">
+                                <label for="minPrice" class="block text-sm text-gray-600">Min</label>
+                                <input 
+                                    type="number" 
+                                    id="minPrice" 
+                                    name="minPrice" 
+                                    value="<%= minPrice || '' %>" 
+                                    placeholder="₹0" 
+                                    min="0"
+                                    class="w-full p-2 border border-gray-300 rounded"
+                                >
+                            </div>
+                            <div class="w-1/2">
+                                <label for="maxPrice" class="block text-sm text-gray-600">Max</label>
+                                <input 
+                                    type="number" 
+                                    id="maxPrice" 
+                                    name="maxPrice" 
+                                    value="<%= maxPrice || '' %>" 
+                                    placeholder="₹10000" 
+                                    min="0"
+                                    class="w-full p-2 border border-gray-300 rounded"
+                                >
+                            </div>
+                        </div>
+                    
+                        <button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 w-full">
+                            Apply
+                        </button>
+                    </form>
+                    
+                </div>
+            </div>
+
+            <!-- Products Section -->
+            <div class="w-full md:w-3/4">
+                <!-- Sort Controls -->
+                <div class="bg-white p-4 rounded-lg shadow mb-6">
+                    <div class="flex flex-col md:flex-row justify-between items-center">
+                        <h2 class="text-2xl font-bold text-gray-800 mb-4 md:mb-0">
+                            Books
+                            <% if (search) { %>
+                                <span class="text-lg font-normal"> - Search results for "<%= search %>"</span>
+                            <% } %>
+                            <% if (category && categoryName) { %>
+                                <span class="text-lg font-normal"> - Category: <%= categoryName %></span>
+                            <% } %>
+                        </h2>
+                        
+                        <div class="flex items-center">
+                            <label for="sort" class="mr-2 text-gray-700">Sort by:</label>
+                            <form action="/products" method="GET" class="flex-grow">
+                                <input type="hidden" name="search" value="<%= search || '' %>">
+                                <% if (Array.isArray(category) && category.length > 0) { %>
+                                    <% category.forEach(cat => { %>
+                                        <input type="hidden" name="category" value="<%= cat %>">
+                                    <% }) %>
+                                <% } else if (category) { %>
+                                    <input type="hidden" name="category" value="<%= category %>">
+                                <% } %>
+                                <input type="hidden" name="minPrice" value="<%= minPrice || '' %>">
+                                <input type="hidden" name="maxPrice" value="<%= maxPrice || '' %>">
+                                <input type="hidden" name="page" value="<%= currentPage || 1 %>">
+                                
+                                <select 
+                                    id="sort" 
+                                    name="sort" 
+                                    onchange="this.form.submit()" 
+                                    class="p-2 border border-gray-300 rounded w-full"
+                                >
+                                    <option value="default" <%= sort === 'default' || !sort ? 'selected' : '' %>>Featured</option>
+                                    <option value="price_asc" <%= sort === 'price_asc' ? 'selected' : '' %>>Price: Low to High</option>
+                                    <option value="price_desc" <%= sort === 'price_desc' ? 'selected' : '' %>>Price: High to Low</option>
+                                    <option value="title_asc" <%= sort === 'title_asc' ? 'selected' : '' %>>Title: A to Z</option>
+                                    <option value="title_desc" <%= sort === 'title_desc' ? 'selected' : '' %>>Title: Z to A</option>
+                                </select>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Product Count -->
+                <div class="mb-4 text-gray-600">
+                    Showing <%= products.length %> of <%= totalProducts %> books
+                </div>
+                  <!-- grid -->
+                <% if (products.length > 0) { %>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                        <% products.forEach(product => { %>
+                            <div class="bg-white rounded-lg shadow overflow-hidden hover:shadow-lg transition-all relative">
+                                <!-- Wishlist Icon -->
+<button 
+class="wishlist-btn absolute top-3 right-3 z-10 bg-white bg-opacity-80 p-2 rounded-full shadow-sm hover:bg-opacity-100 transition-all"
+data-product-id="<%= product._id %>"
+data-in-wishlist="<%= userWishlistItems && userWishlistItems.includes(product._id.toString()) %>"
+>
+<i class="<%= userWishlistItems && userWishlistItems.includes(product._id.toString()) ? 'fas' : 'far' %> fa-heart text-<%= userWishlistItems && userWishlistItems.includes(product._id.toString()) ? 'red' : 'gray' %>-500 hover:text-red-500 transition-colors"></i>
+</button>
+                                
+                                <a href="/products/<%= product._id %>" class="block">
+                                  <!-- Fixed Image Container -->
+                                  <div class="relative h-64">
+                                    <img 
+                                        src="<%= product.coverImage %>" 
+                                        alt="<%= product.title %>"
+                                        class="absolute inset-0 w-full h-full object-cover"
+                                    />
+                                 
+                                </div>
+                                    <div class="p-4">
+                                        <h3 class="text-lg font-semibold text-gray-800 line-clamp-2"><%= product.title %></h3>
+                                        <p class="text-gray-600 mt-1"><%= product.author %></p>
+                                        <div class="flex items-center mt-2">
+                                            <div class="flex items-center text-yellow-400 mr-2">
+                                                <% for (let i = 1; i <= 5; i++) { %>
+                                                    <% if (i <= Math.floor(product.ratings.average)) { %>
+                                                        <i class="fas fa-star"></i>
+                                                    <% } else if (i - 0.5 <= product.ratings.average) { %>
+                                                        <i class="fas fa-star-half-alt"></i>
+                                                    <% } else { %>
+                                                        <i class="far fa-star"></i>
+                                                    <% } %>
+                                                <% } %>
+                                            </div>
+                                            <span class="text-gray-600 text-sm">(<%= product.ratings.count %>)</span>
+                                        </div>
+                                        <div class="mt-3 flex items-end">
+                                            <% if (product.effectiveDiscount > 0) { %>
+                                                <span class="text-lg font-bold text-gray-800">₹<%= product.finalPrice %></span>
+                                                <span class="text-sm text-gray-500 line-through ml-2">₹<%= product.price %></span>
+                                                
+                                                <% if (product.discountSource === 'category') { %>
+                                                    <span class="ml-2 text-xs bg-purple-100 text-purple-800 px-2 py-1 rounded-full">
+                                                        <%= product.discountPercentage %>% Category Offer
+                                                    </span>
+                                                <% } else { %>
+                                                    <span class="ml-2 text-xs bg-green-100 text-green-800 px-2 py-1 rounded-full">
+                                                        <%= product.discountPercentage %>% OFF
+                                                    </span>
+                                                <% } %>
+                                            <% } else { %>
+                                                <span class="text-lg font-bold text-gray-800">₹<%= product.price %></span>
+                                            <% } %>
+                                        </div>
+                                        <div class="mt-2 flex items-center justify-between">
+                                            <% if (product.stock > 0) { %>
+                                                <span class="text-green-600 text-sm">In Stock</span>
+                                            <% } else { %>
+                                                <span class="text-red-600 text-sm">Out of Stock</span>
+                                            <% } %>
+                                        </div>
+                                    </div>
+                                </a>
+                                <!-- Add to Cart Button -->
+                                <div class="px-4 pb-4 mt-auto">
+                                    <button 
+                                    class="add-to-cart-btn w-full <%= product.stock <= 0 ? 'opacity-50 cursor-not-allowed bg-blue-600' : (userCartItems && userCartItems.includes(product._id.toString()) ? 'bg-green-600 hover:bg-green-700' : 'bg-blue-600 hover:bg-blue-700') %> text-white font-medium py-2 px-4 rounded transition-colors"
+                                    <%= product.stock <= 0 ? 'disabled' : '' %>
+                                    data-product-id="<%= product._id %>"
+                                    data-state="<%= userCartItems && userCartItems.includes(product._id.toString()) ? 'go' : 'add' %>"
+                                >
+                                    <i class="fas <%= userCartItems && userCartItems.includes(product._id.toString()) ? 'fa-arrow-right' : 'fa-shopping-cart' %> mr-2"></i> 
+                                    <%= userCartItems && userCartItems.includes(product._id.toString()) ? 'Go to Cart' : 'Add to Cart' %>
+                                </button>
+                                </div>
+                            </div>
+                        <% }) %>
+                    </div>
+                <% } else { %>
+                    <div class="bg-white p-8 rounded-lg shadow text-center">
+                        <i class="fas fa-book-open text-5xl text-gray-400 mb-4"></i>
+                        <h3 class="text-xl font-semibold text-gray-800 mb-2">No books found</h3>
+                        <p class="text-gray-600">
+                            Try adjusting your search or filter criteria to find what you're looking for.
+                        </p>
+                        <a href="/products" class="inline-block mt-4 bg-blue-600 text-white px-6 py-2 rounded hover:bg-blue-700">
+                            View All Books
+                        </a>
+                    </div>
+                <% } %>
+
+                <% if (totalPages > 1) { %>
+                    <div class="mt-8 flex justify-center">
+                        <nav class="inline-flex rounded-md shadow">
+                            <% if (currentPage > 1) { %>
+                                <a 
+                                    href="/products?<%= new URLSearchParams({
+                                        ...(search ? {search} : {}),
+                                        ...Object.fromEntries(
+                                            Array.isArray(category) 
+                                            ? category.map(c => ['category', c]) 
+                                            : (category ? [['category', category]] : [])
+                                        ),
+                                        ...(minPrice ? {minPrice} : {}),
+                                        ...(maxPrice ? {maxPrice} : {}),
+                                        ...(sort ? {sort} : {}),
+                                        page: currentPage - 1
+                                    }).toString() %>" 
+                                    class="relative inline-flex items-center px-4 py-2 border border-gray-300 bg-white text-sm font-medium text-gray-700 hover:bg-gray-50"
+                                >
+                                    <i class="fas fa-chevron-left"></i>
+                                </a>
+                            <% } %>
+                            
+                            <% for(let i = 1; i <= totalPages; i++) { %>
+                                <% if (
+                                    i === 1 || 
+                                    i === totalPages || 
+                                    (i >= currentPage - 1 && i <= currentPage + 1)
+                                ) { %>
+                                    <a 
+                                        href="/products?<%= new URLSearchParams({
+                                            ...(search ? {search} : {}),
+                                            ...Object.fromEntries(
+                                                Array.isArray(category) 
+                                                ? category.map(c => ['category', c]) 
+                                                : (category ? [['category', category]] : [])
+                                            ),
+                                            ...(minPrice ? {minPrice} : {}),
+                                            ...(maxPrice ? {maxPrice} : {}),
+                                            ...(sort ? {sort} : {}),
+                                            page: i
+                                        }).toString() %>" 
+                                        class="relative inline-flex items-center px-4 py-2 border border-gray-300 bg-<%= currentPage === i ? 'blue-600 text-white' : 'white text-gray-700 hover:bg-gray-50' %> text-sm font-medium"
+                                    >
+                                        <%= i %>
+                                    </a>
+                                <% } else if (
+                                    (i === 2 && currentPage > 3) || 
+                                    (i === totalPages - 1 && currentPage < totalPages - 2)
+                                ) { %>
+                                    <span class="relative inline-flex items-center px-4 py-2 border border-gray-300 bg-white text-sm font-medium text-gray-700">
+                                        ...
+                                    </span>
+                                <% } %>
+                            <% } %>
+                            
+                            <% if (currentPage < totalPages) { %>
+                                <a 
+                                    href="/products?<%= new URLSearchParams({
+                                        ...(search ? {search} : {}),
+                                        ...Object.fromEntries(
+                                            Array.isArray(category) 
+                                            ? category.map(c => ['category', c]) 
+                                            : (category ? [['category', category]] : [])
+                                        ),
+                                        ...(minPrice ? {minPrice} : {}),
+                                        ...(maxPrice ? {maxPrice} : {}),
+                                        ...(sort ? {sort} : {}),
+                                        page: currentPage + 1
+                                    }).toString() %>" 
+                                    class="relative inline-flex items-center px-4 py-2 border border-gray-300 bg-white text-sm font-medium text-gray-700 hover:bg-gray-50"
+                                >
+                                    <i class="fas fa-chevron-right"></i>
+                                </a>
+                            <% } %>
+                        </nav>
+                    </div>
+                <% } %>
+            </div>
+        </div>
+    </div>
+    <footer class="bg-gradient-to-r from-[#AB8462] to-[#9A7355] text-white mt-12 relative">
+        <!-- Wave Decoration -->
+        <div class="absolute top-0 left-0 right-0 overflow-hidden w-full"
+          style="height: 30px; transform: translateY(-100%);">
+          <svg viewBox="0 0 1200 120" preserveAspectRatio="none" class="w-full h-full">
+            <path
+              d="M321.39,56.44c58-10.79,114.16-30.13,172-41.86,82.39-16.72,168.19-17.73,250.45-.39C823.78,31,906.67,72,985.66,92.83c70.05,18.48,146.53,26.09,214.34,3V120H0V0C115.39,0,168.49,41.42,321.39,56.44Z"
+              fill="#AB8462"></path>
+          </svg>
+        </div>
+    
+        <!-- Main Footer Content -->
+        <div class="container mx-auto py-12 px-4">
+          <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+            <!-- BookSy Info & Newsletter -->
+            <div class="space-y-6">
+              <div class="flex items-center space-x-2">
+                <i class="fas fa-book-open text-amber-200 text-3xl"></i>
+                <h2 class="text-2xl font-bold text-white">BookSy</h2>
+              </div>
+              <p class="text-gray-200">Your favorite online bookstore with a wide selection of books across all genres.
+                Discover new worlds through our carefully curated collection.</p>
+    
+              <div class="bg-white bg-opacity-10 rounded-lg p-4 shadow-lg backdrop-blur-sm">
+                <h3 class="text-lg font-semibold text-amber-200 mb-2">Subscribe to Our Newsletter</h3>
+                <p class="text-sm text-gray-200 mb-3">Get the latest book releases and exclusive offers</p>
+                <div class="flex rounded-lg overflow-hidden shadow-md">
+                  <input type="email" placeholder="Enter your email"
+                    class="p-3 w-full focus:outline-none text-gray-800 bg-white border-2 border-transparent focus:border-amber-200">
+                  <button
+                    class="bg-amber-200 text-[#AB8462] px-4 hover:bg-white transition-colors duration-300 font-medium flex items-center">
+                    <i class="fas fa-paper-plane mr-2"></i>
+                    <span>Join</span>
+                  </button>
+                </div>
+              </div>
+    
+              <!-- Social Media Icons -->
+              <div class="pt-2">
+                <h3 class="text-lg font-semibold mb-3 text-amber-200">Connect With Us</h3>
+                <div class="flex space-x-3">
+                  <a href="#"
+                    class="bg-white bg-opacity-20 hover:bg-opacity-30 p-3 rounded-full transition-all duration-300 hover:transform hover:scale-110 w-10 h-10 flex items-center justify-center text-white hover:text-amber-200">
+                    <i class="fab fa-facebook-f"></i>
+                  </a>
+                  <a href="#"
+                    class="bg-white bg-opacity-20 hover:bg-opacity-30 p-3 rounded-full transition-all duration-300 hover:transform hover:scale-110 w-10 h-10 flex items-center justify-center text-white hover:text-amber-200">
+                    <i class="fab fa-twitter"></i>
+                  </a>
+                  <a href="#"
+                    class="bg-white bg-opacity-20 hover:bg-opacity-30 p-3 rounded-full transition-all duration-300 hover:transform hover:scale-110 w-10 h-10 flex items-center justify-center text-white hover:text-amber-200">
+                    <i class="fab fa-instagram"></i>
+                  </a>
+                  <a href="#"
+                    class="bg-white bg-opacity-20 hover:bg-opacity-30 p-3 rounded-full transition-all duration-300 hover:transform hover:scale-110 w-10 h-10 flex items-center justify-center text-white hover:text-amber-200">
+                    <i class="fab fa-pinterest"></i>
+                  </a>
+                  <a href="#"
+                    class="bg-white bg-opacity-20 hover:bg-opacity-30 p-3 rounded-full transition-all duration-300 hover:transform hover:scale-110 w-10 h-10 flex items-center justify-center text-white hover:text-amber-200">
+                    <i class="fab fa-youtube"></i>
+                  </a>
+                </div>
+              </div>
+            </div>
+    
+            <!-- Links Columns -->
+            <div>
+              <h3 class="text-xl font-bold mb-6 text-amber-200 flex items-center">
+                <i class="fas fa-book-reader mr-2"></i> Explore
+              </h3>
+              <ul class="space-y-3">
+                <li><a href="/products"
+                    class="text-gray-200 hover:text-white transition-colors duration-300 flex items-center group">
+                    <span
+                      class="w-0 h-0.5 bg-amber-200 group-hover:w-2 transition-all duration-300 mr-0 group-hover:mr-2"></span>
+                    All Books
+                  </a></li>
+                <li><a href="/bestsellers"
+                    class="text-gray-200 hover:text-white transition-colors duration-300 flex items-center group">
+                    <span
+                      class="w-0 h-0.5 bg-amber-200 group-hover:w-2 transition-all duration-300 mr-0 group-hover:mr-2"></span>
+                    Bestsellers
+                  </a></li>
+                <li><a href="/new-releases"
+                    class="text-gray-200 hover:text-white transition-colors duration-300 flex items-center group">
+                    <span
+                      class="w-0 h-0.5 bg-amber-200 group-hover:w-2 transition-all duration-300 mr-0 group-hover:mr-2"></span>
+                    New Releases
+                  </a></li>
+                <li><a href="/genres"
+                    class="text-gray-200 hover:text-white transition-colors duration-300 flex items-center group">
+                    <span
+                      class="w-0 h-0.5 bg-amber-200 group-hover:w-2 transition-all duration-300 mr-0 group-hover:mr-2"></span>
+                    Genres
+                  </a></li>
+                <li><a href="/authors"
+                    class="text-gray-200 hover:text-white transition-colors duration-300 flex items-center group">
+                    <span
+                      class="w-0 h-0.5 bg-amber-200 group-hover:w-2 transition-all duration-300 mr-0 group-hover:mr-2"></span>
+                    Authors
+                  </a></li>
+                <li><a href="/deals"
+                    class="text-gray-200 hover:text-white transition-colors duration-300 flex items-center group">
+                    <span
+                      class="w-0 h-0.5 bg-amber-200 group-hover:w-2 transition-all duration-300 mr-0 group-hover:mr-2"></span>
+                    Special Deals
+                  </a></li>
+              </ul>
+            </div>
+    
+            <!-- Account Column -->
+            <div>
+              <h3 class="text-xl font-bold mb-6 text-amber-200 flex items-center">
+                <i class="fas fa-user mr-2"></i> Your Account
+              </h3>
+              <ul class="space-y-3">
+                <li><a href="/profile"
+                    class="text-gray-200 hover:text-white transition-colors duration-300 flex items-center group">
+                    <span
+                      class="w-0 h-0.5 bg-amber-200 group-hover:w-2 transition-all duration-300 mr-0 group-hover:mr-2"></span>
+                    My Profile
+                  </a></li>
+                <li><a href="/orders"
+                    class="text-gray-200 hover:text-white transition-colors duration-300 flex items-center group">
+                    <span
+                      class="w-0 h-0.5 bg-amber-200 group-hover:w-2 transition-all duration-300 mr-0 group-hover:mr-2"></span>
+                    Order History
+                  </a></li>
+                <li><a href="/track"
+                    class="text-gray-200 hover:text-white transition-colors duration-300 flex items-center group">
+                    <span
+                      class="w-0 h-0.5 bg-amber-200 group-hover:w-2 transition-all duration-300 mr-0 group-hover:mr-2"></span>
+                    Track Order
+                  </a></li>
+                <li><a href="/wishlist"
+                    class="text-gray-200 hover:text-white transition-colors duration-300 flex items-center group">
+                    <span
+                      class="w-0 h-0.5 bg-amber-200 group-hover:w-2 transition-all duration-300 mr-0 group-hover:mr-2"></span>
+                    Wishlist
+                  </a></li>
+                <li><a href="/returns"
+                    class="text-gray-200 hover:text-white transition-colors duration-300 flex items-center group">
+                    <span
+                      class="w-0 h-0.5 bg-amber-200 group-hover:w-2 transition-all duration-300 mr-0 group-hover:mr-2"></span>
+                    Returns & Refunds
+                  </a></li>
+              </ul>
+            </div>
+    
+            <!-- Help Column -->
+            <div>
+              <h3 class="text-xl font-bold mb-6 text-amber-200 flex items-center">
+                <i class="fas fa-headset mr-2"></i> Help & Support
+              </h3>
+              <ul class="space-y-3">
+                <li><a href="/about"
+                    class="text-gray-200 hover:text-white transition-colors duration-300 flex items-center group">
+                    <span
+                      class="w-0 h-0.5 bg-amber-200 group-hover:w-2 transition-all duration-300 mr-0 group-hover:mr-2"></span>
+                    About Us
+                  </a></li>
+                <li><a href="/contact"
+                    class="text-gray-200 hover:text-white transition-colors duration-300 flex items-center group">
+                    <span
+                      class="w-0 h-0.5 bg-amber-200 group-hover:w-2 transition-all duration-300 mr-0 group-hover:mr-2"></span>
+                    Contact Us
+                  </a></li>
+                <li><a href="/faq"
+                    class="text-gray-200 hover:text-white transition-colors duration-300 flex items-center group">
+                    <span
+                      class="w-0 h-0.5 bg-amber-200 group-hover:w-2 transition-all duration-300 mr-0 group-hover:mr-2"></span>
+                    FAQ
+                  </a></li>
+                <li><a href="/shipping"
+                    class="text-gray-200 hover:text-white transition-colors duration-300 flex items-center group">
+                    <span
+                      class="w-0 h-0.5 bg-amber-200 group-hover:w-2 transition-all duration-300 mr-0 group-hover:mr-2"></span>
+                    Shipping Info
+                  </a></li>
+                <li><a href="/privacy"
+                    class="text-gray-200 hover:text-white transition-colors duration-300 flex items-center group">
+                    <span
+                      class="w-0 h-0.5 bg-amber-200 group-hover:w-2 transition-all duration-300 mr-0 group-hover:mr-2"></span>
+                    Privacy Policy
+                  </a></li>
+                <li><a href="/terms"
+                    class="text-gray-200 hover:text-white transition-colors duration-300 flex items-center group">
+                    <span
+                      class="w-0 h-0.5 bg-amber-200 group-hover:w-2 transition-all duration-300 mr-0 group-hover:mr-2"></span>
+                    Terms of Service
+                  </a></li>
+              </ul>
+            </div>
+          </div>
+    
+          <!-- Store Apps -->
+          <div class="mt-12 border-t border-[#8C6B48] pt-8">
+            <div class="flex flex-col md:flex-row items-center justify-between">
+              <div class="mb-6 md:mb-0">
+                <h3 class="text-lg font-semibold text-amber-200 mb-3">Download Our App</h3>
+                <div class="flex space-x-4">
+                  <a href="#"
+                    class="bg-black rounded-lg px-4 py-2 flex items-center space-x-2 hover:bg-gray-900 transition-colors duration-300">
+                    <i class="fab fa-apple text-2xl text-white"></i>
+                    <div>
+                      <p class="text-xs text-gray-300">Download on the</p>
+                      <p class="text-white font-medium">App Store</p>
+                    </div>
+                  </a>
+                  <a href="#"
+                    class="bg-black rounded-lg px-4 py-2 flex items-center space-x-2 hover:bg-gray-900 transition-colors duration-300">
+                    <i class="fab fa-google-play text-2xl text-white"></i>
+                    <div>
+                      <p class="text-xs text-gray-300">GET IT ON</p>
+                      <p class="text-white font-medium">Google Play</p>
+                    </div>
+                  </a>
+                </div>
+              </div>
+    
+              <!-- Payment Methods with hover animations -->
+              <div class="flex flex-col items-center md:items-end">
+                <h3 class="text-lg font-semibold text-amber-200 mb-3">We Accept</h3>
+                <div class="flex space-x-3">
+                  <i
+                    class="fa-brands fa-cc-visa text-3xl text-white hover:text-amber-200 transition-colors duration-300 transform hover:scale-110"></i>
+                  <i
+                    class="fa-brands fa-cc-mastercard text-3xl text-white hover:text-amber-200 transition-colors duration-300 transform hover:scale-110"></i>
+    
+      </footer>
+    
+<script>
+   document.addEventListener('DOMContentLoaded', function() {
+    // Get all "Add to Cart" buttons on the page
+    const addToCartButtons = document.querySelectorAll('.add-to-cart-btn');
+    
+    // Add click event listener to each button
+    addToCartButtons.forEach(button => {
+        button.addEventListener('click', function() {
+            const productId = this.getAttribute('data-product-id');
+            const buttonState = this.getAttribute('data-state');
+            
+            // If button state is "go", redirect to cart
+            if (buttonState === 'go') {
+                window.location.href = '/cart';
+                return;
+            }
+            
+            // Otherwise, add to cart
+            const quantity = 1; // Default quantity for product listing page
+            
+            // Only proceed if the button is not disabled
+            if (!this.hasAttribute('disabled')) {
+                addToCart(productId, quantity, this);
+            }
+        });
+    });
+    
+    // Also handle the single product page button if it exists
+    const singleProductAddBtn = document.getElementById('add-to-cart-btn');
+    if (singleProductAddBtn) {
+        singleProductAddBtn.addEventListener('click', function() {
+            const buttonState = this.getAttribute('data-state');
+            
+            // If button state is "go", redirect to cart
+            if (buttonState === 'go') {
+                window.location.href = '/cart';
+                return;
+            }
+            
+            const productId = this.getAttribute('data-product-id');
+            const quantity = document.getElementById('quantity') ? 
+                parseInt(document.getElementById('quantity').value) : 1;
+            
+            addToCart(productId, quantity, this);
+        });
+    }
+    
+    // Function to handle adding to cart
+    function addToCart(productId, quantity, buttonElement) {
+    fetch('/cart/add', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ productId, quantity }),
+    })
+    .then(response => {
+        if (response.redirected) {
+            window.location.href = response.url;
+            return Promise.reject();
+        }
+        return response.json();
+    })
+    .then(data => {
+        if (data.success) {
+            // Success handling remains the same
+            buttonElement.innerHTML = '<i class="fas fa-arrow-right mr-2"></i> Go to Cart';
+            buttonElement.classList.remove('bg-blue-600', 'hover:bg-blue-700');
+            buttonElement.classList.add('bg-green-600', 'hover:bg-green-700');
+            buttonElement.setAttribute('data-state', 'go');
+            
+            // Show success notification
+            showNotification('Product added to cart successfully!', 'success');
+        } else if (data.requireLogin) {
+            // Handle login required response from backend
+            showNotification('Please login to add items to your cart', 'warning');
+            
+            // Store the current page URL to return after login
+            localStorage.setItem('redirectAfterLogin', window.location.pathname);
+            
+            // Redirect to login page after a short delay
+            setTimeout(() => {
+                window.location.href = '/login';
+            }, 2000);
+        } else {
+            showNotification(data.message || 'Failed to add to cart', 'error');
+        }
+    })
+    .catch(error => {
+        if (error && error.message) {
+            showNotification(error.message, 'error');
+        }
+    });
+}
+
+// Helper function for showing notifications
+function showNotification(message, type) {
+    const notification = document.createElement('div');
+    
+    // Set style based on notification type
+    let bgColor = 'bg-green-500'; // success
+    if (type === 'error') bgColor = 'bg-red-500';
+    if (type === 'warning') bgColor = 'bg-yellow-500';
+    
+    notification.className = `fixed top-4 right-4 ${bgColor} text-white px-4 py-2 rounded shadow-lg z-50`;
+    notification.innerHTML = message;
+    document.body.appendChild(notification);
+    
+    // Remove notification after 3 seconds
+    setTimeout(() => {
+        notification.remove();
+    }, 3000);
+}
+// Helper function for notifications
+function showNotification(message, type) {
+    const notification = document.createElement('div');
+    
+    // Set style based on type
+    let bgColor = 'bg-green-500'; // success
+    if (type === 'error') bgColor = 'bg-red-500';
+    if (type === 'warning') bgColor = 'bg-yellow-500';
+    
+    notification.className = `fixed top-4 right-4 ${bgColor} text-white px-4 py-2 rounded shadow-lg z-50`;
+    notification.innerHTML = message;
+    document.body.appendChild(notification);
+    
+    // Remove notification after 3 seconds
+    setTimeout(() => {
+        notification.remove();
+    }, 3000);
+}
+});
+function handleAllCategoriesChange(checkbox) {
+    // Get all category checkboxes
+    const categoryCheckboxes = document.querySelectorAll('.category-checkbox');
+    
+    // If "All Categories" is checked, uncheck all other categories
+    if (checkbox.checked) {
+        categoryCheckboxes.forEach(cb => {
+            cb.checked = false;
+        });
+    }
+}
+
+function handleCategoryChange() {
+    // Get all category checkboxes and the "All Categories" checkbox
+    const categoryCheckboxes = document.querySelectorAll('.category-checkbox');
+    const allCategoriesCheckbox = document.getElementById('all-categories');
+    
+    // Check if any category is selected
+    let anySelected = false;
+    categoryCheckboxes.forEach(cb => {
+        if (cb.checked) {
+            anySelected = true;
+        }
+    });
+    
+    // If any category is selected, uncheck "All Categories"
+    allCategoriesCheckbox.checked = !anySelected;
+}
+
+// Add event listener to ensure form is submitted with the right parameters
+document.getElementById('categoryForm').addEventListener('submit', function(e) {
+    const allCategoriesCheckbox = document.getElementById('all-categories');
+    const categoryCheckboxes = document.querySelectorAll('.category-checkbox');
+    
+    // If "All Categories" is checked, uncheck all other categories to ensure
+    // we don't send any category parameters
+    if (allCategoriesCheckbox.checked) {
+        categoryCheckboxes.forEach(cb => {
+            cb.checked = false;
+        });
+    }
+});
+document.addEventListener('DOMContentLoaded', function() {
+    // Get all wishlist buttons on the page
+    const wishlistButtons = document.querySelectorAll('.wishlist-btn');
+    
+    // Add click event listener to each wishlist button
+    wishlistButtons.forEach(button => {
+        button.addEventListener('click', function() {
+            const productId = this.getAttribute('data-product-id');
+            const isInWishlist = this.getAttribute('data-in-wishlist') === 'true';
+            
+            toggleWishlistItem(productId, this);
+        });
+    });
+    
+    // Function to toggle wishlist item (add or remove)
+    function toggleWishlistItem(productId, buttonElement) {
+        fetch('/wishlist/toggle', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ productId }),
+        })
+        .then(response => {
+            if (response.redirected) {
+                window.location.href = response.url;
+                return Promise.reject();
+            }
+            return response.json();
+        })
+        .then(data => {
+            if (data.success) {
+                // Update button appearance
+                if (data.inWishlist) {
+                    // Product added to wishlist
+                    buttonElement.querySelector('i').classList.remove('far');
+                    buttonElement.querySelector('i').classList.add('fas');
+                    buttonElement.querySelector('i').classList.add('text-red-500');
+                    
+                    // If button has text (in product details page)
+                    if (buttonElement.innerText.includes('Add to Wishlist')) {
+                        buttonElement.innerHTML = `<i class="fas fa-heart mr-2"></i>Remove from Wishlist`;
+                    }
+                    
+                    buttonElement.setAttribute('data-in-wishlist', 'true');
+                    
+                    // Show success notification
+                    showNotification('Product added to wishlist successfully!', 'success');
+                } else {
+                    // Product removed from wishlist
+                    buttonElement.querySelector('i').classList.remove('fas');
+                    buttonElement.querySelector('i').classList.add('far');
+                    buttonElement.querySelector('i').classList.remove('text-red-500');
+                    
+                    // If button has text (in product details page)
+                    if (buttonElement.innerText.includes('Remove from Wishlist')) {
+                        buttonElement.innerHTML = `<i class="far fa-heart mr-2"></i>Add to Wishlist`;
+                    }
+                    
+                    buttonElement.setAttribute('data-in-wishlist', 'false');
+                    
+                    // Show success notification
+                    showNotification('Product removed from wishlist', 'success');
+                }
+            } else if (data.requireLogin) {
+                // Handle login required response from backend
+                showNotification('Please login to manage your wishlist', 'warning');
+                
+                // Store the current page URL to return after login
+                localStorage.setItem('redirectAfterLogin', window.location.pathname);
+                
+                // Redirect to login page after a short delay
+                setTimeout(() => {
+                    window.location.href = '/login';
+                }, 2000);
+            } else {
+                showNotification(data.message || 'Failed to update wishlist', 'error');
+            }
+        })
+        .catch(error => {
+            if (error && error.message) {
+                showNotification(error.message, 'error');
+            }
+        });
+    }
+    
+    // Use existing showNotification function or create it if it doesn't exist
+    if (typeof showNotification !== 'function') {
+        window.showNotification = function(message, type) {
+            const notification = document.createElement('div');
+            
+            // Set style based on notification type
+            let bgColor = 'bg-green-500'; // success
+            if (type === 'error') bgColor = 'bg-red-500';
+            if (type === 'warning') bgColor = 'bg-yellow-500';
+            
+            notification.className = `fixed top-4 right-4 ${bgColor} text-white px-4 py-2 rounded shadow-lg z-50`;
+            notification.innerHTML = message;
+            document.body.appendChild(notification);
+            
+            // Remove notification after 3 seconds
+            setTimeout(() => {
+                notification.remove();
+            }, 3000);
+        };
+    }
+});
+</script>
+</body>
+</html>

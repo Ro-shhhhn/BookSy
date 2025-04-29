@@ -1,0 +1,1004 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>BookSy - Your Favorite Bookstore</title>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+       .page-gradient-bg {
+        background: linear-gradient(135deg, #f3e7d3 0%, #e6d7c3 25%, #d9c7b3 50%, #e6d7c3 75%, #f3e7d3 100%);
+    }
+    .book-card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+    }
+    .hero-section {
+      background-image: linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)), url('/api/placeholder/1200/400');
+      background-size: cover;
+      background-position: center;
+    }
+     /* Animation keyframes */
+  @keyframes fadeInUp {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  
+  @keyframes floatBook {
+    0% { transform: translateY(0) rotate(0deg); }
+    50% { transform: translateY(-10px) rotate(3deg); }
+    100% { transform: translateY(0) rotate(0deg); }
+  }
+  
+  /* Applied animations */
+  .animate-fadeInUp {
+    animation: fadeInUp 1s ease-out forwards;
+  }
+  
+  .animate-float {
+    animation: floatBook 3s ease-in-out infinite;
+  }
+  
+  /* Book styling */
+  .book-cover {
+    height: 220px;
+    width: 150px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+    transition: transform 0.3s ease;
+    border-radius: 4px;
+    overflow: hidden;
+  }
+  
+  .book-cover:hover {
+    transform: translateY(-10px) scale(1.05);
+  }
+  
+  /* Active slide */
+  .hero-slide.active {
+    opacity: 1;
+    z-index: 10;
+  }
+  
+  /* Active indicator */
+  .slide-indicator.active {
+    opacity: 1;
+    width: 24px;
+  }
+  @keyframes gradient-shift {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+  }
+  
+  .animate-gradient-shift {
+    background-size: 200% 200%;
+    animation: gradient-shift 10s ease infinite;
+  }
+  </style>
+</head>
+<body class="bg-gray-50">
+
+<!-- Navbar -->
+<!-- Navbar -->
+<nav class="bg-gradient-to-r from-[#C3A18B] to-[#A7886D] shadow-lg py-6 sticky top-0 z-50">
+    <div class="container mx-auto px-4">
+      <div class="flex justify-between items-center">
+        <!-- Logo -->
+        <div class="flex items-center">
+          <a href="/" class="flex items-center space-x-2 group">
+            <i class="fas fa-book-open text-amber-200 text-2xl group-hover:text-white transition-colors duration-300"></i>
+            <span class="text-white text-2xl font-extrabold tracking-wider group-hover:text-amber-200 transition-colors duration-300">BookSy</span>
+          </a>
+        </div>
+  
+        <!-- Desktop Navigation -->
+        <div class="hidden md:flex items-center space-x-8">
+          <a href="/" class="text-white hover:text-amber-200 transition-colors duration-300 font-medium relative group">
+            Home
+            <span class="absolute -bottom-1 left-0 w-0 h-0.5 bg-amber-200 group-hover:w-full transition-all duration-300"></span>
+          </a>
+          <a href="/products" class="text-white hover:text-amber-200 transition-colors duration-300 font-medium relative group">
+            Books
+            <span class="absolute -bottom-1 left-0 w-0 h-0.5 bg-amber-200 group-hover:w-full transition-all duration-300"></span>
+          </a>
+          <a href="/about" class="text-white hover:text-amber-200 transition-colors duration-300 font-medium relative group">
+            About
+            <span class="absolute -bottom-1 left-0 w-0 h-0.5 bg-amber-200 group-hover:w-full transition-all duration-300"></span>
+          </a>
+          <a href="/contact" class="text-white hover:text-amber-200 transition-colors duration-300 font-medium relative group">
+            Contact
+            <span class="absolute -bottom-1 left-0 w-0 h-0.5 bg-amber-200 group-hover:w-full transition-all duration-300"></span>
+          </a>
+        </div>
+  
+        <!-- Icons and Actions -->
+        <div class="flex items-center space-x-5">
+          <!-- Wishlist -->
+          <a href="/wishlist" class="text-white hover:text-amber-200 transition-colors duration-300 text-lg flex items-center">
+            <i class="far fa-heart text-xl mr-1"></i>
+            <span class="hidden md:inline">Wishlist</span>
+          </a>
+  
+          <!-- Cart Icon -->
+          <a href="/cart" class="text-white hover:text-amber-200 transition-colors duration-300 relative group">
+            <div class="relative">
+              <i class="fa-solid fa-cart-shopping text-xl"></i>
+              <span class="absolute -top-2 -right-2 bg-amber-200 text-[#AB8462] text-xs font-bold rounded-full h-5 w-5 flex items-center justify-center group-hover:bg-white transition-colors duration-300">
+                <%= locals.cartCount || 0 %>
+              </span>
+            </div>
+          </a>
+  
+          <!-- Profile/Sign In -->
+          <% if (locals.session && session.userId) { %>
+            <div class="relative group">
+              <button class="text-white hover:text-amber-200 transition-colors duration-300 focus:outline-none flex items-center">
+                <% if (locals.user && user.profilePicture) { %>
+                  <img src="<%= user.profilePicture %>" alt="Profile" class="w-8 h-8 rounded-full object-cover border-2 border-amber-200 hover:border-white transition-colors duration-300">
+                <% } else { %>
+                  <div class="w-8 h-8 rounded-full bg-amber-200 text-[#AB8462] flex items-center justify-center border-2 border-amber-200 hover:bg-white transition-colors duration-300">
+                    <i class="fa-solid fa-user"></i>
+                  </div>
+                <% } %>
+              </button>
+              <!-- Dropdown -->
+              <div class="absolute right-0 mt-2 w-64 bg-white rounded-lg shadow-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300 ease-in-out transform origin-top-right translate-y-2 group-hover:translate-y-0">
+                <div class="py-2 rounded-lg overflow-hidden">
+                  <div class="px-4 py-3 bg-[#AB8462] text-white">
+                    <% if (locals.user && user.name) { %>
+                      <p class="font-medium"><%= user.name %></p>
+                      <p class="text-sm text-gray-200 truncate"><%= user.email %></p>
+                    <% } else { %>
+                      <p class="font-medium">My Account</p>
+                    <% } %>
+                  </div>
+                  <a href="/profile" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition duration-200 flex items-center">
+                    <i class="fa-solid fa-user-circle mr-2 text-[#AB8462]"></i> My Profile
+                  </a>
+                  <a href="/orders" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition duration-200 flex items-center">
+                    <i class="fa-solid fa-shopping-bag mr-2 text-[#AB8462]"></i> My Orders
+                  </a>
+                  <a href="/addresses" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition duration-200 flex items-center">
+                    <i class="fa-solid fa-address-book mr-2 text-[#AB8462]"></i> Addresses
+                  </a>
+                  <a href="/wishlist" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition duration-200 flex items-center">
+                    <i class="fa-solid fa-heart mr-2 text-[#AB8462]"></i> Wishlist
+                  </a>
+                  <div class="border-t border-gray-200 my-1"></div>
+                  <a href="/logout" class="block px-4 py-2 text-sm text-red-600 hover:bg-red-50 transition duration-200 flex items-center">
+                    <i class="fa-solid fa-sign-out-alt mr-2"></i> Logout
+                  </a>
+                </div>
+              </div>
+            </div>
+          <% } else { %>
+            <a href="/login" class="bg-amber-200 hover:bg-white text-[#AB8462] font-medium py-2 px-4 rounded-full transition-colors duration-300 flex items-center shadow-md hover:shadow-lg">
+              <i class="fa-solid fa-sign-in-alt mr-2"></i> Sign In
+            </a>
+          <% } %>
+  
+          <!-- Mobile Menu Toggle -->
+          <button id="mobile-menu-toggle" class="md:hidden text-white hover:text-amber-200 focus:outline-none transition-colors duration-300">
+            <i class="fa-solid fa-bars text-xl"></i>
+          </button>
+        </div>
+      </div>
+    </div>
+  </nav>
+    <div class="container mx-auto px-4 py-8">
+        <!-- Breadcrumbs -->
+        <nav class="flex mb-5" aria-label="Breadcrumb">
+            <ol class="inline-flex items-center space-x-1 md:space-x-3">
+                <li class="inline-flex items-center">
+                    <a href="/" class="text-gray-700 hover:text-blue-600">
+                        <svg class="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M10.707 2.293a1 1 0 00-1.414 0l-7 7a1 1 0 001.414 1.414L4 10.414V17a1 1 0 001 1h2a1 1 0 001-1v-2a1 1 0 011-1h2a1 1 0 011 1v2a1 1 0 001 1h2a1 1 0 001-1v-6.586l.293.293a1 1 0 001.414-1.414l-7-7z"></path>
+                        </svg>
+                        Home
+                    </a>
+                </li>
+                <li>
+                    <div class="flex items-center">
+                        <svg class="w-6 h-6 text-gray-400" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+                            <path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd"></path>
+                        </svg>
+                        <a href="/products" class="ml-1 text-gray-700 hover:text-blue-600 md:ml-2">Products</a>
+                    </div>
+                </li>
+                <li aria-current="page">
+                    <div class="flex items-center">
+                        <svg class="w-6 h-6 text-gray-400" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+                            <path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd"></path>
+                        </svg>
+                        <span class="ml-1 text-gray-500 md:ml-2 font-medium truncate max-w-xs"><%= product.title %></span>
+                    </div>
+                </li>
+            </ol>
+        </nav>
+
+        <% if(!product.isActive || product.stock <= 0) { %>
+            <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative mb-5" role="alert">
+                <strong class="font-bold">Product Unavailable!</strong>
+                <span class="block sm:inline">
+                    <% if(!product.isActive) { %>
+                        This product is currently not available.
+                    <% } else { %>
+                        This product is currently out of stock.
+                    <% } %>
+                </span>
+                <div class="mt-3">
+                    <a href="/products" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
+                        Back to Products
+                    </a>
+                </div>
+            </div>
+        <% } %>
+
+        <div class="flex flex-col md:flex-row -mx-4">
+            <!-- Product Images Section -->
+            <div class="md:flex-1 px-4">
+                <div class="relative h-[460px] rounded-lg bg-gray-100 mb-4">
+                    <!-- Main image container with zoom functionality -->
+                    <div id="img-zoom-container" class="relative h-full w-full overflow-hidden">
+                        <img id="main-image" class="absolute inset-0 w-full h-full object-contain transition-transform duration-200" 
+                             src="<%= product.coverImage %>" alt="<%= product.title %>">
+                        <!-- Lens element will be added  by JS -->
+                    </div>
+                    <!-- Moved zoom result outside the container for better positioning -->
+                    <div id="img-zoom-result" class="hidden fixed bg-white border border-gray-300 shadow-lg z-20"></div>
+                </div>
+                <div class="flex -mx-2 mb-4 overflow-x-auto">
+                    <% product.images.forEach((image, index) => { %>
+                        <div class="flex-grow-0 flex-shrink-0 w-1/4 px-2">
+                            <button class="focus:outline-none w-full rounded-lg h-24 md:h-32 bg-gray-100 flex items-center justify-center thumbnail-image <%= index === 0 ? 'ring-2 ring-blue-500' : '' %>" data-image="<%= image %>">
+                                <img class="max-h-full max-w-full object-contain" src="<%= image %>" alt="<%= product.title %> - Image <%= index + 1 %>">
+                            </button>
+                        </div>
+                    <% }) %>
+                </div>
+            </div>
+            <!-- Product Details Section -->
+            <div class="md:flex-1 px-4">
+                <h2 class="text-2xl font-bold text-gray-800 mb-2"><%= product.title %></h2>
+                <p class="text-gray-600 text-sm mb-4">By <span class="font-medium text-blue-600"><%= product.author %></span> | Publisher: <span class="font-medium"><%= product.publisher %></span></p>
+                
+                <!-- Ratings -->
+                <div class="flex items-center mb-4">
+                    <div class="flex text-yellow-400">
+                        <% for(let i = 1; i <= 5; i++) { %>
+                            <% if(i <= Math.floor(4.5)) { %>
+                                <svg class="w-5 h-5 fill-current" viewBox="0 0 24 24">
+                                    <path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/>
+                                </svg>
+                            <% } else if(i - 0.5 <= 4.5) { %>
+                                <svg class="w-5 h-5 fill-current" viewBox="0 0 24 24">
+                                    <path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z" fill="url(#half-star)"/>
+                                    <defs>
+                                        <linearGradient id="half-star" x1="0" x2="100%" y1="0" y2="0">
+                                            <stop offset="50%" stop-color="currentColor"/>
+                                            <stop offset="50%" stop-color="#e5e7eb"/>
+                                        </linearGradient>
+                                    </defs>
+                                </svg>
+                            <% } else { %>
+                                <svg class="w-5 h-5 fill-current text-gray-300" viewBox="0 0 24 24">
+                                    <path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/>
+                                </svg>
+                            <% } %>
+                        <% } %>
+                    </div>
+                    <span class="text-gray-600 ml-2 text-sm">4.5 (128 reviews)</span>
+                </div>
+                
+                <!-- Price Section -->
+               <!-- Price Section (Modified) -->
+<div class="mb-4">
+    <% if(product.effectiveDiscount > 0) { %>
+        <div class="flex items-center">
+            <span class="text-3xl font-bold text-gray-900">₹<%= product.finalPrice.toFixed(2) %></span>
+            <span class="text-lg text-gray-500 line-through ml-2">₹<%= product.price.toFixed(2) %></span>
+            <span class="ml-2 bg-green-100 text-green-800 text-xs font-medium px-2.5 py-0.5 rounded">
+                <%= product.discountPercentage %>% OFF
+                <% if(product.discountSource === 'category') { %>
+                    (Category Offer)
+                <% } %>
+            </span>
+        </div>
+    <% } else { %>
+        <span class="text-3xl font-bold text-gray-900">₹<%= product.price.toFixed(2) %></span>
+    <% } %>
+    <p class="text-green-600 text-sm mt-1">In stock: <%= product.stock %> available</p>
+</div>
+                
+                <!-- Language & Pages -->
+                <div class="mb-4">
+                    <span class="text-sm bg-blue-100 text-blue-800 font-medium px-2.5 py-0.5 rounded mr-2">
+                        <%= {en: 'English', hi: 'Hindi', ml: 'Malayalam', ta: 'Tamil', fr: 'French', es: 'Spanish', ru: 'Russian', ar: 'Arabic', ja: 'Japanese', zh: 'Chinese'}[product.language] || product.language %>
+                    </span>
+                    <% if(product.pages) { %>
+                        <span class="text-sm bg-gray-100 text-gray-800 font-medium px-2.5 py-0.5 rounded">
+                            <%= product.pages %> pages
+                        </span>
+                    <% } %>
+                </div>
+                
+                <!-- Highlights/Specs -->
+                <div class="mb-6">
+                    <h3 class="text-lg font-semibold text-gray-800 mb-2">Book Highlights</h3>
+                    <ul class="list-disc pl-5 text-gray-600">
+                        <li class="mb-1">ISBN: <%= product.isbn || '978-3-16-148410-0' %></li>
+                        <li class="mb-1">Published: <%= product.publishedDate ? new Date(product.publishedDate).toLocaleDateString() : '13 May 2023' %></li>
+                        <li class="mb-1">Language: <%= {en: 'English', hi: 'Hindi', ml: 'Malayalam', ta: 'Tamil', fr: 'French', es: 'Spanish', ru: 'Russian', ar: 'Arabic', ja: 'Japanese', zh: 'Chinese'}[product.language] || product.language %></li>
+                        <li class="mb-1">Edition: First Edition, 2023</li>
+                        <li class="mb-1">Binding: Paperback</li>
+                    </ul>
+                </div>
+                
+                <!-- Action Buttons -->
+                <!-- Action Buttons -->
+<!-- Action Buttons -->
+<div class="flex space-x-4 mb-6">
+    <% if(product.isActive && product.stock > 0) { %>
+        <button id="add-to-cart-btn" data-product-id="<%= product._id %>" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-full flex items-center justify-center flex-1">
+            <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"></path>
+            </svg>
+            <% if (locals.cartHasProduct) { %>
+                Go to Cart
+            <% } else { %>
+                Add to Cart
+            <% } %>
+        </button>
+        <button id="buy-now" data-product-id="<%= product._id %>" class="bg-yellow-500 hover:bg-yellow-600 text-white font-bold py-2 px-4 rounded-full flex items-center justify-center flex-1">
+            Buy Now
+        </button>
+    <% } else { %>
+        <button disabled class="bg-gray-300 text-gray-500 font-bold py-2 px-4 rounded-full flex items-center justify-center flex-1 cursor-not-allowed">
+            <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"></path>
+            </svg>
+            <%= !product.isActive ? 'Product Unavailable' : 'Out of Stock' %>
+        </button>
+    <% } %>
+    <!-- Add this button next to the "Add to Cart" and "Buy Now" buttons in your product details page -->
+<button 
+class="wishlist-btn bg-white border border-red-500 hover:bg-red-500 hover:text-white text-red-500 font-bold py-2 px-4 rounded-full flex items-center justify-center"
+data-product-id="<%= product._id %>"
+data-in-wishlist="<%= userWishlistItems && userWishlistItems.includes(product._id.toString()) %>"
+>
+<i class="<%= userWishlistItems && userWishlistItems.includes(product._id.toString()) ? 'fas' : 'far' %> fa-heart mr-2"></i>
+<%= userWishlistItems && userWishlistItems.includes(product._id.toString()) ? 'Remove from Wishlist' : 'Add to Wishlist' %>
+</button>
+</div>
+
+<!-- Add this toast notification element -->
+<div id="notification" class="fixed top-5 right-5 bg-white shadow-lg rounded-lg p-4 transform transition-transform duration-300 scale-0 z-50">
+    <div id="notification-content" class="flex items-center">
+        <div id="notification-icon" class="mr-3"></div>
+        <div id="notification-message"></div>
+    </div>
+</div>
+                
+                <!-- Description -->
+                <div class="mb-6">
+                    <h3 class="text-lg font-semibold text-gray-800 mb-2">Book Description</h3>
+                    <div class="text-gray-600 leading-relaxed">
+                        <%= product.description %>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Reviews Section -->
+        <div class="mt-10">
+            <h2 class="text-2xl font-bold text-gray-800 mb-6">Customer Reviews</h2>
+            
+            <div class="flex flex-col md:flex-row mb-8">
+                <!-- Overall Rating Summary -->
+                <div class="md:w-1/3 mb-6 md:mb-0">
+                    <div class="flex items-center mb-4">
+                        <span class="text-5xl font-bold text-gray-900 mr-2">4.5</span>
+                        <div class="flex flex-col">
+                            <div class="flex text-yellow-400">
+                                <% for(let i = 1; i <= 5; i++) { %>
+                                    <% if(i <= Math.floor(4.5)) { %>
+                                        <svg class="w-5 h-5 fill-current" viewBox="0 0 24 24">
+                                            <path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/>
+                                        </svg>
+                                    <% } else if(i - 0.5 <= 4.5) { %>
+                                        <svg class="w-5 h-5 fill-current" viewBox="0 0 24 24">
+                                            <path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z" fill="url(#rating-half-star)"/>
+                                            <defs>
+                                                <linearGradient id="rating-half-star" x1="0" x2="100%" y1="0" y2="0">
+                                                    <stop offset="50%" stop-color="currentColor"/>
+                                                    <stop offset="50%" stop-color="#e5e7eb"/>
+                                                </linearGradient>
+                                            </defs>
+                                        </svg>
+                                    <% } else { %>
+                                        <svg class="w-5 h-5 fill-current text-gray-300" viewBox="0 0 24 24">
+                                            <path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/>
+                                        </svg>
+                                    <% } %>
+                                <% } %>
+                            </div>
+                            <span class="text-sm text-gray-500">Based on 128 reviews</span>
+                        </div>
+                    </div>
+                    
+                    <!-- Rating Distribution -->
+                    <div class="space-y-2">
+                        <% [5,4,3,2,1].forEach(stars => { %>
+                            <div class="flex items-center">
+                                <span class="text-sm font-medium text-gray-700 w-10"><%= stars %> star</span>
+                                <div class="w-full bg-gray-200 rounded-full h-2 mx-2">
+                                    <div class="bg-yellow-400 h-2 rounded-full"style="width: <%= stars === 5 ? '65' : stars === 4 ? '25' : stars === 3 ? '5' : stars === 2 ? '3' : '2' %>%"></div>
+                                </div>
+                                <span class="text-sm font-medium text-gray-500 w-8"><%= stars === 5 ? '65' : stars === 4 ? '25' : stars === 3 ? '5' : stars === 2 ? '3' : '2' %>%</span>
+                            </div>
+                        <% }) %>
+                    </div>
+                </div>
+
+
+                
+                <!-- Review List -->
+                <div class="md:w-2/3 md:pl-8">
+                    <!-- Static Reviews -->
+                    <div class="space-y-6">
+                        <div class="border-b pb-6">
+                            <div class="flex items-center mb-2">
+                                <div class="flex text-yellow-400">
+                                    <% for(let i = 0; i < 5; i++) { %>
+                                        <svg class="w-4 h-4 fill-current <%= i < 5 ? '' : 'text-gray-300' %>" viewBox="0 0 24 24">
+                                            <path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/>
+                                        </svg>
+                                    <% } %>
+                                </div>
+                                <h4 class="ml-2 text-sm font-semibold text-gray-800">A Beautiful Story that Captures the Essence of Human Emotions</h4>
+                            </div>
+                            <div class="flex items-center text-gray-500 text-sm mb-2">
+                                <span class="font-medium text-gray-700">Ananya M.</span>
+                                <span class="mx-1">•</span>
+                                <span>Verified Purchase</span>
+                                <span class="mx-1">•</span>
+                                <span>February 12, 2025</span>
+                            </div>
+                            <p class="text-gray-600 text-sm">This book exceeded all my expectations. The character development is superb, and the storyline kept me engaged from beginning to end. I found myself completely immersed in the world the author created. The writing style is elegant yet accessible, making it perfect for both casual readers and literary enthusiasts. Highly recommended!</p>
+                        </div>
+                        
+                        <div class="border-b pb-6">
+                            <div class="flex items-center mb-2">
+                                <div class="flex text-yellow-400">
+                                    <% for(let i = 0; i < 4; i++) { %>
+                                        <svg class="w-4 h-4 fill-current <%= i < 4 ? '' : 'text-gray-300' %>" viewBox="0 0 24 24">
+                                            <path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/>
+                                        </svg>
+                                    <% } %>
+                                    <svg class="w-4 h-4 fill-current text-gray-300" viewBox="0 0 24 24">
+                                        <path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/>
+                                    </svg>
+                                </div>
+                                <h4 class="ml-2 text-sm font-semibold text-gray-800">Compelling Read but Slow in Parts</h4>
+                            </div>
+                            <div class="flex items-center text-gray-500 text-sm mb-2">
+                                <span class="font-medium text-gray-700">Raj P.</span>
+                                <span class="mx-1">•</span>
+                                <span>Verified Purchase</span>
+                                <span class="mx-1">•</span>
+                                <span>January 28, 2025</span>
+                            </div>
+                            <p class="text-gray-600 text-sm">Overall, I enjoyed this book very much. The author's unique perspective on the subject matter shines through in every chapter. The middle section dragged a bit, but the ending more than made up for it. The quality of the physical book is excellent too - sturdy binding and good paper quality. Would definitely read more from this author.</p>
+                        </div>
+                        
+                        <div>
+                            <div class="flex items-center mb-2">
+                                <div class="flex text-yellow-400">
+                                    <% for(let i = 0; i < 5; i++) { %>
+                                        <svg class="w-4 h-4 fill-current <%= i < 5 ? '' : 'text-gray-300' %>" viewBox="0 0 24 24">
+                                            <path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/>
+                                        </svg>
+                                    <% } %>
+                                </div>
+                                <h4 class="ml-2 text-sm font-semibold text-gray-800">A Must-Read for Every Book Lover</h4>
+                            </div>
+                            <div class="flex items-center text-gray-500 text-sm mb-2">
+                                <span class="font-medium text-gray-700">Meera S.</span>
+                                <span class="mx-1">•</span>
+                                <span>Verified Purchase</span>
+                                <span class="mx-1">•</span>
+                                <span>March 5, 2025</span>
+                            </div>
+                            <p class="text-gray-600 text-sm">I couldn't put this book down! The author's insights are profound and the narrative is beautifully constructed. The themes explored in this work resonated deeply with me, and I found myself reflecting on them long after I finished reading. The delivery was prompt and the book arrived in perfect condition. I've already recommended it to all my friends!</p>
+                        </div>
+                        
+                        <div class="mt-4">
+                            <a href="#" class="text-blue-600 hover:text-blue-800 font-medium">See all 128 reviews</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+<!-- Related Products Section -->
+<section class="mt-12">
+    <h2 class="text-2xl font-bold text-gray-800 mb-6">Related Products</h2>
+    
+    <% if (relatedProducts && relatedProducts.length > 0) { %>
+        <div class="grid grid-cols-2 md:grid-cols-5 gap-6 px-4">
+            <% relatedProducts.forEach(relatedProduct => { %>
+                <div class="bg-white rounded-lg shadow overflow-hidden hover:shadow-lg transition-all w-full">
+                    <a href="/products/<%= relatedProduct._id %>" class="block">
+                        <div class="relative h-56">
+                            <img 
+                                src="<%= relatedProduct.coverImage %>" 
+                                alt="<%= relatedProduct.title %>"
+                                class="absolute inset-0 w-full h-full object-contain" 
+                            />
+                            <% if (relatedProduct.discountPrice > 0) { %>
+                                <div class="absolute top-2 left-2 bg-red-500 text-white px-2 py-1 rounded-full text-xs font-bold">
+                                    <%= Math.round((relatedProduct.discountPrice / relatedProduct.price) * 100) %>% OFF
+                                </div>
+                            <% } %>
+                        </div>
+                        <div class="p-3">
+                            <h3 class="text-sm font-semibold text-gray-800 line-clamp-2 h-10"><%= relatedProduct.title %></h3>
+                            <p class="text-xs text-gray-600 mt-1"><%= relatedProduct.author %></p>
+                            <div class="mt-2 flex items-end">
+                                <% if (relatedProduct.discountPrice > 0) { %>
+                                    <span class="text-sm font-bold text-gray-800">₹<%= relatedProduct.price - relatedProduct.discountPrice %></span>
+                                    <span class="text-xs text-gray-500 line-through ml-2">₹<%= relatedProduct.price %></span>
+                                <% } else { %>
+                                    <span class="text-sm font-bold text-gray-800">₹<%= relatedProduct.price %></span>
+                                <% } %>
+                            </div>
+                        </div>
+                    </a>
+                </div>
+            <% }) %>
+        </div>
+    <% } else { %>
+        <p class="text-gray-600">No related products found.</p>
+    <% } %>
+</section>
+    </div>
+    <footer style="background-color: #AB8462;" class="text-white mt-8">
+        <div class="container mx-auto py-8 px-4">
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-8">
+                <!-- BookSy Info -->
+                <div>
+                    <h3 class="text-xl font-bold mb-4">BookSy</h3>
+                    <p class="text-sm mb-4">Get updates on new books</p>
+                    <div class="flex">
+                        <input type="email" placeholder="Enter your email" class="p-2 rounded-l text-gray-800 w-full">
+                        <button style="background-color: #8C6B48;" class="px-4 py-2 rounded-r hover:bg-[#775A3D] transition">
+                            <i class="fa-solid fa-arrow-right"></i>
+                        </button>
+                    </div>
+                </div>
+    
+                <!-- Company Links -->
+                <div>
+                    <h3 class="text-lg font-bold mb-4">Company</h3>
+                    <ul class="space-y-2 text-sm">
+                        <li><a href="/about" class="hover:text-gray-200">About Company</a></li>
+                        <li><a href="/careers" class="hover:text-gray-200">Careers</a></li>
+                        <li><a href="/contact" class="hover:text-gray-200">Contact</a></li>
+                        <li><a href="/blog" class="hover:text-gray-200">Blog</a></li>
+                        <li><a href="/terms" class="hover:text-gray-200">Terms & Policies</a></li>
+                    </ul>
+                </div>
+    
+                <!-- Account Links -->
+                <div>
+                    <h3 class="text-lg font-bold mb-4">Account</h3>
+                    <ul class="space-y-2 text-sm">
+                        <li><a href="/account" class="hover:text-gray-200">Your Account</a></li>
+                        <li><a href="/returns" class="hover:text-gray-200">Returns & Refunds</a></li>
+                        <li><a href="/orders" class="hover:text-gray-200">Order History</a></li>
+                        <li><a href="/track" class="hover:text-gray-200">Track Order</a></li>
+                        <li><a href="/wishlist" class="hover:text-gray-200">Wishlist</a></li>
+                    </ul>
+                </div>
+    
+                <!-- Customer Service -->
+                <div>
+                    <h3 class="text-lg font-bold mb-4">Customer Service</h3>
+                    <ul class="space-y-2 text-sm">
+                        <li><a href="/payment" class="hover:text-gray-200">Payment Methods</a></li>
+                        <li><a href="/shipping" class="hover:text-gray-200">Shipping & Delivery</a></li>
+                        <li><a href="/returns-policy" class="hover:text-gray-200">Returns Policy</a></li>
+                        <li><a href="/faq" class="hover:text-gray-200">FAQ</a></li>
+                        <li><a href="/support" class="hover:text-gray-200">Help and Support</a></li>
+                    </ul>
+                </div>
+            </div>
+    
+            <div class="mt-8 pt-8 border-t" style="border-color: #8C6B48;" class="flex flex-col md:flex-row justify-between items-center">
+                <p class="text-sm mb-4 md:mb-0">&copy; 2025 BookSy. All rights reserved.</p>
+                <div class="flex space-x-4">
+                    <i class="fa-brands fa-cc-visa text-2xl"></i>
+                    <i class="fa-brands fa-cc-mastercard text-2xl"></i>
+                    <i class="fa-brands fa-cc-paypal text-2xl"></i>
+                    <i class="fa-brands fa-cc-amex text-2xl"></i>
+                </div>
+            </div>
+        </div>
+    </footer>
+    
+    
+    <script>
+      document.addEventListener('DOMContentLoaded', function() {
+    const addToCartBtn = document.getElementById('add-to-cart-btn');
+    const buyNowBtn = document.getElementById('buy-now');
+    
+    // Create notification element if it doesn't exist
+    let notification = document.getElementById('notification');
+    if (!notification) {
+        notification = document.createElement('div');
+        notification.id = 'notification';
+        notification.className = 'fixed top-5 right-5 bg-white shadow-lg rounded-lg p-4 transform transition-transform duration-300 scale-0 z-50';
+        notification.innerHTML = `
+            <div id="notification-content" class="flex items-center">
+                <div id="notification-icon" class="mr-3"></div>
+                <div id="notification-message"></div>
+            </div>
+        `;
+        document.body.appendChild(notification);
+    }
+    
+    const notificationMessage = document.getElementById('notification-message');
+    const notificationIcon = document.getElementById('notification-icon');
+    
+    // Function to show toast notification
+    function showNotification(message, isSuccess = true) {
+        notificationMessage.textContent = message;
+        
+        // Set icon based on success/error
+        if (isSuccess) {
+            notificationIcon.innerHTML = '<svg class="w-6 h-6 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>';
+            notification.classList.add('bg-green-50');
+            notification.classList.remove('bg-red-50');
+        } else {
+            notificationIcon.innerHTML = '<svg class="w-6 h-6 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>';
+            notification.classList.add('bg-red-50');
+            notification.classList.remove('bg-green-50');
+        }
+        
+        // Show notification
+        notification.classList.remove('scale-0');
+        notification.classList.add('scale-100');
+        
+        // Hide after 3 seconds
+        setTimeout(() => {
+            notification.classList.remove('scale-100');
+            notification.classList.add('scale-0');
+        }, 3000);
+    }
+    
+    if (addToCartBtn) {
+        addToCartBtn.addEventListener('click', function() {
+            const productId = this.getAttribute('data-product-id');
+            const quantity = document.getElementById('quantity') ? 
+                parseInt(document.getElementById('quantity').value) : 1;
+            
+            fetch('/cart/add', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ productId, quantity }),
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    // Show success notification
+                    showNotification(data.message || 'Product added to cart successfully!', true);
+                    
+                    // Update button text to "Go to Cart"
+                    this.innerHTML = `
+                        <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"></path>
+                        </svg>
+                        Go to Cart
+                    `;
+                    
+                    // Change click event to redirect to cart
+                    this.removeEventListener('click', arguments.callee);
+                    this.addEventListener('click', function() {
+                        window.location.href = '/cart';
+                    });
+                } else if (data.requireLogin) {
+                    // Redirect to login page if user is not logged in
+                    window.location.href = '/login?redirect=' + encodeURIComponent(window.location.href);
+                } else {
+                    // Show error notification
+                    showNotification(data.message || 'Failed to add to cart', false);
+                }
+            })
+            .catch(error => {
+                // Show error notification for other errors
+                showNotification('Error: Could not add to cart', false);
+                console.error(error);
+            });
+        });
+    }
+    
+    // Buy Now button functionality
+    if (buyNowBtn) {
+        buyNowBtn.addEventListener('click', function() {
+            const productId = addToCartBtn.getAttribute('data-product-id');
+            const quantity = document.getElementById('quantity') ? 
+                parseInt(document.getElementById('quantity').value) : 1;
+            
+            fetch('/cart/add', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ productId, quantity }),
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    // Redirect to cart page immediately
+                    window.location.href = '/cart';
+                } else if (data.requireLogin) {
+                    // Redirect to login page if user is not logged in
+                    window.location.href = '/login?redirect=' + encodeURIComponent(window.location.href);
+                } else {
+                    // Show error notification
+                    showNotification(data.message || 'Failed to add to cart', false);
+                }
+            })
+            .catch(error => {
+                // Show error notification for other errors
+                showNotification('Error: Could not add to cart', false);
+                console.error(error);
+            });
+        });
+    }
+    
+    // If button should already be "Go to Cart"
+    if (addToCartBtn && <%= cartHasProduct ? 'true' : 'false' %>) {
+        addToCartBtn.addEventListener('click', function(e) {
+            e.preventDefault();
+            window.location.href = '/cart';
+        });
+    }
+});
+
+document.addEventListener('DOMContentLoaded', function() {
+    // Image Thumbnail Selection
+    const thumbnailImages = document.querySelectorAll('.thumbnail-image');
+    const mainImage = document.getElementById('main-image');
+
+    thumbnailImages.forEach(thumbnail => {
+        thumbnail.addEventListener('click', function() {
+            // Remove ring from all thumbnails
+            thumbnailImages.forEach(t => t.classList.remove('ring-2', 'ring-blue-500'));
+            
+            // Add ring to selected thumbnail
+            this.classList.add('ring-2', 'ring-blue-500');
+            
+            // Change main image source
+            const newImageSrc = this.getAttribute('data-image');
+            mainImage.src = newImageSrc;
+        });
+    });
+
+    // Image Zoom Functionality
+    const imgZoomContainer = document.getElementById('img-zoom-container');
+    const imgZoomResult = document.getElementById('img-zoom-result');
+    let lens, img;
+
+    function createZoomLens() {
+        // Remove existing lens if any
+        const existingLens = imgZoomContainer.querySelector('.img-zoom-lens');
+        if (existingLens) existingLens.remove();
+
+        // Create lens
+        lens = document.createElement('div');
+        lens.classList.add('img-zoom-lens', 'absolute', 'border', 'border-blue-500', 'bg-white', 'bg-opacity-20', 'z-10');
+        lens.style.width = '100px';
+        lens.style.height = '100px';
+        imgZoomContainer.appendChild(lens);
+
+        img = mainImage;
+
+        // Event listeners for zoom
+        imgZoomContainer.addEventListener('mousemove', moveLens);
+        imgZoomContainer.addEventListener('mouseenter', showZoom);
+        imgZoomContainer.addEventListener('mouseleave', hideZoom);
+    }
+
+    function showZoom() {
+        imgZoomResult.classList.remove('hidden');
+        createZoomLens();
+    }
+
+    function hideZoom() {
+        imgZoomResult.classList.add('hidden');
+        lens.remove();
+    }
+
+    function moveLens(e) {
+        let pos, x, y;
+        // Prevent default behavior
+        e.preventDefault();
+
+        // Get the cursor's x and y positions
+        pos = getCursorPos(e);
+        x = pos.x;
+        y = pos.y;
+
+        // Calculate lens position
+        let lensWidth = lens.offsetWidth;
+        let lensHeight = lens.offsetHeight;
+
+        // Restrict lens movement within container
+        x = x - (lensWidth / 2);
+        y = y - (lensHeight / 2);
+
+        // Prevent lens from going outside the image container
+        x = Math.max(0, Math.min(x, imgZoomContainer.offsetWidth - lensWidth));
+        y = Math.max(0, Math.min(y, imgZoomContainer.offsetHeight - lensHeight));
+
+        // Position the lens
+        lens.style.left = x + 'px';
+        lens.style.top = y + 'px';
+
+        // Update zoom result
+        updateZoomResult(x, y);
+    }
+
+    function getCursorPos(e) {
+        let rect = imgZoomContainer.getBoundingClientRect();
+        return {
+            x: e.clientX - rect.left,
+            y: e.clientY - rect.top
+        };
+    }
+
+    function updateZoomResult(x, y) {
+        // Calculate zoom ratio
+        const zoomRatio = 2;
+
+        // Position and size zoom result
+        imgZoomResult.style.position = 'fixed';
+        imgZoomResult.style.top = '50%';
+        imgZoomResult.style.right = '5%';
+        imgZoomResult.style.transform = 'translateY(-50%)';
+        imgZoomResult.style.width = '300px';
+        imgZoomResult.style.height = '300px';
+        imgZoomResult.style.border = '1px solid #ddd';
+        imgZoomResult.style.backgroundImage = `url(${img.src})`;
+        imgZoomResult.style.backgroundSize = `${img.width * zoomRatio}px ${img.height * zoomRatio}px`;
+        
+        // Calculate background position
+        const containerWidth = imgZoomContainer.offsetWidth;
+        const containerHeight = imgZoomContainer.offsetHeight;
+
+        const bgX = -((x / containerWidth) * 100) * (img.width * zoomRatio - imgZoomResult.offsetWidth) / 100;
+        const bgY = -((y / containerHeight) * 100) * (img.height * zoomRatio - imgZoomResult.offsetHeight) / 100;
+
+        imgZoomResult.style.backgroundPosition = `${bgX}px ${bgY}px`;
+    }
+
+    // Initial zoom setup
+    createZoomLens();
+});
+
+document.addEventListener('DOMContentLoaded', function() {
+    // Get all wishlist buttons on the page
+    const wishlistButtons = document.querySelectorAll('.wishlist-btn');
+    
+    // Add click event listener to each wishlist button
+    wishlistButtons.forEach(button => {
+        button.addEventListener('click', function() {
+            const productId = this.getAttribute('data-product-id');
+            const isInWishlist = this.getAttribute('data-in-wishlist') === 'true';
+            
+            toggleWishlistItem(productId, this);
+        });
+    });
+    
+    // Function to toggle wishlist item (add or remove)
+    function toggleWishlistItem(productId, buttonElement) {
+        fetch('/wishlist/toggle', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ productId }),
+        })
+        .then(response => {
+            if (response.redirected) {
+                window.location.href = response.url;
+                return Promise.reject();
+            }
+            return response.json();
+        })
+        .then(data => {
+            if (data.success) {
+                // Update button appearance
+                if (data.inWishlist) {
+                    // Product added to wishlist
+                    buttonElement.querySelector('i').classList.remove('far');
+                    buttonElement.querySelector('i').classList.add('fas');
+                    buttonElement.querySelector('i').classList.add('text-red-500');
+                    
+                    // If button has text (in product details page)
+                    if (buttonElement.innerText.includes('Add to Wishlist')) {
+                        buttonElement.innerHTML = `<i class="fas fa-heart mr-2"></i>Remove from Wishlist`;
+                    }
+                    
+                    buttonElement.setAttribute('data-in-wishlist', 'true');
+                    
+                    // Show success notification
+                    showNotification('Product added to wishlist successfully!', 'success');
+                } else {
+                    // Product removed from wishlist
+                    buttonElement.querySelector('i').classList.remove('fas');
+                    buttonElement.querySelector('i').classList.add('far');
+                    buttonElement.querySelector('i').classList.remove('text-red-500');
+                    
+                    // If button has text (in product details page)
+                    if (buttonElement.innerText.includes('Remove from Wishlist')) {
+                        buttonElement.innerHTML = `<i class="far fa-heart mr-2"></i>Add to Wishlist`;
+                    }
+                    
+                    buttonElement.setAttribute('data-in-wishlist', 'false');
+                    
+                    // Show success notification
+                    showNotification('Product removed from wishlist', 'success');
+                }
+            } else if (data.requireLogin) {
+                // Handle login required response from backend
+                showNotification('Please login to manage your wishlist', 'warning');
+                
+                // Store the current page URL to return after login
+                localStorage.setItem('redirectAfterLogin', window.location.pathname);
+                
+                // Redirect to login page after a short delay
+                setTimeout(() => {
+                    window.location.href = '/login';
+                }, 2000);
+            } else {
+                showNotification(data.message || 'Failed to update wishlist', 'error');
+            }
+        })
+        .catch(error => {
+            if (error && error.message) {
+                showNotification(error.message, 'error');
+            }
+        });
+    }
+    
+    // Use existing showNotification function or create it if it doesn't exist
+    if (typeof showNotification !== 'function') {
+        window.showNotification = function(message, type) {
+            const notification = document.createElement('div');
+            
+            // Set style based on notification type
+            let bgColor = 'bg-green-500'; // success
+            if (type === 'error') bgColor = 'bg-red-500';
+            if (type === 'warning') bgColor = 'bg-yellow-500';
+            
+            notification.className = `fixed top-4 right-4 ${bgColor} text-white px-4 py-2 rounded shadow-lg z-50`;
+            notification.innerHTML = message;
+            document.body.appendChild(notification);
+            
+            // Remove notification after 3 seconds
+            setTimeout(() => {
+                notification.remove();
+            }, 3000);
+        };
+    }
+});
+
+        </script>
+        
+</body>
+</html>

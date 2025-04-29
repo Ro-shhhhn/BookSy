@@ -1,0 +1,1464 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>BookSy - Your Favorite Bookstore</title>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    .page-gradient-bg {
+      background: linear-gradient(135deg, #f3e7d3 0%, #e6d7c3 25%, #d9c7b3 50%, #e6d7c3 75%, #f3e7d3 100%);
+    }
+
+    .book-card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+    }
+
+    .hero-section {
+      background-image: linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)), url('/api/placeholder/1200/400');
+      background-size: cover;
+      background-position: center;
+    }
+
+    /* Animation keyframes */
+    @keyframes fadeInUp {
+      from {
+        opacity: 0;
+        transform: translateY(20px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    @keyframes floatBook {
+      0% {
+        transform: translateY(0) rotate(0deg);
+      }
+
+      50% {
+        transform: translateY(-10px) rotate(3deg);
+      }
+
+      100% {
+        transform: translateY(0) rotate(0deg);
+      }
+    }
+
+    /* Applied animations */
+    .animate-fadeInUp {
+      animation: fadeInUp 1s ease-out forwards;
+    }
+
+    .animate-float {
+      animation: floatBook 3s ease-in-out infinite;
+    }
+
+    /* Book styling */
+    .book-cover {
+      height: 220px;
+      width: 150px;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+      transition: transform 0.3s ease;
+      border-radius: 4px;
+      overflow: hidden;
+    }
+
+    .book-cover:hover {
+      transform: translateY(-10px) scale(1.05);
+    }
+
+    /* Active slide */
+    .hero-slide.active {
+      opacity: 1;
+      z-index: 10;
+    }
+
+    /* Active indicator */
+    .slide-indicator.active {
+      opacity: 1;
+      width: 24px;
+    }
+
+    @keyframes gradient-shift {
+      0% {
+        background-position: 0% 50%;
+      }
+
+      50% {
+        background-position: 100% 50%;
+      }
+
+      100% {
+        background-position: 0% 50%;
+      }
+    }
+
+    .animate-gradient-shift {
+      background-size: 200% 200%;
+      animation: gradient-shift 10s ease infinite;
+    }
+  </style>
+</head>
+
+<body class="bg-gray-50">
+
+  <!-- Navbar -->
+  <!-- Navbar -->
+  <nav class="bg-gradient-to-r from-[#C3A18B] to-[#A7886D] shadow-lg py-6 sticky top-0 z-50">
+    <div class="container mx-auto px-4">
+      <div class="flex justify-between items-center">
+        <!-- Logo -->
+        <div class="flex items-center">
+          <a href="/" class="flex items-center space-x-2 group">
+            <i
+              class="fas fa-book-open text-amber-200 text-2xl group-hover:text-white transition-colors duration-300"></i>
+            <span
+              class="text-white text-2xl font-extrabold tracking-wider group-hover:text-amber-200 transition-colors duration-300">BookSy</span>
+          </a>
+        </div>
+
+        <!-- Desktop Navigation -->
+        <div class="hidden md:flex items-center space-x-8">
+          <a href="/" class="text-white hover:text-amber-200 transition-colors duration-300 font-medium relative group">
+            Home
+            <span
+              class="absolute -bottom-1 left-0 w-0 h-0.5 bg-amber-200 group-hover:w-full transition-all duration-300"></span>
+          </a>
+          <a href="/products"
+            class="text-white hover:text-amber-200 transition-colors duration-300 font-medium relative group">
+            Books
+            <span
+              class="absolute -bottom-1 left-0 w-0 h-0.5 bg-amber-200 group-hover:w-full transition-all duration-300"></span>
+          </a>
+          <a href="/about"
+            class="text-white hover:text-amber-200 transition-colors duration-300 font-medium relative group">
+            About
+            <span
+              class="absolute -bottom-1 left-0 w-0 h-0.5 bg-amber-200 group-hover:w-full transition-all duration-300"></span>
+          </a>
+          <a href="/contact"
+            class="text-white hover:text-amber-200 transition-colors duration-300 font-medium relative group">
+            Contact
+            <span
+              class="absolute -bottom-1 left-0 w-0 h-0.5 bg-amber-200 group-hover:w-full transition-all duration-300"></span>
+          </a>
+        </div>
+
+        <!-- Icons and Actions -->
+        <div class="flex items-center space-x-5">
+          <!-- Wishlist -->
+          <a href="/wishlist"
+            class="text-white hover:text-amber-200 transition-colors duration-300 text-lg flex items-center">
+            <i class="far fa-heart text-xl mr-1"></i>
+            <span class="hidden md:inline">Wishlist</span>
+          </a>
+
+          <!-- Cart Icon -->
+          <a href="/cart" class="text-white hover:text-amber-200 transition-colors duration-300 relative group">
+            <div class="relative">
+              <i class="fa-solid fa-cart-shopping text-xl"></i>
+              <span
+                class="absolute -top-2 -right-2 bg-amber-200 text-[#AB8462] text-xs font-bold rounded-full h-5 w-5 flex items-center justify-center group-hover:bg-white transition-colors duration-300">
+                <%= locals.cartCount || 0 %>
+              </span>
+            </div>
+          </a>
+
+          <!-- Profile/Sign In -->
+          <% if (locals.session && session.userId) { %>
+            <div class="relative group">
+              <button
+                class="text-white hover:text-amber-200 transition-colors duration-300 focus:outline-none flex items-center">
+                <% if (locals.user && user.profilePicture) { %>
+                  <img src="<%= user.profilePicture %>" alt="Profile"
+                    class="w-8 h-8 rounded-full object-cover border-2 border-amber-200 hover:border-white transition-colors duration-300">
+                  <% } else { %>
+                    <div
+                      class="w-8 h-8 rounded-full bg-amber-200 text-[#AB8462] flex items-center justify-center border-2 border-amber-200 hover:bg-white transition-colors duration-300">
+                      <i class="fa-solid fa-user"></i>
+                    </div>
+                    <% } %>
+              </button>
+              <!-- Dropdown -->
+              <div
+                class="absolute right-0 mt-2 w-64 bg-white rounded-lg shadow-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300 ease-in-out transform origin-top-right translate-y-2 group-hover:translate-y-0">
+                <div class="py-2 rounded-lg overflow-hidden">
+                  <div class="px-4 py-3 bg-[#AB8462] text-white">
+                    <% if (locals.user && user.name) { %>
+                      <p class="font-medium">
+                        <%= user.name %>
+                      </p>
+                      <p class="text-sm text-gray-200 truncate">
+                        <%= user.email %>
+                      </p>
+                      <% } else { %>
+                        <p class="font-medium">My Account</p>
+                        <% } %>
+                  </div>
+                  <a href="/profile"
+                    class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition duration-200 flex items-center">
+                    <i class="fa-solid fa-user-circle mr-2 text-[#AB8462]"></i> My Profile
+                  </a>
+                  <a href="/orders"
+                    class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition duration-200 flex items-center">
+                    <i class="fa-solid fa-shopping-bag mr-2 text-[#AB8462]"></i> My Orders
+                  </a>
+                  <a href="/addresses"
+                    class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition duration-200 flex items-center">
+                    <i class="fa-solid fa-address-book mr-2 text-[#AB8462]"></i> Addresses
+                  </a>
+                  <a href="/wishlist"
+                    class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition duration-200 flex items-center">
+                    <i class="fa-solid fa-heart mr-2 text-[#AB8462]"></i> Wishlist
+                  </a>
+                  <div class="border-t border-gray-200 my-1"></div>
+                  <a href="/logout"
+                    class="block px-4 py-2 text-sm text-red-600 hover:bg-red-50 transition duration-200 flex items-center">
+                    <i class="fa-solid fa-sign-out-alt mr-2"></i> Logout
+                  </a>
+                </div>
+              </div>
+            </div>
+            <% } else { %>
+              <a href="/login"
+                class="bg-amber-200 hover:bg-white text-[#AB8462] font-medium py-2 px-4 rounded-full transition-colors duration-300 flex items-center shadow-md hover:shadow-lg">
+                <i class="fa-solid fa-sign-in-alt mr-2"></i> Sign In
+              </a>
+              <% } %>
+
+                <!-- Mobile Menu Toggle -->
+                <button id="mobile-menu-toggle"
+                  class="md:hidden text-white hover:text-amber-200 focus:outline-none transition-colors duration-300">
+                  <i class="fa-solid fa-bars text-xl"></i>
+                </button>
+        </div>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Hero Section -->
+  <!-- Expanded Hero Section with Full Slideshow -->
+  <section class="hero-section relative overflow-hidden h-screen max-h-[700px]">
+    <!-- Slideshow container -->
+
+
+    <div class="hero-slide absolute inset-0 flex items-center opacity-0 transition-opacity duration-1000 ease-in-out">
+      <!-- Lighter aesthetic gradient background that matches the brown navbar -->
+      <div class="absolute inset-0 bg-gradient-to-br from-amber-500 via-stone-400 to-stone-600"></div>
+      <!-- Subtle animated gradient overlay -->
+      <div
+        class="absolute inset-0 opacity-20 bg-gradient-to-tr from-transparent via-amber-500 to-transparent animate-gradient-shift">
+      </div>
+      <div class="container mx-auto px-4 relative z-10 text-white text-center">
+        <h1 class="text-5xl md:text-7xl font-bold mb-6 tracking-tight">
+          <span class="text-transparent bg-clip-text bg-gradient-to-r from-amber-100 via-white to-amber-50">Discover
+            Your Next Adventure</span>
+        </h1>
+        <p class="text-xl md:text-2xl mb-10 max-w-3xl mx-auto text-gray-100">
+          Explore our curated collection of hand-picked books that will transport you to new worlds
+        </p>
+        <div class="book-carousel w-full max-w-5xl mx-auto overflow-hidden h-64">
+          <div class="carousel-inner flex gap-6">
+            <!-- Book items will be populated by JS -->
+          </div>
+        </div>
+        <div class="mt-8">
+          <a href="/products"
+            class="inline-block bg-amber-600 hover:bg-amber-500 text-white px-8 py-4 rounded-full text-lg font-semibold transition duration-300 transform hover:scale-105 shadow-lg">
+            Browse All Books
+          </a>
+        </div>
+      </div>
+    </div>
+
+
+
+
+    <!-- Slide 2: Special Offers -->
+    <div class="hero-slide absolute inset-0 flex items-center opacity-0 transition-opacity duration-1000 ease-in-out">
+      <div class="absolute inset-0 bg-gradient-to-r from-rose-900 to-red-800 opacity-90"></div>
+      <div class="absolute inset-0 bg-cover bg-center" style="background-image: url('/images/bookshelf.webp');"></div>
+      <div class="container mx-auto px-4 relative z-10 text-white">
+        <div class="max-w-5xl mx-auto flex flex-col md:flex-row items-center">
+          <div class="md:w-1/2 text-center md:text-left mb-10 md:mb-0">
+            <div class="inline-block bg-red-700 text-white px-6 py-2 rounded-full mb-6 animate-pulse">Limited Time Offer
+            </div>
+            <h2 class="text-4xl md:text-6xl font-bold mb-6">Buy 2 Get 1 Free</h2>
+            <p class="text-xl mb-8">On all fiction titles this month! Discover new worlds and save while doing it.</p>
+            <div class="countdown-timer text-2xl font-semibold mb-8">
+              Ends in: <span class="countdown-display">5 days, 12 hours</span>
+            </div>
+            <a href="/product"
+              class="inline-block bg-white hover:bg-gray-100 text-red-800 px-8 py-4 rounded-full text-lg font-semibold transition duration-300 transform hover:scale-105">
+              Shop Offers Now
+            </a>
+          </div>
+          <div class="md:w-1/2 flex justify-center">
+            <div class="relative h-96 w-96">
+              <!-- Updated Book Covers -->
+              <div class="absolute h-64 w-48 top-8 left-12 bg-cover bg-center rounded shadow-xl transform rotate-12"
+                style="background-image: url('/uploads/products/cropped-1741975054676-unefuel81.jpg');"></div>
+              <div class="absolute h-64 w-48 top-10 left-28 bg-cover bg-center rounded shadow-xl transform -rotate-6"
+                style="background-image: url('/uploads/products/product-1741984281014-1.jpg');"></div>
+              <div class="absolute h-64 w-48 top-6 left-48 bg-cover bg-center rounded shadow-xl transform rotate-3"
+                style="background-image: url('/uploads/products/product-1741983737392-2.jpg');"></div>
+              <div class="absolute top-72 right-16 text-center">
+                <div class="bg-yellow-500 text-black text-xl font-bold px-4 py-2 rounded-full transform rotate-12">FREE!
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+
+    <!-- Slide 3: New Arrivals -->
+    <div class="hero-slide absolute inset-0 flex items-center opacity-0 transition-opacity duration-1000 ease-in-out">
+      <div class="absolute inset-0 bg-gradient-to-r from-emerald-900 to-teal-800 opacity-90"></div>
+      <div class="absolute inset-0 bg-cover bg-center" style="background-image: url('/images/reading.webp');"></div>
+      <div class="container mx-auto px-4 relative z-10 text-white text-center">
+        <h2 class="text-4xl md:text-6xl font-bold mb-4">Just Arrived</h2>
+        <p class="text-xl md:text-2xl mb-8 max-w-3xl mx-auto">Be the first to discover this month's most anticipated
+          releases</p>
+
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-6 max-w-5xl mx-auto">
+          <!-- New arrivals will be populated by JS -->
+        </div>
+
+        <div class="mt-10">
+          <a href="/new-arrivals"
+            class="inline-block bg-teal-500 hover:bg-teal-600 text-white px-8 py-4 rounded-full text-lg font-semibold transition duration-300 transform hover:scale-105">
+            View All New Arrivals
+          </a>
+        </div>
+      </div>
+    </div>
+
+    <!-- Slide indicators -->
+    <div class="absolute bottom-6 left-0 right-0 flex justify-center gap-3 z-20">
+      <button
+        class="slide-indicator w-3 h-3 rounded-full bg-white opacity-50 hover:opacity-100 transition-opacity"></button>
+      <button
+        class="slide-indicator w-3 h-3 rounded-full bg-white opacity-50 hover:opacity-100 transition-opacity"></button>
+      <button
+        class="slide-indicator w-3 h-3 rounded-full bg-white opacity-50 hover:opacity-100 transition-opacity"></button>
+    </div>
+
+    <!-- Slide navigation -->
+    <button
+      class="absolute left-4 top-1/2 transform -translate-y-1/2 bg-black bg-opacity-30 hover:bg-opacity-50 text-white w-12 h-12 rounded-full flex items-center justify-center z-20 transition-all">
+      <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+      </svg>
+    </button>
+    <button
+      class="absolute right-4 top-1/2 transform -translate-y-1/2 bg-black bg-opacity-30 hover:bg-opacity-50 text-white w-12 h-12 rounded-full flex items-center justify-center z-20 transition-all">
+      <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+      </svg>
+    </button>
+    </div>
+  </section>
+
+  <!-- Page Background Gradient Wrapper -->
+  <!-- Page Background Gradient Wrapper - MORE PRONOUNCED -->
+  <style>
+    .page-gradient-bg {
+      background: linear-gradient(135deg, #f3e7d3 0%, #e6d7c3 25%, #d9c7b3 50%, #e6d7c3 75%, #f3e7d3 100%);
+    }
+  </style>
+
+  <div class="page-gradient-bg">
+    <!-- Categories Section -->
+    <section class="py-12">
+      <div class="container mx-auto px-4">
+        <h2
+          class="text-3xl font-bold text-center mb-8 text-transparent bg-clip-text bg-gradient-to-r from-stone-800 to-amber-700">
+          Popular Categories</h2>
+        <div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4 text-center">
+          <a href="products?category=67cf4f17db8e8041f8068def"
+            class="p-4 rounded-lg bg-gradient-to-br from-white to-amber-50 hover:from-amber-50 hover:to-amber-100 shadow-sm transition">
+            <div class="bg-pink-200 rounded-full w-16 h-16 flex items-center justify-center mx-auto mb-2">
+              <i class="fa-solid fa-heart text-2xl" style="color: #F7A1B5;"></i>
+            </div>
+            <span class="font-medium">Romance</span>
+          </a>
+          <a href="products?category=67cffdf1e116213c8a04a0c1"
+            class="p-4 rounded-lg bg-gradient-to-br from-white to-amber-50 hover:from-amber-50 hover:to-amber-100 shadow-sm transition">
+            <div class="bg-blue-200 rounded-full w-16 h-16 flex items-center justify-center mx-auto mb-2">
+              <i class="fa-solid fa-brain text-2xl" style="color: #4A90E2;"></i>
+            </div>
+            <span class="font-medium">Psychology</span>
+          </a>
+          <a href="products?category=67cffec9e116213c8a04a0eb"
+            class="p-4 rounded-lg bg-gradient-to-br from-white to-amber-50 hover:from-amber-50 hover:to-amber-100 shadow-sm transition">
+            <div class="bg-yellow-200 rounded-full w-16 h-16 flex items-center justify-center mx-auto mb-2">
+              <i class="fa-solid fa-lightbulb text-2xl" style="color: #FBBF24;"></i>
+            </div>
+            <span class="font-medium">Self-Help</span>
+          </a>
+          <a href="products?category=67cffef8e116213c8a04a0fb"
+            class="p-4 rounded-lg bg-gradient-to-br from-white to-amber-50 hover:from-amber-50 hover:to-amber-100 shadow-sm transition">
+            <div class="bg-green-200 rounded-full w-16 h-16 flex items-center justify-center mx-auto mb-2">
+              <i class="fa-solid fa-leaf text-2xl" style="color: #34D399;"></i>
+            </div>
+            <span class="font-medium">Health and Wellness</span>
+          </a>
+
+          <a href="products"
+            class="p-4 rounded-lg bg-gradient-to-br from-white to-amber-50 hover:from-amber-50 hover:to-amber-100 shadow-sm transition">
+            <div
+              class="bg-gradient-to-br from-amber-200 to-amber-300 rounded-full w-16 h-16 flex items-center justify-center mx-auto mb-2">
+              <i class="fa-solid fa-ellipsis text-2xl" style="color: #AB8462;"></i>
+            </div>
+            <span class="font-medium">All Categories</span>
+          </a>
+        </div>
+      </div>
+    </section>
+
+    <!-- Featured Books Section -->
+    <section class="py-12">
+      <div class="container mx-auto px-4">
+        <div class="flex justify-between items-center mb-8">
+          <h2 class="text-3xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-stone-800 to-amber-700">
+            Featured Books</h2>
+          <a href="/products"
+            class="text-transparent bg-clip-text bg-gradient-to-r from-amber-700 to-amber-600 hover:from-amber-800 hover:to-amber-700 font-medium">View
+            All <i class="fa-solid fa-arrow-right ml-1"></i></a>
+        </div>
+        <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+          <!-- Book Card 1 -->
+          <a href="products/67d48f8beead852282e5d20a" class="block">
+            <div
+              class="bg-gradient-to-br from-white to-amber-50 rounded-lg shadow-md overflow-hidden transition-all duration-300 hover:shadow-lg hover:from-amber-50 hover:to-amber-100 book-card">
+              <img src="\uploads\products\cropped-1741975054676-unefuel81.jpg" alt="Book Cover"
+                class="w-full h-64 object-cover">
+              <div class="p-4">
+                <span
+                  class="text-sm text-transparent bg-clip-text bg-gradient-to-r from-amber-800 to-amber-600">Romance</span>
+                <h3 class="font-bold text-lg mb-2">IT ENDS WITH US</h3>
+                <p class="text-gray-700 text-sm mb-2">COLLEEN HOOVER</p>
+                <div class="flex justify-between items-center">
+                  <span class="font-bold text-lg">₹18.99</span>
+                  <button
+                    class="bg-gradient-to-r from-amber-600 to-amber-700 text-white px-3 py-1 rounded-full hover:from-amber-700 hover:to-amber-800 transition shadow-sm">
+                    <i class="fa-solid fa-cart-plus"></i> Add
+                  </button>
+                </div>
+              </div>
+            </div>
+          </a>
+
+          <!-- Book Card 2 -->
+          <a href="products/67d48ff9eead852282e5d224" class="block">
+            <div
+              class="bg-gradient-to-br from-white to-amber-50 rounded-lg shadow-md overflow-hidden transition-all duration-300 hover:shadow-lg hover:from-amber-50 hover:to-amber-100 book-card">
+              <img src="\uploads\products\product-1741975250944-0.jpg" alt="Book Cover"
+                class="w-full h-64 object-cover">
+              <div class="p-4">
+                <span
+                  class="text-sm text-transparent bg-clip-text bg-gradient-to-r from-amber-800 to-amber-600">Romance</span>
+                <h3 class="font-bold text-lg mb-2">ME BEFORE YOU</h3>
+                <p class="text-gray-700 text-sm mb-2">JOHN HAUG</p>
+                <div class="flex justify-between items-center">
+                  <span class="font-bold text-lg">₹24.50</span>
+                  <button
+                    class="bg-gradient-to-r from-amber-600 to-amber-700 text-white px-3 py-1 rounded-full hover:from-amber-700 hover:to-amber-800 transition shadow-sm">
+                    <i class="fa-solid fa-cart-plus"></i> Add
+                  </button>
+                </div>
+              </div>
+            </div>
+          </a>
+
+          <!-- Book Card 3 -->
+          <a href="products/67d49219eead852282e5d245" class="block">
+            <div
+              class="bg-gradient-to-br from-white to-amber-50 rounded-lg shadow-md overflow-hidden transition-all duration-300 hover:shadow-lg hover:from-amber-50 hover:to-amber-100 book-card">
+              <img src="\uploads\products\product-1741984281015-3.jpg" alt="Book Cover"
+                class="w-full h-64 object-cover">
+              <div class="p-4">
+                <span class="text-sm text-transparent bg-clip-text bg-gradient-to-r from-amber-800 to-amber-600">Self
+                  Help</span>
+                <h3 class="font-bold text-lg mb-2">ATOMIC HABITS</h3>
+                <p class="text-gray-700 text-sm mb-2">Alex Thompson</p>
+                <div class="flex justify-between items-center">
+                  <span class="font-bold text-lg">₹21.99</span>
+                  <button
+                    class="bg-gradient-to-r from-amber-600 to-amber-700 text-white px-3 py-1 rounded-full hover:from-amber-700 hover:to-amber-800 transition shadow-sm">
+                    <i class="fa-solid fa-cart-plus"></i> Add
+                  </button>
+                </div>
+              </div>
+            </div>
+          </a>
+
+          <!-- Book Card 4 -->
+          <a href="products/67d496e8eead852282e5d2e4" class="block">
+            <div
+              class="bg-gradient-to-br from-white to-amber-50 rounded-lg shadow-md overflow-hidden transition-all duration-300 hover:shadow-lg hover:from-amber-50 hover:to-amber-100 book-card">
+              <img src="\uploads\products\product-1741985512911-0.jpg" alt="Book Cover"
+                class="w-full h-64 object-cover">
+              <div class="p-4">
+                <span class="text-sm text-transparent bg-clip-text bg-gradient-to-r from-amber-800 to-amber-600">Health
+                  and Wellness</span>
+                <h3 class="font-bold text-lg mb-2">HOW TO NOT DIE</h3>
+                <p class="text-gray-700 text-sm mb-2">Sarah Wilson</p>
+                <div class="flex justify-between items-center">
+                  <span class="font-bold text-lg">₹19.99</span>
+                  <button
+                    class="bg-gradient-to-r from-amber-600 to-amber-700 text-white px-3 py-1 rounded-full hover:from-amber-700 hover:to-amber-800 transition shadow-sm">
+                    <i class="fa-solid fa-cart-plus"></i> Add
+                  </button>
+                </div>
+              </div>
+            </div>
+          </a>
+        </div>
+      </div>
+    </section>
+  </div>
+  <!-- New Arrivals Section -->
+  <section class="py-12 bg-yellow-50">
+    <div class="container mx-auto px-4">
+      <div class="flex justify-between items-center mb-8">
+        <h2 class="text-3xl font-bold">New Arrivals</h2>
+        <a href="/products" class="text-[#AB8462] hover:text-[#8C6B48] font-medium">View All <i
+            class="fa-solid fa-arrow-right ml-1"></i></a>
+      </div>
+      <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+        <!-- New Book Card 1 -->
+        <a href="products/67d49624eead852282e5d28d" class="block">
+          <div class="bg-white rounded-lg shadow-md overflow-hidden transition-all duration-300 book-card">
+            <div class="relative">
+              <img src="\uploads\products\product-1741985283040-0.jpg" alt="Book Cover"
+                class="w-full h-64 object-cover">
+              <div class="absolute top-2 right-2 bg-red-600 text-white text-xs font-bold px-2 py-1 rounded">NEW</div>
+            </div>
+            <div class="p-4">
+              <span class="text-sm text-gray-500">Health</span>
+              <h3 class="font-bold text-lg mb-2">You can heal your life</h3>
+              <p class="text-gray-700 text-sm mb-2">Olivia Stone</p>
+              <div class="flex justify-between items-center">
+                <span class="font-bold text-lg">₹22.99</span>
+                <button style="background-color: #AB8462;"
+                  class="text-white px-3 py-1 rounded-full hover:bg-[#8C6B48] transition">
+                  <i class="fa-solid fa-cart-plus"></i> Add
+                </button>
+              </div>
+            </div>
+          </div>
+        </a>
+
+        <!-- New Book Card 2 -->
+        <a href="products/67d495a2eead852282e5d283" class="block">
+          <div class="bg-white rounded-lg shadow-md overflow-hidden transition-all duration-300 book-card">
+            <div class="relative">
+              <img src="\uploads\products\product-1741985185983-1.jpg" alt="Book Cover"
+                class="w-full h-64 object-cover">
+              <div class="absolute top-2 right-2 bg-red-600 text-white text-xs font-bold px-2 py-1 rounded">NEW</div>
+            </div>
+            <div class="p-4">
+              <span class="text-sm text-gray-500">Psychology</span>
+              <h3 class="font-bold text-lg mb-2">The Lucifer Effect</h3>
+              <p class="text-gray-700 text-sm mb-2">Robert Johnson</p>
+              <div class="flex justify-between items-center">
+                <span class="font-bold text-lg">₹28.50</span>
+                <button style="background-color: #AB8462;"
+                  class="text-white px-3 py-1 rounded-full hover:bg-[#8C6B48] transition">
+                  <i class="fa-solid fa-cart-plus"></i> Add
+                </button>
+              </div>
+            </div>
+          </div>
+        </a>
+
+        <!-- New Book Card 3 -->
+        <a href="products/67d4954deead852282e5d27d" class="block">
+          <div class="bg-white rounded-lg shadow-md overflow-hidden transition-all duration-300 book-card">
+            <div class="relative">
+              <img src="\uploads\products\product-1741985101324-0.jpg" alt="Book Cover"
+                class="w-full h-64 object-cover">
+              <div class="absolute top-2 right-2 bg-red-600 text-white text-xs font-bold px-2 py-1 rounded">NEW</div>
+            </div>
+            <div class="p-4">
+              <span class="text-sm text-gray-500">Romance</span>
+              <h3 class="font-bold text-lg mb-2">The Fault In Our Stars</h3>
+              <p class="text-gray-700 text-sm mb-2">Daniel Black</p>
+              <div class="flex justify-between items-center">
+                <span class="font-bold text-lg">₹20.99</span>
+                <button style="background-color: #AB8462;"
+                  class="text-white px-3 py-1 rounded-full hover:bg-[#8C6B48] transition">
+                  <i class="fa-solid fa-cart-plus"></i> Add
+                </button>
+              </div>
+            </div>
+          </div>
+        </a>
+
+        <!-- New Book Card 4 -->
+        <a href="products/67d492b3eead852282e5d24f" class="block">
+          <div class="bg-white rounded-lg shadow-md overflow-hidden transition-all duration-300 book-card">
+            <div class="relative">
+              <img src="\uploads\products\product-1741984435438-0.jpg" alt="Book Cover"
+                class="w-full h-64 object-cover">
+              <div class="absolute top-2 right-2 bg-red-600 text-white text-xs font-bold px-2 py-1 rounded">NEW</div>
+            </div>
+            <div class="p-4">
+              <span class="text-sm text-gray-500">Self-Help</span>
+              <h3 class="font-bold text-lg mb-2">7 Habits Of Highly Effective People</h3>
+              <p class="text-gray-700 text-sm mb-2">Emily Chen</p>
+              <div class="flex justify-between items-center">
+                <span class="font-bold text-lg">₹17.99</span>
+                <button style="background-color: #AB8462;"
+                  class="text-white px-3 py-1 rounded-full hover:bg-[#8C6B48] transition">
+                  <i class="fa-solid fa-cart-plus"></i> Add
+                </button>
+              </div>
+            </div>
+          </div>
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- Deals Section -->
+  <section class="py-12 bg-yellow-50">
+    <div class="container mx-auto px-4">
+      <div class="flex justify-between items-center mb-8">
+        <h2 class="text-3xl font-bold">Special Deals</h2>
+        <a href="/deals" class="text-[#AB8462] hover:text-[#8C6B48] font-medium">View All <i
+            class="fa-solid fa-arrow-right ml-1"></i></a>
+      </div>
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <!-- Deal Card 1 -->
+        <div class="bg-white rounded-lg shadow-md overflow-hidden flex flex-col md:flex-row">
+          <img src="\uploads\products\cropped-1741975054676-unefuel81.jpg" alt="Book Cover"
+            class="w-full md:w-1/3 h-48 md:h-auto object-cover">
+          <div class="p-6 flex-1">
+            <div class="flex justify-between items-start mb-2">
+              <div>
+                <span class="text-sm text-gray-500">King in Romance</span>
+                <h3 class="font-bold text-xl">IT ENDS WITH US</h3>
+              </div>
+              <span class="bg-red-600 text-white text-xs font-bold px-2 py-1 rounded">SALE</span>
+            </div>
+            <p class="text-gray-700 mb-3">The Secret Love !Lets Seek In to it!</p>
+            <div class="flex items-center mb-4">
+              <span class="text-2xl font-bold text-red-600 mr-2">₹12.99</span>
+              <span class="text-gray-500 line-through">₹24.99</span>
+              <span class="ml-2 bg-red-100 text-red-800 text-xs font-medium px-2 py-0.5 rounded">50% OFF</span>
+            </div>
+            <button style="background-color: #AB8462;"
+              class="text-white px-4 py-2 rounded hover:bg-[#8C6B48] transition w-full md:w-auto">
+              <i class="fa-solid fa-cart-plus mr-1"></i> Add to Cart
+            </button>
+          </div>
+        </div>
+
+        <!-- Deal Card 2 -->
+        <div class="bg-white rounded-lg shadow-md overflow-hidden flex flex-col md:flex-row">
+          <img src="\uploads\products\product-1741974326286-3.jpg" alt="Book Cover"
+            class="w-full md:w-1/3 h-48 md:h-auto object-cover">
+          <div class="p-6 flex-1">
+            <div class="flex justify-between items-start mb-2">
+              <div>
+                <span class="text-sm text-gray-500">psychology</span>
+                <h3 class="font-bold text-xl">1984</h3>
+              </div>
+              <span class="bg-red-600 text-white text-xs font-bold px-2 py-1 rounded">SALE</span>
+            </div>
+            <p class="text-gray-700 mb-3">Explore The Secrets What GEORGE ORWELL MADE</p>
+            <div class="flex items-center mb-4">
+              <span class="text-2xl font-bold text-red-600 mr-2">₹19.99</span>
+              <span class="text-gray-500 line-through">₹32.99</span>
+              <span class="ml-2 bg-red-100 text-red-800 text-xs font-medium px-2 py-0.5 rounded">40% OFF</span>
+            </div>
+            <button style="background-color: #AB8462;"
+              class="text-white px-4 py-2 rounded hover:bg-[#8C6B48] transition w-full md:w-auto">
+              <i class="fa-solid fa-cart-plus mr-1"></i> Add to Cart
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Popular Authors Section -->
+  <section class="py-12 bg-yellow-50">
+    <div class="container mx-auto px-4">
+      <h2 class="text-3xl font-bold text-center mb-8">Popular Authors</h2>
+      <div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-6">
+        <!-- Author 1 -->
+        <div class="text-center">
+          <div class="w-24 h-24 mx-auto mb-3 rounded-full overflow-hidden">
+            <img src="\images\author1.jpg" alt="Author" class="w-full h-full object-cover">
+          </div>
+          <h3 class="font-medium">J.K. Rowling</h3>
+          <a href="/author/jk-rowling" class="text-sm text-[#AB8462]">View Books</a>
+        </div>
+
+        <!-- Author 2 -->
+        <div class="text-center">
+          <div class="w-24 h-24 mx-auto mb-3 rounded-full overflow-hidden">
+            <img src="\images\auth2.jpeg" alt="Author" class="w-full h-full object-cover">
+          </div>
+          <h3 class="font-medium">Stephen King</h3>
+          <a href="/author/stephen-king" class="text-sm text-[#AB8462]">View Books</a>
+        </div>
+
+        <!-- Author 3 -->
+        <div class="text-center">
+          <div class="w-24 h-24 mx-auto mb-3 rounded-full overflow-hidden">
+            <img src="\images\auth3.webp" alt="Author" class="w-full h-full object-cover">
+          </div>
+          <h3 class="font-medium">Toni Morrison</h3>
+          <a href="/author/toni-morrison" class="text-sm text-[#AB8462]">View Books</a>
+        </div>
+
+        <!-- Author 4 -->
+        <div class="text-center">
+          <div class="w-24 h-24 mx-auto mb-3 rounded-full overflow-hidden">
+            <img src="\images\auth4.jpg" alt="Author" class="w-full h-full object-cover">
+          </div>
+          <h3 class="font-medium">Haruki Murakami</h3>
+          <a href="\images\auth5.jpg" class="text-sm text-[#AB8462]">View Books</a>
+        </div>
+
+        <!-- Author 5 -->
+        <div class="text-center">
+          <div class="w-24 h-24 mx-auto mb-3 rounded-full overflow-hidden">
+            <img src="\images\auth5.jpg" alt="Author" class="w-full h-full object-cover">
+          </div>
+          <h3 class="font-medium">Chimamanda Adichie</h3>
+          <a href="/author/chimamanda-adichie" class="text-sm text-[#AB8462]">View Books</a>
+        </div>
+
+        <!-- Author 6 -->
+        <div class="text-center">
+          <div class="w-24 h-24 mx-auto mb-3 rounded-full overflow-hidden">
+            <img src="\images\auth6.png" alt="Author" class="w-full h-full object-cover">
+          </div>
+          <h3 class="font-medium">Neil Gaiman</h3>
+          <a href="/author/neil-gaiman" class="text-sm text-[#AB8462]">View Books</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Reading Club Banner -->
+  <section class="py-16 bg-yellow-50">
+    <div class="container mx-auto px-4">
+      <div class="bg-white rounded-lg shadow-md overflow-hidden">
+        <div class="grid grid-cols-1 md:grid-cols-2">
+          <div class="p-8 flex flex-col justify-center">
+            <h2 class="text-3xl font-bold mb-4">Join Our Reading Club</h2>
+            <p class="text-gray-700 mb-6">Connect with fellow book lovers, attend exclusive events, and get special
+              discounts on your favorite titles.</p>
+            <div class="flex flex-col sm:flex-row gap-4">
+              <button style="background-color: #AB8462;"
+                class="text-white px-6 py-3 rounded hover:bg-[#8C6B48] transition">
+                Join Now
+              </button>
+              <button class="border border-[#AB8462] text-[#AB8462] px-6 py-3 rounded hover:bg-gray-50 transition">
+                Learn More
+              </button>
+            </div>
+          </div>
+          <div class="hidden md:block">
+            <img src="\images\club2.jpg" alt="Reading Club" class="w-full h-full object-cover">
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Testimonials Section -->
+  <section class="py-12 bg-yellow-50">
+    <div class="container mx-auto px-4">
+      <h2 class="text-3xl font-bold text-center mb-8">What Our Customers Say</h2>
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <!-- Testimonial 1 -->
+        <div class="bg-gray-50 p-6 rounded-lg">
+          <div class="flex items-center mb-4">
+            <div class="text-yellow-400 flex">
+              <i class="fa-solid fa-star"></i>
+              <i class="fa-solid fa-star"></i>
+              <i class="fa-solid fa-star"></i>
+              <i class="fa-solid fa-star"></i>
+              <i class="fa-solid fa-star"></i>
+            </div>
+            <span class="ml-2 text-gray-600">5.0</span>
+          </div>
+          <p class="text-gray-700 mb-4">"BookSy has the best selection of books I've found anywhere. The delivery is
+            fast and the books always arrive in perfect condition!Highly satisfied"</p>
+          <div class="flex items-center">
+            <div class="w-10 h-10 rounded-full overflow-hidden mr-3">
+              <img src="\images\profile1.jpg" alt="Customer" class="w-full h-full object-cover">
+            </div>
+            <div>
+              <h4 class="font-medium">Emma Johnson</h4>
+              <p class="text-sm text-gray-500">Verified Customer</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Testimonial 2 -->
+        <div class="bg-gray-50 p-6 rounded-lg">
+          <div class="flex items-center mb-4">
+            <div class="text-yellow-400 flex">
+              <i class="fa-solid fa-star"></i>
+              <i class="fa-solid fa-star"></i>
+              <i class="fa-solid fa-star"></i>
+              <i class="fa-solid fa-star"></i>
+              <i class="fa-solid fa-star"></i>
+            </div>
+            <span class="ml-2 text-gray-600">5.0</span>
+          </div>
+          <p class="text-gray-700 mb-4">"I love the reading club events! It's a great way to discover new titles and
+            meet other book enthusiasts. The monthly discounts are also a huge plus."</p>
+          <div class="flex items-center">
+            <div class="w-10 h-10 rounded-full overflow-hidden mr-3">
+              <img src="\images\profile2.jpg" alt="Customer" class="w-full h-full object-cover">
+            </div>
+            <div>
+              <h4 class="font-medium">Marcus Lee</h4>
+              <p class="text-sm text-gray-500">Reading Club Member</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Testimonial 3 -->
+        <div class="bg-gray-50 p-6 rounded-lg">
+          <div class="flex items-center mb-4">
+            <div class="text-yellow-400 flex">
+              <i class="fa-solid fa-star"></i>
+              <i class="fa-solid fa-star"></i>
+              <i class="fa-solid fa-star"></i>
+              <i class="fa-solid fa-star"></i>
+              <i class="fa-solid fa-star"></i>
+              <i class="fa-solid fa-star"></i>
+              <i class="fa-solid fa-star-half-alt"></i>
+            </div>
+            <span class="ml-2 text-gray-600">4.5</span>
+          </div>
+          <p class="text-gray-700 mb-4">"Customer service is outstanding. When I had an issue with my order, they
+            resolved it immediately. Plus, their recommendations are always spot on!"</p>
+          <div class="flex items-center">
+            <div class="w-10 h-10 rounded-full overflow-hidden mr-3">
+              <img src="\images\profile3.avif" alt="Customer" class="w-full h-full object-cover">
+            </div>
+            <div>
+              <h4 class="font-medium">Sophia Rodriguez</h4>
+              <p class="text-sm text-gray-500">Verified Customer</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Blog Section -->
+  <section class="py-12 bg-yellow-50">
+    <div class="container mx-auto px-4">
+      <div class="flex justify-between items-center mb-8">
+        <h2 class="text-3xl font-bold">From Our Blog</h2>
+        <a href="/blog" class="text-[#AB8462] hover:text-[#8C6B48] font-medium">View All Posts <i
+            class="fa-solid fa-arrow-right ml-1"></i></a>
+      </div>
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <!-- Blog Post 1 -->
+        <div
+          class="bg-white rounded-lg shadow-md overflow-hidden transition-all duration-300 hover:-translate-y-1 hover:shadow-lg">
+          <img src="\images\mustread.jpg" alt="Blog Post" class="w-full h-48 object-cover">
+          <div class="p-6">
+            <div class="flex items-center text-sm text-gray-500 mb-3">
+              <i class="fa-regular fa-calendar mr-2"></i>
+              <span>March 10, 2025</span>
+            </div>
+            <h3 class="font-bold text-xl mb-2">10 Must-Read Books for Spring 2025</h3>
+            <p class="text-gray-700 mb-4">Discover the season's most anticipated titles that should be on your reading
+              list...</p>
+            <a href="/blog/spring-reads-2025" class="text-[#AB8462] hover:text-[#8C6B48] font-medium">Read More</a>
+          </div>
+        </div>
+
+        <!-- Blog Post 2 -->
+        <div
+          class="bg-white rounded-lg shadow-md overflow-hidden transition-all duration-300 hover:-translate-y-1 hover:shadow-lg">
+          <img src="\images\authors.avif" alt="Blog Post" class="w-full h-48 object-cover">
+          <div class="p-6">
+            <div class="flex items-center text-sm text-gray-500 mb-3">
+              <i class="fa-regular fa-calendar mr-2"></i>
+              <span>March 5, 2025</span>
+            </div>
+            <h3 class="font-bold text-xl mb-2">Interview: Best-Selling Author Talks New Release</h3>
+            <p class="text-gray-700 mb-4">We sat down with acclaimed author Emily Stone to discuss her latest novel and
+              creative process...</p>
+            <a href="/blog/author-interview-emily-stone" class="text-[#AB8462] hover:text-[#8C6B48] font-medium">Read
+              More</a>
+          </div>
+        </div>
+
+        <!-- Blog Post 3 -->
+        <div
+          class="bg-white rounded-lg shadow-md overflow-hidden transition-all duration-300 hover:-translate-y-1 hover:shadow-lg">
+          <img src="\images\library.jpg" alt="Blog Post" class="w-full h-48 object-cover">
+          <div class="p-6">
+            <div class="flex items-center text-sm text-gray-500 mb-3">
+              <i class="fa-regular fa-calendar mr-2"></i>
+              <span>February 28, 2025</span>
+            </div>
+            <h3 class="font-bold text-xl mb-2">How to Create the Perfect Home Library</h3>
+            <p class="text-gray-700 mb-4">Tips and tricks for designing a beautiful and functional space for your book
+              collection...</p>
+            <a href="/blog/perfect-home-library" class="text-[#AB8462] hover:text-[#8C6B48] font-medium">Read More</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Newsletter Section -->
+  <section class="py-16" style="background-color: #F5EDE5;">
+    <div class="container mx-auto px-4 text-center">
+      <h2 class="text-3xl font-bold mb-2">Stay Updated</h2>
+      <p class="text-gray-700 mb-6 max-w-2xl mx-auto">Subscribe to our newsletter for the latest book releases,
+        exclusive offers, and reading recommendations.</p>
+      <div class="flex max-w-md mx-auto">
+        <input type="email" placeholder="Your email address"
+          class="flex-1 p-3 rounded-l-lg border-0 focus:ring-2 focus:ring-[#AB8462]">
+        <button style="background-color: #AB8462;"
+          class="px-6 py-3 rounded-r-lg text-white hover:bg-[#8C6B48] transition">
+          Subscribe
+        </button>
+      </div>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer class="bg-gradient-to-r from-[#AB8462] to-[#9A7355] text-white mt-12 relative">
+    <!-- Wave Decoration -->
+    <div class="absolute top-0 left-0 right-0 overflow-hidden w-full"
+      style="height: 30px; transform: translateY(-100%);">
+      <svg viewBox="0 0 1200 120" preserveAspectRatio="none" class="w-full h-full">
+        <path
+          d="M321.39,56.44c58-10.79,114.16-30.13,172-41.86,82.39-16.72,168.19-17.73,250.45-.39C823.78,31,906.67,72,985.66,92.83c70.05,18.48,146.53,26.09,214.34,3V120H0V0C115.39,0,168.49,41.42,321.39,56.44Z"
+          fill="#AB8462"></path>
+      </svg>
+    </div>
+
+    <!-- Main Footer Content -->
+    <div class="container mx-auto py-12 px-4">
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+        <!-- BookSy Info & Newsletter -->
+        <div class="space-y-6">
+          <div class="flex items-center space-x-2">
+            <i class="fas fa-book-open text-amber-200 text-3xl"></i>
+            <h2 class="text-2xl font-bold text-white">BookSy</h2>
+          </div>
+          <p class="text-gray-200">Your favorite online bookstore with a wide selection of books across all genres.
+            Discover new worlds through our carefully curated collection.</p>
+
+          <div class="bg-white bg-opacity-10 rounded-lg p-4 shadow-lg backdrop-blur-sm">
+            <h3 class="text-lg font-semibold text-amber-200 mb-2">Subscribe to Our Newsletter</h3>
+            <p class="text-sm text-gray-200 mb-3">Get the latest book releases and exclusive offers</p>
+            <div class="flex rounded-lg overflow-hidden shadow-md">
+              <input type="email" placeholder="Enter your email"
+                class="p-3 w-full focus:outline-none text-gray-800 bg-white border-2 border-transparent focus:border-amber-200">
+              <button
+                class="bg-amber-200 text-[#AB8462] px-4 hover:bg-white transition-colors duration-300 font-medium flex items-center">
+                <i class="fas fa-paper-plane mr-2"></i>
+                <span>Join</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- Social Media Icons -->
+          <div class="pt-2">
+            <h3 class="text-lg font-semibold mb-3 text-amber-200">Connect With Us</h3>
+            <div class="flex space-x-3">
+              <a href="#"
+                class="bg-white bg-opacity-20 hover:bg-opacity-30 p-3 rounded-full transition-all duration-300 hover:transform hover:scale-110 w-10 h-10 flex items-center justify-center text-white hover:text-amber-200">
+                <i class="fab fa-facebook-f"></i>
+              </a>
+              <a href="#"
+                class="bg-white bg-opacity-20 hover:bg-opacity-30 p-3 rounded-full transition-all duration-300 hover:transform hover:scale-110 w-10 h-10 flex items-center justify-center text-white hover:text-amber-200">
+                <i class="fab fa-twitter"></i>
+              </a>
+              <a href="#"
+                class="bg-white bg-opacity-20 hover:bg-opacity-30 p-3 rounded-full transition-all duration-300 hover:transform hover:scale-110 w-10 h-10 flex items-center justify-center text-white hover:text-amber-200">
+                <i class="fab fa-instagram"></i>
+              </a>
+              <a href="#"
+                class="bg-white bg-opacity-20 hover:bg-opacity-30 p-3 rounded-full transition-all duration-300 hover:transform hover:scale-110 w-10 h-10 flex items-center justify-center text-white hover:text-amber-200">
+                <i class="fab fa-pinterest"></i>
+              </a>
+              <a href="#"
+                class="bg-white bg-opacity-20 hover:bg-opacity-30 p-3 rounded-full transition-all duration-300 hover:transform hover:scale-110 w-10 h-10 flex items-center justify-center text-white hover:text-amber-200">
+                <i class="fab fa-youtube"></i>
+              </a>
+            </div>
+          </div>
+        </div>
+
+        <!-- Links Columns -->
+        <div>
+          <h3 class="text-xl font-bold mb-6 text-amber-200 flex items-center">
+            <i class="fas fa-book-reader mr-2"></i> Explore
+          </h3>
+          <ul class="space-y-3">
+            <li><a href="/products"
+                class="text-gray-200 hover:text-white transition-colors duration-300 flex items-center group">
+                <span
+                  class="w-0 h-0.5 bg-amber-200 group-hover:w-2 transition-all duration-300 mr-0 group-hover:mr-2"></span>
+                All Books
+              </a></li>
+            <li><a href="/bestsellers"
+                class="text-gray-200 hover:text-white transition-colors duration-300 flex items-center group">
+                <span
+                  class="w-0 h-0.5 bg-amber-200 group-hover:w-2 transition-all duration-300 mr-0 group-hover:mr-2"></span>
+                Bestsellers
+              </a></li>
+            <li><a href="/new-releases"
+                class="text-gray-200 hover:text-white transition-colors duration-300 flex items-center group">
+                <span
+                  class="w-0 h-0.5 bg-amber-200 group-hover:w-2 transition-all duration-300 mr-0 group-hover:mr-2"></span>
+                New Releases
+              </a></li>
+            <li><a href="/genres"
+                class="text-gray-200 hover:text-white transition-colors duration-300 flex items-center group">
+                <span
+                  class="w-0 h-0.5 bg-amber-200 group-hover:w-2 transition-all duration-300 mr-0 group-hover:mr-2"></span>
+                Genres
+              </a></li>
+            <li><a href="/authors"
+                class="text-gray-200 hover:text-white transition-colors duration-300 flex items-center group">
+                <span
+                  class="w-0 h-0.5 bg-amber-200 group-hover:w-2 transition-all duration-300 mr-0 group-hover:mr-2"></span>
+                Authors
+              </a></li>
+            <li><a href="/deals"
+                class="text-gray-200 hover:text-white transition-colors duration-300 flex items-center group">
+                <span
+                  class="w-0 h-0.5 bg-amber-200 group-hover:w-2 transition-all duration-300 mr-0 group-hover:mr-2"></span>
+                Special Deals
+              </a></li>
+          </ul>
+        </div>
+
+        <!-- Account Column -->
+        <div>
+          <h3 class="text-xl font-bold mb-6 text-amber-200 flex items-center">
+            <i class="fas fa-user mr-2"></i> Your Account
+          </h3>
+          <ul class="space-y-3">
+            <li><a href="/profile"
+                class="text-gray-200 hover:text-white transition-colors duration-300 flex items-center group">
+                <span
+                  class="w-0 h-0.5 bg-amber-200 group-hover:w-2 transition-all duration-300 mr-0 group-hover:mr-2"></span>
+                My Profile
+              </a></li>
+            <li><a href="/orders"
+                class="text-gray-200 hover:text-white transition-colors duration-300 flex items-center group">
+                <span
+                  class="w-0 h-0.5 bg-amber-200 group-hover:w-2 transition-all duration-300 mr-0 group-hover:mr-2"></span>
+                Order History
+              </a></li>
+            <li><a href="/track"
+                class="text-gray-200 hover:text-white transition-colors duration-300 flex items-center group">
+                <span
+                  class="w-0 h-0.5 bg-amber-200 group-hover:w-2 transition-all duration-300 mr-0 group-hover:mr-2"></span>
+                Track Order
+              </a></li>
+            <li><a href="/wishlist"
+                class="text-gray-200 hover:text-white transition-colors duration-300 flex items-center group">
+                <span
+                  class="w-0 h-0.5 bg-amber-200 group-hover:w-2 transition-all duration-300 mr-0 group-hover:mr-2"></span>
+                Wishlist
+              </a></li>
+            <li><a href="/returns"
+                class="text-gray-200 hover:text-white transition-colors duration-300 flex items-center group">
+                <span
+                  class="w-0 h-0.5 bg-amber-200 group-hover:w-2 transition-all duration-300 mr-0 group-hover:mr-2"></span>
+                Returns & Refunds
+              </a></li>
+          </ul>
+        </div>
+
+        <!-- Help Column -->
+        <div>
+          <h3 class="text-xl font-bold mb-6 text-amber-200 flex items-center">
+            <i class="fas fa-headset mr-2"></i> Help & Support
+          </h3>
+          <ul class="space-y-3">
+            <li><a href="/about"
+                class="text-gray-200 hover:text-white transition-colors duration-300 flex items-center group">
+                <span
+                  class="w-0 h-0.5 bg-amber-200 group-hover:w-2 transition-all duration-300 mr-0 group-hover:mr-2"></span>
+                About Us
+              </a></li>
+            <li><a href="/contact"
+                class="text-gray-200 hover:text-white transition-colors duration-300 flex items-center group">
+                <span
+                  class="w-0 h-0.5 bg-amber-200 group-hover:w-2 transition-all duration-300 mr-0 group-hover:mr-2"></span>
+                Contact Us
+              </a></li>
+            <li><a href="/faq"
+                class="text-gray-200 hover:text-white transition-colors duration-300 flex items-center group">
+                <span
+                  class="w-0 h-0.5 bg-amber-200 group-hover:w-2 transition-all duration-300 mr-0 group-hover:mr-2"></span>
+                FAQ
+              </a></li>
+            <li><a href="/shipping"
+                class="text-gray-200 hover:text-white transition-colors duration-300 flex items-center group">
+                <span
+                  class="w-0 h-0.5 bg-amber-200 group-hover:w-2 transition-all duration-300 mr-0 group-hover:mr-2"></span>
+                Shipping Info
+              </a></li>
+            <li><a href="/privacy"
+                class="text-gray-200 hover:text-white transition-colors duration-300 flex items-center group">
+                <span
+                  class="w-0 h-0.5 bg-amber-200 group-hover:w-2 transition-all duration-300 mr-0 group-hover:mr-2"></span>
+                Privacy Policy
+              </a></li>
+            <li><a href="/terms"
+                class="text-gray-200 hover:text-white transition-colors duration-300 flex items-center group">
+                <span
+                  class="w-0 h-0.5 bg-amber-200 group-hover:w-2 transition-all duration-300 mr-0 group-hover:mr-2"></span>
+                Terms of Service
+              </a></li>
+          </ul>
+        </div>
+      </div>
+
+      <!-- Store Apps -->
+      <div class="mt-12 border-t border-[#8C6B48] pt-8">
+        <div class="flex flex-col md:flex-row items-center justify-between">
+          <div class="mb-6 md:mb-0">
+            <h3 class="text-lg font-semibold text-amber-200 mb-3">Download Our App</h3>
+            <div class="flex space-x-4">
+              <a href="#"
+                class="bg-black rounded-lg px-4 py-2 flex items-center space-x-2 hover:bg-gray-900 transition-colors duration-300">
+                <i class="fab fa-apple text-2xl text-white"></i>
+                <div>
+                  <p class="text-xs text-gray-300">Download on the</p>
+                  <p class="text-white font-medium">App Store</p>
+                </div>
+              </a>
+              <a href="#"
+                class="bg-black rounded-lg px-4 py-2 flex items-center space-x-2 hover:bg-gray-900 transition-colors duration-300">
+                <i class="fab fa-google-play text-2xl text-white"></i>
+                <div>
+                  <p class="text-xs text-gray-300">GET IT ON</p>
+                  <p class="text-white font-medium">Google Play</p>
+                </div>
+              </a>
+            </div>
+          </div>
+
+          <!-- Payment Methods with hover animations -->
+          <div class="flex flex-col items-center md:items-end">
+            <h3 class="text-lg font-semibold text-amber-200 mb-3">We Accept</h3>
+            <div class="flex space-x-3">
+              <i
+                class="fa-brands fa-cc-visa text-3xl text-white hover:text-amber-200 transition-colors duration-300 transform hover:scale-110"></i>
+              <i
+                class="fa-brands fa-cc-mastercard text-3xl text-white hover:text-amber-200 transition-colors duration-300 transform hover:scale-110"></i>
+
+  </footer>
+  <script>
+    document.addEventListener('DOMContentLoaded', function () {
+      // Book data with actual paths
+      const featuredBooks = [
+        {
+          title: 'It Ends With Us',
+          author: 'Colleen Hoover',
+          cover: '/uploads/products/cropped-1741975054676-unefuel81.jpg',
+          price: '₹799'
+        },
+        {
+          title: 'How Not to Die',
+          author: 'Michael Greger',
+          cover: '/uploads/products/product-1743838480364-0.jpg',
+          price: '₹149'
+        },
+        {
+          title: 'The Fault in Our Stars',
+          author: 'John Green',
+          cover: '/uploads/products/product-1741985101324-0.jpg',
+          price: '₹599'
+        },
+        {
+          title: 'You Can Heal Your Life',
+          author: 'Louise L. Hay',
+          cover: '/uploads/products/product-1741985300104-0.jpg',
+          price: '₹349'
+        },
+        {
+          title: 'Why We Sleep',
+          author: 'Matthew Walker',
+          cover: '/uploads/products/product-1741984882926-1.jpg',
+          price: '₹659'
+        },
+        {
+          title: 'The Obesity Code',
+          author: 'Dr. Jason Fung',
+          cover: '/uploads/products/product-1741985024314-1.jpg',
+          price: '₹399'
+        },
+        {
+          title: 'Atomic Habits',
+          author: 'James Clear',
+          cover: '/uploads/products/product-1741984281014-1.jpg',
+          price: '₹999'
+        },
+        {
+          title: 'Me Before You',
+          author: 'Jojo Moyes',
+          cover: '/uploads/products/product-1741983737392-2.jpg',
+          price: '₹599'
+        }
+      ];
+
+
+
+      const newArrivals = [
+        {
+          title: 'It Ends With Us',
+          author: 'Colleen Hoover',
+          cover: '/uploads/products/cropped-1741975054676-unefuel81.jpg',
+          price: '₹26.99'
+        },
+        {
+          title: 'Atomic Habits',
+          author: 'James Clear',
+          cover: '/uploads/products/product-1741984281014-1.jpg',
+          price: '₹23.99'
+        },
+        {
+          title: 'Me Before You',
+          author: 'Jojo Moyes',
+          cover: '/uploads/products/product-1741983737392-2.jpg',
+          price: '₹599'
+        },
+        {
+          title: 'You Can Heal Your Life',
+          author: 'Louise L. Hay',
+          cover: '/uploads/products/product-1741985300104-0.jpg',
+          price: '₹349'
+        }
+      ];
+
+      // Function to create book elements for carousel
+      function createBookCarousel() {
+        const carouselInner = document.querySelector('.carousel-inner');
+        if (!carouselInner) return;
+
+        // Clear existing content
+        carouselInner.innerHTML = '';
+
+        // Use our book data or create placeholders if necessary
+        const booksToDisplay = featuredBooks.length ? featuredBooks : Array(8).fill({});
+
+        booksToDisplay.forEach((book, index) => {
+          const bookElement = document.createElement('div');
+          bookElement.className = 'book-cover flex-shrink-0 animate-float';
+          bookElement.style.animationDelay = `${index * 0.2}s`;
+
+          if (book.cover) {
+            // Create book with real data
+            bookElement.innerHTML = `
+                                      <img src="${book.cover}" alt="${book.title}" class="w-full h-full object-cover">
+                                      <div class="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black to-transparent p-3">
+                                        <h3 class="text-sm font-bold text-white truncate">${book.title}</h3>
+                                        <p class="text-xs text-gray-300">${book.author}</p>
+                                        <div class="text-amber-400 font-semibold mt-1">${book.price}</div>
+                                      </div>
+                                    `;
+          } else {
+            // Create placeholder book
+            const colors = ['bg-blue-600', 'bg-red-600', 'bg-green-600', 'bg-purple-600', 'bg-yellow-600', 'bg-indigo-600'];
+            const randomColor = colors[Math.floor(Math.random() * colors.length)];
+
+            bookElement.className += ` ${randomColor}`;
+            bookElement.innerHTML = `
+                                      <div class="w-full h-full flex items-center justify-center">
+                                        <span class="text-white text-lg">Book ${index + 1}</span>
+                                      </div>
+                                    `;
+          }
+
+          carouselInner.appendChild(bookElement);
+        });
+
+        // Clone books for infinite scroll effect
+        const books = document.querySelectorAll('.book-cover');
+        books.forEach(book => {
+          const clone = book.cloneNode(true);
+          carouselInner.appendChild(clone);
+        });
+      }
+
+      // Function to create new arrivals grid
+      function createNewArrivals() {
+        const newArrivalsGrid = document.querySelector('.grid');
+        if (!newArrivalsGrid) return;
+
+        // Clear existing content
+        newArrivalsGrid.innerHTML = '';
+
+        // Use our book data or create placeholders if necessary
+        const booksToDisplay = newArrivals.length ? newArrivals : Array(4).fill({});
+
+        booksToDisplay.forEach((book, index) => {
+          const bookElement = document.createElement('div');
+          bookElement.className = 'flex flex-col items-center animate-fadeInUp';
+          bookElement.style.animationDelay = `${index * 0.15}s`;
+
+          if (book.cover) {
+            // Create book with real data
+            bookElement.innerHTML = `
+                                      <div class="book-cover mb-4" style="background-image: url('${book.cover}');">
+                                        <img src="${book.cover}" alt="${book.title}" class="w-full h-full object-cover">
+                                      </div>
+                                      <h3 class="text-lg font-bold">${book.title}</h3>
+                                      <p class="text-gray-300 text-sm">${book.author}</p>
+                                      <div class="text-amber-400 font-semibold mt-2">${book.price}</div>
+                                    `;
+          } else {
+            // Create placeholder book
+            const colors = ['bg-teal-600', 'bg-teal-700', 'bg-teal-800', 'bg-teal-900'];
+            const randomColor = colors[Math.floor(Math.random() * colors.length)];
+
+            bookElement.innerHTML = `
+                                      <div class="book-cover ${randomColor} mb-4 flex items-center justify-center">
+                                        <span class="text-white text-lg">New Book</span>
+                                      </div>
+                                      <h3 class="text-lg font-bold">Coming Soon</h3>
+                                      <p class="text-gray-300 text-sm">Featured Author</p>
+                                      <div class="text-amber-400 font-semibold mt-2">$XX.XX</div>
+                                    `;
+          }
+
+          newArrivalsGrid.appendChild(bookElement);
+        });
+      }
+
+      // Initialize slideshow
+      function initSlideshow() {
+        const slides = document.querySelectorAll('.hero-slide');
+        const indicators = document.querySelectorAll('.slide-indicator');
+        const prevBtn = document.querySelector('.hero-section button:first-of-type');
+        const nextBtn = document.querySelector('.hero-section button:last-of-type');
+
+        let currentSlide = 0;
+        let slideInterval;
+        const slideDelay = 3000; // 6 seconds per slide
+
+        // Function to show a specific slide
+        function showSlide(index) {
+          slides.forEach(slide => {
+            slide.classList.remove('active');
+            slide.style.opacity = 0;
+          });
+
+          indicators.forEach(indicator => {
+            indicator.classList.remove('active');
+          });
+
+          slides[index].classList.add('active');
+          slides[index].style.opacity = 1;
+          indicators[index].classList.add('active');
+
+          currentSlide = index;
+        }
+
+        // Initialize the first slide
+        showSlide(0);
+
+        // Set up automatic slideshow
+        function startSlideshow() {
+          slideInterval = setInterval(() => {
+            let nextSlide = (currentSlide + 1) % slides.length;
+            showSlide(nextSlide);
+          }, slideDelay);
+        }
+
+        // Start the slideshow
+        startSlideshow();
+
+        // Event listeners for manual navigation
+        if (prevBtn) {
+          prevBtn.addEventListener('click', () => {
+            clearInterval(slideInterval);
+            let prevSlide = (currentSlide - 1 + slides.length) % slides.length;
+            showSlide(prevSlide);
+            startSlideshow();
+          });
+        }
+
+        if (nextBtn) {
+          nextBtn.addEventListener('click', () => {
+            clearInterval(slideInterval);
+            let nextSlide = (currentSlide + 1) % slides.length;
+            showSlide(nextSlide);
+            startSlideshow();
+          });
+        }
+
+        // Event listeners for indicators
+        indicators.forEach((indicator, index) => {
+          indicator.addEventListener('click', () => {
+            clearInterval(slideInterval);
+            showSlide(index);
+            startSlideshow();
+          });
+        });
+
+        // Pause slideshow on hover
+        slides.forEach(slide => {
+          slide.addEventListener('mouseenter', () => {
+            clearInterval(slideInterval);
+          });
+
+          slide.addEventListener('mouseleave', () => {
+            startSlideshow();
+          });
+        });
+      }
+
+      // Initialize the hero section
+      createBookCarousel();
+      createNewArrivals();
+      initSlideshow();
+
+      // Add infinite scroll animation to book carousel
+      const carouselInner = document.querySelector('.carousel-inner');
+      if (carouselInner) {
+        const carouselWidth = carouselInner.scrollWidth / 2;
+        carouselInner.style.animation = `scrollX ${featuredBooks.length * 5}s linear infinite`;
+
+        // Add keyframes dynamically
+        const styleSheet = document.createElement('style');
+        styleSheet.textContent = `
+                                  @keyframes scrollX {
+                                    0% { transform: translateX(0); }
+                                    100% { transform: translateX(-${carouselWidth}px); }
+                                  }
+                                `;
+        document.head.appendChild(styleSheet);
+      }
+    });
+  </script>
+</body>
+
+</html>

@@ -1,0 +1,859 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>BookSy - Your Favorite Bookstore</title>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+       .page-gradient-bg {
+        background: linear-gradient(135deg, #f3e7d3 0%, #e6d7c3 25%, #d9c7b3 50%, #e6d7c3 75%, #f3e7d3 100%);
+    }
+    .book-card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+    }
+    .hero-section {
+      background-image: linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)), url('/api/placeholder/1200/400');
+      background-size: cover;
+      background-position: center;
+    }
+     /* Animation keyframes */
+  @keyframes fadeInUp {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  
+  @keyframes floatBook {
+    0% { transform: translateY(0) rotate(0deg); }
+    50% { transform: translateY(-10px) rotate(3deg); }
+    100% { transform: translateY(0) rotate(0deg); }
+  }
+  
+  /* Applied animations */
+  .animate-fadeInUp {
+    animation: fadeInUp 1s ease-out forwards;
+  }
+  
+  .animate-float {
+    animation: floatBook 3s ease-in-out infinite;
+  }
+  
+  /* Book styling */
+  .book-cover {
+    height: 220px;
+    width: 150px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+    transition: transform 0.3s ease;
+    border-radius: 4px;
+    overflow: hidden;
+  }
+  
+  .book-cover:hover {
+    transform: translateY(-10px) scale(1.05);
+  }
+  
+  /* Active slide */
+  .hero-slide.active {
+    opacity: 1;
+    z-index: 10;
+  }
+  
+  /* Active indicator */
+  .slide-indicator.active {
+    opacity: 1;
+    width: 24px;
+  }
+  @keyframes gradient-shift {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+  }
+  
+  .animate-gradient-shift {
+    background-size: 200% 200%;
+    animation: gradient-shift 10s ease infinite;
+  }
+  </style>
+</head>
+<body class="bg-gray-50">
+
+<!-- Navbar -->
+<!-- Navbar -->
+<nav class="bg-gradient-to-r from-[#C3A18B] to-[#A7886D] shadow-lg py-6 sticky top-0 z-50">
+    <div class="container mx-auto px-4">
+      <div class="flex justify-between items-center">
+        <!-- Logo -->
+        <div class="flex items-center">
+          <a href="/" class="flex items-center space-x-2 group">
+            <i class="fas fa-book-open text-amber-200 text-2xl group-hover:text-white transition-colors duration-300"></i>
+            <span class="text-white text-2xl font-extrabold tracking-wider group-hover:text-amber-200 transition-colors duration-300">BookSy</span>
+          </a>
+        </div>
+  
+        <!-- Desktop Navigation -->
+        <div class="hidden md:flex items-center space-x-8">
+          <a href="/" class="text-white hover:text-amber-200 transition-colors duration-300 font-medium relative group">
+            Home
+            <span class="absolute -bottom-1 left-0 w-0 h-0.5 bg-amber-200 group-hover:w-full transition-all duration-300"></span>
+          </a>
+          <a href="/products" class="text-white hover:text-amber-200 transition-colors duration-300 font-medium relative group">
+            Books
+            <span class="absolute -bottom-1 left-0 w-0 h-0.5 bg-amber-200 group-hover:w-full transition-all duration-300"></span>
+          </a>
+          <a href="/about" class="text-white hover:text-amber-200 transition-colors duration-300 font-medium relative group">
+            About
+            <span class="absolute -bottom-1 left-0 w-0 h-0.5 bg-amber-200 group-hover:w-full transition-all duration-300"></span>
+          </a>
+          <a href="/contact" class="text-white hover:text-amber-200 transition-colors duration-300 font-medium relative group">
+            Contact
+            <span class="absolute -bottom-1 left-0 w-0 h-0.5 bg-amber-200 group-hover:w-full transition-all duration-300"></span>
+          </a>
+        </div>
+  
+        <!-- Icons and Actions -->
+        <div class="flex items-center space-x-5">
+          <!-- Wishlist -->
+          <a href="/wishlist" class="text-white hover:text-amber-200 transition-colors duration-300 text-lg flex items-center">
+            <i class="far fa-heart text-xl mr-1"></i>
+            <span class="hidden md:inline">Wishlist</span>
+          </a>
+  
+          <!-- Cart Icon -->
+          <a href="/cart" class="text-white hover:text-amber-200 transition-colors duration-300 relative group">
+            <div class="relative">
+              <i class="fa-solid fa-cart-shopping text-xl"></i>
+              <span class="absolute -top-2 -right-2 bg-amber-200 text-[#AB8462] text-xs font-bold rounded-full h-5 w-5 flex items-center justify-center group-hover:bg-white transition-colors duration-300">
+                <%= locals.cartCount || 0 %>
+              </span>
+            </div>
+          </a>
+  
+          <!-- Profile/Sign In -->
+          <% if (locals.session && session.userId) { %>
+            <div class="relative group">
+              <button class="text-white hover:text-amber-200 transition-colors duration-300 focus:outline-none flex items-center">
+                <% if (locals.user && user.profilePicture) { %>
+                  <img src="<%= user.profilePicture %>" alt="Profile" class="w-8 h-8 rounded-full object-cover border-2 border-amber-200 hover:border-white transition-colors duration-300">
+                <% } else { %>
+                  <div class="w-8 h-8 rounded-full bg-amber-200 text-[#AB8462] flex items-center justify-center border-2 border-amber-200 hover:bg-white transition-colors duration-300">
+                    <i class="fa-solid fa-user"></i>
+                  </div>
+                <% } %>
+              </button>
+              <!-- Dropdown -->
+              <div class="absolute right-0 mt-2 w-64 bg-white rounded-lg shadow-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300 ease-in-out transform origin-top-right translate-y-2 group-hover:translate-y-0">
+                <div class="py-2 rounded-lg overflow-hidden">
+                  <div class="px-4 py-3 bg-[#AB8462] text-white">
+                    <% if (locals.user && user.name) { %>
+                      <p class="font-medium"><%= user.name %></p>
+                      <p class="text-sm text-gray-200 truncate"><%= user.email %></p>
+                    <% } else { %>
+                      <p class="font-medium">My Account</p>
+                    <% } %>
+                  </div>
+                  <a href="/profile" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition duration-200 flex items-center">
+                    <i class="fa-solid fa-user-circle mr-2 text-[#AB8462]"></i> My Profile
+                  </a>
+                  <a href="/orders" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition duration-200 flex items-center">
+                    <i class="fa-solid fa-shopping-bag mr-2 text-[#AB8462]"></i> My Orders
+                  </a>
+                  <a href="/addresses" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition duration-200 flex items-center">
+                    <i class="fa-solid fa-address-book mr-2 text-[#AB8462]"></i> Addresses
+                  </a>
+                  <a href="/wishlist" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition duration-200 flex items-center">
+                    <i class="fa-solid fa-heart mr-2 text-[#AB8462]"></i> Wishlist
+                  </a>
+                  <div class="border-t border-gray-200 my-1"></div>
+                  <a href="/logout" class="block px-4 py-2 text-sm text-red-600 hover:bg-red-50 transition duration-200 flex items-center">
+                    <i class="fa-solid fa-sign-out-alt mr-2"></i> Logout
+                  </a>
+                </div>
+              </div>
+            </div>
+          <% } else { %>
+            <a href="/login" class="bg-amber-200 hover:bg-white text-[#AB8462] font-medium py-2 px-4 rounded-full transition-colors duration-300 flex items-center shadow-md hover:shadow-lg">
+              <i class="fa-solid fa-sign-in-alt mr-2"></i> Sign In
+            </a>
+          <% } %>
+  
+          <!-- Mobile Menu Toggle -->
+          <button id="mobile-menu-toggle" class="md:hidden text-white hover:text-amber-200 focus:outline-none transition-colors duration-300">
+            <i class="fa-solid fa-bars text-xl"></i>
+          </button>
+        </div>
+      </div>
+    </div>
+  </nav>
+  <div class="container mx-auto">
+    <h1 class="text-2xl font-bold mb-6">Order Details</h1>
+
+    <div class="bg-white shadow-md rounded-lg p-6">
+        <div class="flex justify-between items-center mb-6">
+            <div>
+                <span class="font-bold">Order #<%= order.uniqueOrderId %></span>
+                <span 
+                    class="ml-4 px-3 py-1 rounded-full text-sm 
+                    <%= 
+                        order.orderStatus === 'Delivered' ? 'bg-green-200 text-green-800' :
+                        order.orderStatus === 'Returned' ? 'bg-purple-200 text-purple-800' :
+                        order.orderStatus === 'Cancelled' ? 'bg-red-200 text-red-800' :
+                        order.orderStatus === 'Processing' ? 'bg-yellow-200 text-yellow-800' :
+                        'bg-blue-200 text-blue-800'
+                    %>"
+                >
+                    <%= order.orderStatus %>
+                </span>
+                
+                <% 
+                // Calculate how many items are returned
+                const returnedItems = order.items.filter(item => item.returnStatus === 'Approved');
+                if (returnedItems.length > 0 && returnedItems.length < order.items.length) { %>
+                    <span class="ml-2 px-3 py-1 rounded-full text-xs bg-purple-200 text-purple-800">
+                        <%= returnedItems.length %> of <%= order.items.length %> items returned
+                    </span>
+                <% } %>
+            </div>
+            <div>
+                <span class="text-gray-600">
+                    Order Date: <%= order.createdAt.toLocaleDateString() %>
+                </span>
+            </div>
+        </div>
+
+        <!-- Add this right after the existing order status display in the order-details.ejs file -->
+        <div class="mb-6">
+            <% if (order.orderStatus === 'Shipped') { %>
+                <button onclick="openCancelShippedOrderModal()" class="mt-4 bg-red-500 hover:bg-red-600 text-white font-medium py-2 px-4 rounded">
+                    Cancel Order
+                </button>
+            <% } %>
+        </div>
+
+        <div class="grid md:grid-cols-2 gap-6 mb-6">
+            <div>
+                <h2 class="text-lg font-semibold mb-4">Shipping Address</h2>
+                <% if (order.shippingAddress) { %>
+                    <p><%= order.shippingAddress.name || 'N/A' %></p>
+                    <p><%= order.shippingAddress.addressLine1 || 'N/A' %></p>
+                    <% if (order.shippingAddress.addressLine2) { %>
+                        <p><%= order.shippingAddress.addressLine2 %></p>
+                    <% } %>
+                    <p>
+                        <%= order.shippingAddress.city || 'N/A' %>, 
+                        <%= order.shippingAddress.state || 'N/A' %> 
+                        <%= order.shippingAddress.postalCode || 'N/A' %>
+                    </p>
+                    <p>Country: <%= order.shippingAddress.country || 'N/A' %></p>
+                <% } else { %>
+                    <p>No shipping address available</p>
+                <% } %>
+            </div>
+
+            <div>
+                <h2 class="text-lg font-semibold mb-4">Payment Details</h2>
+                <p>Method: <%= order.paymentMethod %></p>
+                <p>Subtotal: ₹<%= order.subtotal.toFixed(2) %></p>
+                
+                <% if (order.couponCode) { %>
+                    <p class="text-green-600">
+                        Coupon Applied: <%= order.couponCode %>
+                        <span class="text-sm">(Discount: ₹<%= order.discount.toFixed(2) %>)</span>
+                    </p>
+                <% } %>
+                
+                <p class="font-semibold">Total Amount: ₹<%= order.total.toFixed(2) %></p>
+                <p>Payment Status: 
+                    <span 
+                        class="px-2 py-1 rounded-full text-xs
+                            <%= 
+                                order.paymentStatus === 'paid' ? 'bg-green-200 text-green-800' :
+                                order.paymentStatus === 'failed' ? 'bg-red-200 text-red-800' :
+                                'bg-yellow-200 text-yellow-800'
+                            %>"
+                    >
+                        <%= order.paymentStatus %>
+                    </span>
+                </p>
+            </div>
+        </div>
+
+        <div>
+            <h2 class="text-lg font-semibold mb-4">Order Items</h2>
+            <div class="grid gap-4">
+                <% order.items.forEach(item => { %>
+                    <div class="flex items-center bg-gray-100 p-4 rounded-lg">
+                        <img 
+                            src="<%= item.product.coverImage %>" 
+                            alt="<%= item.product.title %>" 
+                            class="w-20 h-20 object-cover mr-4"
+                        >
+                        <div class="flex-grow">
+                            <h3 class="font-bold"><%= item.product.title %></h3>
+                            <p>Quantity: <%= item.quantity %></p>
+                            <p>Price: ₹<%= item.price %></p>
+                            <% if (item.returnStatus && item.returnStatus !== 'None') { %>
+                                <p class="mt-2">
+                                    <span class="
+                                        px-2 py-1 rounded-full text-xs
+                                        <%= 
+                                            item.returnStatus === 'Approved' ? 'bg-green-200 text-green-800' :
+                                            item.returnStatus === 'Rejected' ? 'bg-red-200 text-red-800' :
+                                            item.returnStatus === 'Cancelled' ? 'bg-red-200 text-red-800' :
+                                            'bg-yellow-200 text-yellow-800'
+                                        %>"
+                                    >
+                                        <%= item.returnStatus %>
+                                    </span>
+                                    <% if (item.returnReason) { %>
+                                        <span class="text-sm text-gray-600 ml-2">
+                                            (<%= item.returnReason.substring(0, 30) %><%= item.returnReason.length > 30 ? '...' : '' %>)
+                                        </span>
+                                    <% } %>
+                                </p>
+                            <% } %>
+                        </div>
+                        <div class="ml-4">
+                            <% if (['Pending', 'Processing'].includes(order.orderStatus) && (!item.returnStatus || item.returnStatus === 'None')) { %>
+                                <button 
+                                    onclick="cancelProduct('<%= order._id %>', '<%= item.product._id %>')" 
+                                    class="bg-red-500 text-white px-3 py-1 rounded hover:bg-red-600 text-sm"
+                                >
+                                    Cancel
+                                </button>
+                            <% } %>
+                        </div>
+                    </div>
+                <% }); %>
+            </div>
+        </div>
+    </div>
+
+    <% if (order.orderStatus === 'Delivered') { %>
+        <div class="mt-6">
+            <h2 class="text-lg font-semibold mb-4">Return Products</h2>
+            <form id="returnProductsForm" class="bg-gray-100 p-4 rounded-lg">
+                <input type="hidden" id="orderId" value="<%= order._id %>">
+                
+                <div class="mb-4">
+                    <label class="block text-gray-700 mb-2">Select Products to Return:</label>
+                    <div class="space-y-2">
+                        <% order.items.forEach(item => { %>
+                            <div class="flex items-center">
+                                <input 
+                                    type="checkbox" 
+                                    name="returnProducts" 
+                                    value="<%= item.product._id %>" 
+                                    id="return-<%= item.product._id %>"
+                                    class="mr-2"
+                                >
+                                <label for="return-<%= item.product._id %>" class="flex items-center">
+                                    <img 
+                                        src="<%= item.product.coverImage %>" 
+                                        alt="<%= item.product.title %>" 
+                                        class="w-10 h-10 object-cover mr-2"
+                                    >
+                                    <%= item.product.title %> (Qty: <%= item.quantity %>)
+                                </label>
+                            </div>
+                        <% }); %>
+                    </div>
+                </div>
+                
+                <!-- Add this to replace the simple alerts with better validation UI in the returnProductsForm -->
+                <div class="mb-4">
+                    <label for="returnReason" class="block text-gray-700 mb-2">Return Reason:</label>
+                    <textarea 
+                        id="returnReason" 
+                        name="returnReason" 
+                        class="w-full border p-2 rounded" 
+                        rows="3" 
+                        required
+                        placeholder="Please provide a detailed reason for the return (min 10 characters)"
+                    ></textarea>
+                    <p id="returnReasonError" class="hidden text-red-500 text-sm mt-1"></p>
+                </div>
+                
+                <div class="flex justify-end">
+                    <button 
+                        type="button"
+                        onclick="submitProductReturn()"
+                        class="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600"
+                    >
+                        Submit Return Request
+                    </button>
+                </div>
+            </form>
+        </div>
+    <% } %>
+
+    <% if (successMessage && successMessage.length > 0) { %>
+        <div class="fixed top-4 right-4 bg-green-500 text-white px-4 py-2 rounded shadow-lg z-50">
+            <%= successMessage %>
+            <button onclick="this.parentElement.style.display='none'" class="ml-2">×</button>
+        </div>
+    <% } %>
+    
+    <% if (errorMessage && errorMessage.length > 0) { %>
+        <div class="fixed top-4 right-4 bg-red-500 text-white px-4 py-2 rounded shadow-lg z-50">
+            <%= errorMessage %>
+            <button onclick="this.parentElement.style.display='none'" class="ml-2">×</button>
+        </div>
+    <% } %>
+</div>
+
+<!-- Enhanced notification messages system to replace browser alerts -->
+<div id="notificationContainer" class="fixed top-4 right-4 z-50 flex flex-col space-y-2" style="max-width: 300px;"></div>
+
+<!-- Modals -->
+<div id="cancelProductModal" class="fixed inset-0 bg-gray-800 bg-opacity-50 hidden items-center justify-center z-50">
+    <div class="bg-white rounded-lg p-6 max-w-md w-full">
+        <h3 class="text-xl font-bold mb-4">Cancel Product</h3>
+        <p class="mb-4">Are you sure you want to cancel this product? This action cannot be undone.</p>
+        <div class="mb-4">
+            <label for="cancelProductReason" class="block text-gray-700 mb-2">Reason for cancellation (optional):</label>
+            <textarea 
+                id="cancelProductReason" 
+                class="w-full border p-2 rounded" 
+                rows="3" 
+                placeholder="Please provide a reason for cancellation"
+            ></textarea>
+            <p id="cancelProductReasonError" class="hidden text-red-500 text-sm mt-1"></p>
+        </div>
+        <div class="flex justify-end space-x-3">
+            <button 
+                onclick="closeCancelProductModal()" 
+                class="bg-gray-300 hover:bg-gray-400 text-gray-800 px-4 py-2 rounded"
+            >
+                Cancel
+            </button>
+            <button 
+                onclick="confirmProductCancel()" 
+                class="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded"
+            >
+                Confirm Cancellation
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- Add this new modal for cancelling shipped orders -->
+<div id="cancelShippedOrderModal" class="fixed inset-0 bg-gray-800 bg-opacity-50 hidden items-center justify-center z-50">
+    <div class="bg-white rounded-lg p-6 max-w-md w-full">
+        <h3 class="text-xl font-bold mb-4">Cancel Shipped Order</h3>
+        <p class="mb-4">Are you sure you want to cancel this order? This action cannot be undone.</p>
+        <div class="mb-4">
+            <label for="cancelShippedOrderReason" class="block text-gray-700 mb-2">Reason for cancellation:</label>
+            <textarea 
+                id="cancelShippedOrderReason" 
+                class="w-full border p-2 rounded" 
+                rows="3" 
+                placeholder="Please provide a reason for cancellation"
+            ></textarea>
+            <p id="cancelShippedOrderReasonError" class="hidden text-red-500 text-sm mt-1">Please provide a reason for cancellation</p>
+        </div>
+        <div class="flex justify-end space-x-3">
+            <button 
+                onclick="closeCancelShippedOrderModal()" 
+                class="bg-gray-300 hover:bg-gray-400 text-gray-800 px-4 py-2 rounded"
+            >
+                Cancel
+            </button>
+            <button 
+                onclick="confirmShippedOrderCancel()" 
+                class="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded"
+            >
+                Confirm Cancellation
+            </button>
+        </div>
+    </div>
+</div>
+
+<script>
+    let currentOrderId = null;
+    let currentProductId = null;
+
+    // Enhanced notification system
+    function showNotification(message, type = 'success') {
+        const container = document.getElementById('notificationContainer');
+        const notification = document.createElement('div');
+        
+        notification.className = `p-4 rounded-lg shadow-lg text-white ${type === 'success' ? 'bg-green-500' : 'bg-red-500'}`;
+        notification.innerHTML = `
+            <div class="flex items-center justify-between">
+                <span>${message}</span>
+                <button class="ml-4 text-white hover:text-gray-200" onclick="this.parentElement.parentElement.remove()">×</button>
+            </div>
+        `;
+        
+        container.appendChild(notification);
+        
+        // Auto-remove after 5 seconds
+        setTimeout(() => {
+            if (notification.parentNode) {
+                notification.remove();
+            }
+        }, 5000);
+    }
+
+    // Cancel product functions
+    function cancelProduct(orderId, productId) {
+        currentOrderId = orderId;
+        currentProductId = productId;
+        document.getElementById('cancelProductModal').classList.remove('hidden');
+        document.getElementById('cancelProductModal').classList.add('flex');
+    }
+
+    function closeCancelProductModal() {
+        document.getElementById('cancelProductModal').classList.add('hidden');
+        document.getElementById('cancelProductModal').classList.remove('flex');
+    }
+
+    function confirmProductCancel() {
+        const reason = document.getElementById('cancelProductReason').value;
+        
+        // Validate reason
+        if (!reason || reason.trim().length < 5) {
+            document.getElementById('cancelProductReasonError').classList.remove('hidden');
+            document.getElementById('cancelProductReasonError').textContent = 'Please provide a reason (minimum 5 characters)';
+            return;
+        }
+        
+        const form = document.createElement('form');
+        form.method = 'POST';
+        form.action = `/orders/${currentOrderId}/cancel-product`;
+
+        const productInput = document.createElement('input');
+        productInput.type = 'hidden';
+        productInput.name = 'productId';
+        productInput.value = currentProductId;
+        form.appendChild(productInput);
+
+        const reasonInput = document.createElement('input');
+        reasonInput.type = 'hidden';
+        reasonInput.name = 'reason';
+        reasonInput.value = reason;
+        form.appendChild(reasonInput);
+
+        document.body.appendChild(form);
+        form.submit();
+    }
+
+    // Add functions for shipped order cancellation
+    function openCancelShippedOrderModal() {
+        currentOrderId = '<%= order._id %>';
+        document.getElementById('cancelShippedOrderModal').classList.remove('hidden');
+        document.getElementById('cancelShippedOrderModal').classList.add('flex');
+    }
+
+    function closeCancelShippedOrderModal() {
+        document.getElementById('cancelShippedOrderModal').classList.add('hidden');
+        document.getElementById('cancelShippedOrderModal').classList.remove('flex');
+    }
+
+    function confirmShippedOrderCancel() {
+        const reason = document.getElementById('cancelShippedOrderReason').value;
+        
+        // Validate reason
+        if (!reason || reason.trim().length < 5) {
+            document.getElementById('cancelShippedOrderReasonError').classList.remove('hidden');
+            return;
+        }
+        
+        // Hide error message if validation passes
+        document.getElementById('cancelShippedOrderReasonError').classList.add('hidden');
+        
+        const form = document.createElement('form');
+        form.method = 'POST';
+        form.action = `/orders/${currentOrderId}/cancel-shipped`;
+
+        const reasonInput = document.createElement('input');
+        reasonInput.type = 'hidden';
+        reasonInput.name = 'reason';
+        reasonInput.value = reason;
+        form.appendChild(reasonInput);
+
+        document.body.appendChild(form);
+        form.submit();
+    }
+
+    // Enhanced return products function with better validation
+    function submitProductReturn() {
+        const orderId = document.getElementById('orderId').value;
+        const reason = document.getElementById('returnReason').value;
+        const checkboxes = document.querySelectorAll('input[name="returnProducts"]:checked');
+        const errorElement = document.getElementById('returnReasonError');
+        
+        // Get selected product IDs
+        const productIds = Array.from(checkboxes).map(checkbox => checkbox.value);
+        
+        // Validate selections
+        if (productIds.length === 0) {
+            showNotification('Please select at least one product to return', 'error');
+            return;
+        }
+        
+        // Validate reason
+        if (!reason || reason.trim().length < 10) {
+            errorElement.textContent = 'Please provide a detailed return reason (minimum 10 characters)';
+            errorElement.classList.remove('hidden');
+            return;
+        }
+        
+        // Hide error message if validation passes
+        errorElement.classList.add('hidden');
+        
+        // Send request to server
+        fetch(`/orders/${orderId}/return-products`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ reason, productIds })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                showNotification('Return request submitted successfully');
+                location.reload();
+            } else {
+                showNotification(data.message || 'Failed to submit return request', 'error');
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            showNotification('An error occurred while submitting your return request', 'error');
+        });
+    }
+</script>
+<footer class="bg-gradient-to-r from-[#AB8462] to-[#9A7355] text-white mt-12 relative">
+    <!-- Wave Decoration -->
+    <div class="absolute top-0 left-0 right-0 overflow-hidden w-full"
+      style="height: 30px; transform: translateY(-100%);">
+      <svg viewBox="0 0 1200 120" preserveAspectRatio="none" class="w-full h-full">
+        <path
+          d="M321.39,56.44c58-10.79,114.16-30.13,172-41.86,82.39-16.72,168.19-17.73,250.45-.39C823.78,31,906.67,72,985.66,92.83c70.05,18.48,146.53,26.09,214.34,3V120H0V0C115.39,0,168.49,41.42,321.39,56.44Z"
+          fill="#AB8462"></path>
+      </svg>
+    </div>
+
+    <!-- Main Footer Content -->
+    <div class="container mx-auto py-12 px-4">
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+        <!-- BookSy Info & Newsletter -->
+        <div class="space-y-6">
+          <div class="flex items-center space-x-2">
+            <i class="fas fa-book-open text-amber-200 text-3xl"></i>
+            <h2 class="text-2xl font-bold text-white">BookSy</h2>
+          </div>
+          <p class="text-gray-200">Your favorite online bookstore with a wide selection of books across all genres.
+            Discover new worlds through our carefully curated collection.</p>
+
+          <div class="bg-white bg-opacity-10 rounded-lg p-4 shadow-lg backdrop-blur-sm">
+            <h3 class="text-lg font-semibold text-amber-200 mb-2">Subscribe to Our Newsletter</h3>
+            <p class="text-sm text-gray-200 mb-3">Get the latest book releases and exclusive offers</p>
+            <div class="flex rounded-lg overflow-hidden shadow-md">
+              <input type="email" placeholder="Enter your email"
+                class="p-3 w-full focus:outline-none text-gray-800 bg-white border-2 border-transparent focus:border-amber-200">
+              <button
+                class="bg-amber-200 text-[#AB8462] px-4 hover:bg-white transition-colors duration-300 font-medium flex items-center">
+                <i class="fas fa-paper-plane mr-2"></i>
+                <span>Join</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- Social Media Icons -->
+          <div class="pt-2">
+            <h3 class="text-lg font-semibold mb-3 text-amber-200">Connect With Us</h3>
+            <div class="flex space-x-3">
+              <a href="#"
+                class="bg-white bg-opacity-20 hover:bg-opacity-30 p-3 rounded-full transition-all duration-300 hover:transform hover:scale-110 w-10 h-10 flex items-center justify-center text-white hover:text-amber-200">
+                <i class="fab fa-facebook-f"></i>
+              </a>
+              <a href="#"
+                class="bg-white bg-opacity-20 hover:bg-opacity-30 p-3 rounded-full transition-all duration-300 hover:transform hover:scale-110 w-10 h-10 flex items-center justify-center text-white hover:text-amber-200">
+                <i class="fab fa-twitter"></i>
+              </a>
+              <a href="#"
+                class="bg-white bg-opacity-20 hover:bg-opacity-30 p-3 rounded-full transition-all duration-300 hover:transform hover:scale-110 w-10 h-10 flex items-center justify-center text-white hover:text-amber-200">
+                <i class="fab fa-instagram"></i>
+              </a>
+              <a href="#"
+                class="bg-white bg-opacity-20 hover:bg-opacity-30 p-3 rounded-full transition-all duration-300 hover:transform hover:scale-110 w-10 h-10 flex items-center justify-center text-white hover:text-amber-200">
+                <i class="fab fa-pinterest"></i>
+              </a>
+              <a href="#"
+                class="bg-white bg-opacity-20 hover:bg-opacity-30 p-3 rounded-full transition-all duration-300 hover:transform hover:scale-110 w-10 h-10 flex items-center justify-center text-white hover:text-amber-200">
+                <i class="fab fa-youtube"></i>
+              </a>
+            </div>
+          </div>
+        </div>
+
+        <!-- Links Columns -->
+        <div>
+          <h3 class="text-xl font-bold mb-6 text-amber-200 flex items-center">
+            <i class="fas fa-book-reader mr-2"></i> Explore
+          </h3>
+          <ul class="space-y-3">
+            <li><a href="/products"
+                class="text-gray-200 hover:text-white transition-colors duration-300 flex items-center group">
+                <span
+                  class="w-0 h-0.5 bg-amber-200 group-hover:w-2 transition-all duration-300 mr-0 group-hover:mr-2"></span>
+                All Books
+              </a></li>
+            <li><a href="/bestsellers"
+                class="text-gray-200 hover:text-white transition-colors duration-300 flex items-center group">
+                <span
+                  class="w-0 h-0.5 bg-amber-200 group-hover:w-2 transition-all duration-300 mr-0 group-hover:mr-2"></span>
+                Bestsellers
+              </a></li>
+            <li><a href="/new-releases"
+                class="text-gray-200 hover:text-white transition-colors duration-300 flex items-center group">
+                <span
+                  class="w-0 h-0.5 bg-amber-200 group-hover:w-2 transition-all duration-300 mr-0 group-hover:mr-2"></span>
+                New Releases
+              </a></li>
+            <li><a href="/genres"
+                class="text-gray-200 hover:text-white transition-colors duration-300 flex items-center group">
+                <span
+                  class="w-0 h-0.5 bg-amber-200 group-hover:w-2 transition-all duration-300 mr-0 group-hover:mr-2"></span>
+                Genres
+              </a></li>
+            <li><a href="/authors"
+                class="text-gray-200 hover:text-white transition-colors duration-300 flex items-center group">
+                <span
+                  class="w-0 h-0.5 bg-amber-200 group-hover:w-2 transition-all duration-300 mr-0 group-hover:mr-2"></span>
+                Authors
+              </a></li>
+            <li><a href="/deals"
+                class="text-gray-200 hover:text-white transition-colors duration-300 flex items-center group">
+                <span
+                  class="w-0 h-0.5 bg-amber-200 group-hover:w-2 transition-all duration-300 mr-0 group-hover:mr-2"></span>
+                Special Deals
+              </a></li>
+          </ul>
+        </div>
+
+        <!-- Account Column -->
+        <div>
+          <h3 class="text-xl font-bold mb-6 text-amber-200 flex items-center">
+            <i class="fas fa-user mr-2"></i> Your Account
+          </h3>
+          <ul class="space-y-3">
+            <li><a href="/profile"
+                class="text-gray-200 hover:text-white transition-colors duration-300 flex items-center group">
+                <span
+                  class="w-0 h-0.5 bg-amber-200 group-hover:w-2 transition-all duration-300 mr-0 group-hover:mr-2"></span>
+                My Profile
+              </a></li>
+            <li><a href="/orders"
+                class="text-gray-200 hover:text-white transition-colors duration-300 flex items-center group">
+                <span
+                  class="w-0 h-0.5 bg-amber-200 group-hover:w-2 transition-all duration-300 mr-0 group-hover:mr-2"></span>
+                Order History
+              </a></li>
+            <li><a href="/track"
+                class="text-gray-200 hover:text-white transition-colors duration-300 flex items-center group">
+                <span
+                  class="w-0 h-0.5 bg-amber-200 group-hover:w-2 transition-all duration-300 mr-0 group-hover:mr-2"></span>
+                Track Order
+              </a></li>
+            <li><a href="/wishlist"
+                class="text-gray-200 hover:text-white transition-colors duration-300 flex items-center group">
+                <span
+                  class="w-0 h-0.5 bg-amber-200 group-hover:w-2 transition-all duration-300 mr-0 group-hover:mr-2"></span>
+                Wishlist
+              </a></li>
+            <li><a href="/returns"
+                class="text-gray-200 hover:text-white transition-colors duration-300 flex items-center group">
+                <span
+                  class="w-0 h-0.5 bg-amber-200 group-hover:w-2 transition-all duration-300 mr-0 group-hover:mr-2"></span>
+                Returns & Refunds
+              </a></li>
+          </ul>
+        </div>
+
+        <!-- Help Column -->
+        <div>
+          <h3 class="text-xl font-bold mb-6 text-amber-200 flex items-center">
+            <i class="fas fa-headset mr-2"></i> Help & Support
+          </h3>
+          <ul class="space-y-3">
+            <li><a href="/about"
+                class="text-gray-200 hover:text-white transition-colors duration-300 flex items-center group">
+                <span
+                  class="w-0 h-0.5 bg-amber-200 group-hover:w-2 transition-all duration-300 mr-0 group-hover:mr-2"></span>
+                About Us
+              </a></li>
+            <li><a href="/contact"
+                class="text-gray-200 hover:text-white transition-colors duration-300 flex items-center group">
+                <span
+                  class="w-0 h-0.5 bg-amber-200 group-hover:w-2 transition-all duration-300 mr-0 group-hover:mr-2"></span>
+                Contact Us
+              </a></li>
+            <li><a href="/faq"
+                class="text-gray-200 hover:text-white transition-colors duration-300 flex items-center group">
+                <span
+                  class="w-0 h-0.5 bg-amber-200 group-hover:w-2 transition-all duration-300 mr-0 group-hover:mr-2"></span>
+                FAQ
+              </a></li>
+            <li><a href="/shipping"
+                class="text-gray-200 hover:text-white transition-colors duration-300 flex items-center group">
+                <span
+                  class="w-0 h-0.5 bg-amber-200 group-hover:w-2 transition-all duration-300 mr-0 group-hover:mr-2"></span>
+                Shipping Info
+              </a></li>
+            <li><a href="/privacy"
+                class="text-gray-200 hover:text-white transition-colors duration-300 flex items-center group">
+                <span
+                  class="w-0 h-0.5 bg-amber-200 group-hover:w-2 transition-all duration-300 mr-0 group-hover:mr-2"></span>
+                Privacy Policy
+              </a></li>
+            <li><a href="/terms"
+                class="text-gray-200 hover:text-white transition-colors duration-300 flex items-center group">
+                <span
+                  class="w-0 h-0.5 bg-amber-200 group-hover:w-2 transition-all duration-300 mr-0 group-hover:mr-2"></span>
+                Terms of Service
+              </a></li>
+          </ul>
+        </div>
+      </div>
+
+      <!-- Store Apps -->
+      <div class="mt-12 border-t border-[#8C6B48] pt-8">
+        <div class="flex flex-col md:flex-row items-center justify-between">
+          <div class="mb-6 md:mb-0">
+            <h3 class="text-lg font-semibold text-amber-200 mb-3">Download Our App</h3>
+            <div class="flex space-x-4">
+              <a href="#"
+                class="bg-black rounded-lg px-4 py-2 flex items-center space-x-2 hover:bg-gray-900 transition-colors duration-300">
+                <i class="fab fa-apple text-2xl text-white"></i>
+                <div>
+                  <p class="text-xs text-gray-300">Download on the</p>
+                  <p class="text-white font-medium">App Store</p>
+                </div>
+              </a>
+              <a href="#"
+                class="bg-black rounded-lg px-4 py-2 flex items-center space-x-2 hover:bg-gray-900 transition-colors duration-300">
+                <i class="fab fa-google-play text-2xl text-white"></i>
+                <div>
+                  <p class="text-xs text-gray-300">GET IT ON</p>
+                  <p class="text-white font-medium">Google Play</p>
+                </div>
+              </a>
+            </div>
+          </div>
+
+          <!-- Payment Methods with hover animations -->
+          <div class="flex flex-col items-center md:items-end">
+            <h3 class="text-lg font-semibold text-amber-200 mb-3">We Accept</h3>
+            <div class="flex space-x-3">
+              <i
+                class="fa-brands fa-cc-visa text-3xl text-white hover:text-amber-200 transition-colors duration-300 transform hover:scale-110"></i>
+              <i
+                class="fa-brands fa-cc-mastercard text-3xl text-white hover:text-amber-200 transition-colors duration-300 transform hover:scale-110"></i>
+
+  </footer>

@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BookSy - OTP Verification</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        .btn-verify { background-color: #b08968; }
+        .btn-verify:hover { background-color: #a07958; }
+        .otp-input { width: 3.5rem; height: 3.5rem; font-size: 1.5rem; text-align: center; border: 2px solid #333; border-radius: 0.25rem; }
+        .timer { color: #b08968; }
+        .disabled { opacity: 0.5; pointer-events: none; }
+    </style>
+</head>
+<body class="bg-white font-sans">
+    <div class="min-h-screen flex flex-col">
+        <header class="p-6">
+            <div class="flex items-center">
+                <svg class="w-8 h-8 text-gray-800" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"></path>
+                    <path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"></path>
+                </svg>
+                <span class="ml-2 text-xl font-semibold">BookSy</span>
+            </div>
+        </header>
+
+        <main class="flex-grow flex">
+            <div class="w-full lg:w-1/2 flex items-center justify-center p-8">
+                <div class="w-full max-w-md">
+                    <h1 class="text-3xl font-semibold text-[#b08968] mb-2">OTP</h1>
+                    <h2 class="text-2xl font-semibold text-[#b08968] mb-6">Verification Code</h2>
+
+                    <% if (typeof error !== 'undefined' && error) { %>
+                        <p class="text-red-600 text-center mb-4"><%= error %></p>
+                    <% } %>
+                    
+                    <% if (typeof message !== 'undefined' && message) { %>
+                        <p class="text-green-600 text-center mb-4"><%= message %></p>
+                    <% } %>
+                    
+                    <div class="mb-8 text-center">
+                        <p class="text-gray-600">Resend OTP in : <span class="timer" id="timer">60sec</span></p>
+                    </div>
+                    
+                    <form id="otpForm" action="/verify-otp" method="POST" onsubmit="return validateForm()">
+                        <input type="hidden" name="email" id="emailInput" value="<%= email %>">
+                        <input type="hidden" name="purpose" id="purposeInput" value="<%= purpose || 'signup' %>">
+                        <div class="flex justify-between mb-6">
+                            <input type="text" maxlength="1" class="otp-input" data-index="0" required>
+                            <input type="text" maxlength="1" class="otp-input" data-index="1" required>
+                            <input type="text" maxlength="1" class="otp-input" data-index="2" required>
+                            <input type="text" maxlength="1" class="otp-input" data-index="3" required>
+                            <input type="hidden" name="otp" id="otpValue">
+                        </div>
+
+                        <div class="mb-6 text-center">
+                            <button id="resendOtp" type="button" class="text-[#b08968] disabled" disabled>Resend OTP</button>
+                        </div>
+
+                        <button type="submit" class="w-full py-3 btn-verify text-white rounded-md hover:opacity-90 transition duration-200">
+                            Verify OTP
+                        </button>
+                    </form>
+                    
+                    <form id="resendForm" action="/resend-otp" method="POST" class="hidden">
+                        <input type="hidden" name="email" value="<%= email %>">
+                        <input type="hidden" name="purpose" value="<%= purpose || 'signup' %>">
+                    </form>
+
+                    <div class="mt-20 text-sm text-gray-500">© All rights reserved. Made by BookSy inc</div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            let seconds = 60;
+            const timerElement = document.getElementById('timer');
+            const resendButton = document.getElementById('resendOtp');
+            const inputs = document.querySelectorAll('.otp-input');
+            const hiddenOtpInput = document.getElementById('otpValue');
+            const form = document.getElementById('otpForm');
+            const resendForm = document.getElementById('resendForm');
+            const emailInput = document.getElementById('emailInput');
+
+            console.log("Email from form:", emailInput.value);
+
+            inputs[0].focus();
+
+            const countdown = setInterval(function() {
+                seconds--;
+                timerElement.textContent = seconds + ' sec';
+
+                if (seconds <= 0) {
+                    clearInterval(countdown);
+                    timerElement.textContent = 'Resend OTP available';
+                    resendButton.classList.remove('disabled');
+                    resendButton.removeAttribute('disabled');
+                }
+            }, 1000);
+
+            inputs.forEach((input, index) => {
+                input.addEventListener('input', function() {
+                    this.value = this.value.replace(/[^0-9]/g, '');
+                    if (this.value.length === 1 && index < inputs.length - 1) {
+                        inputs[index + 1].focus();
+                    }
+                    updateHiddenOtp();
+                });
+
+                input.addEventListener('keydown', function(e) {
+                    if (e.key === 'Backspace' && index > 0 && this.value.length === 0) {
+                        inputs[index - 1].focus();
+                    }
+                });
+
+                input.addEventListener('paste', function(e) {
+                    e.preventDefault();
+                    const pasteData = e.clipboardData.getData('text');
+                    if (/^\d+$/.test(pasteData)) {
+                        const digits = pasteData.substring(0, 4).split('');
+                        digits.forEach((digit, i) => {
+                            if (i < inputs.length) {
+                                inputs[i].value = digit;
+                            }
+                        });
+                        if (digits.length < inputs.length) {
+                            inputs[digits.length].focus();
+                        } else {
+                            inputs[inputs.length - 1].focus();
+                        }
+                        updateHiddenOtp();
+                    }
+                });
+            });
+
+            function updateHiddenOtp() {
+                let otp = "";
+                inputs.forEach(input => { otp += input.value; });
+                hiddenOtpInput.value = otp;
+            }
+
+            // Validate form before submission
+            window.validateForm = function() {
+                let otp = "";
+                inputs.forEach(input => { otp += input.value; });
+                
+                if (otp.length !== 4) {
+                    alert("Please enter all 4 digits of the OTP");
+                    return false;
+                }
+                
+                hiddenOtpInput.value = otp;
+                return true;
+            };
+
+            resendButton.addEventListener('click', function() {
+                if (!resendButton.disabled) {
+                    resendForm.submit();
+                    resendButton.classList.add('disabled');
+                    resendButton.setAttribute('disabled', 'true');
+                    seconds = 60;
+                    timerElement.textContent = seconds + ' sec';
+                }
+            });
+        });
+    </script>
+</body>
+</html>

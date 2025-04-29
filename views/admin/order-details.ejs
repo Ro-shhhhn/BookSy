@@ -1,0 +1,357 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BookSy - Order Details</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        select option:disabled {
+            color: #ccc;
+            background-color: #f3f4f6;
+        }
+        
+        /* Add style for the disabled explanation tooltip */
+        .status-info {
+            position: relative;
+            display: inline-block;
+            margin-left: 0.5rem;
+            cursor: help;
+        }
+        
+        .status-info:hover .tooltip {
+            visibility: visible;
+            opacity: 1;
+        }
+        
+        .tooltip {
+            visibility: hidden;
+            width: 200px;
+            background-color: #374151;
+            color: #fff;
+            text-align: center;
+            border-radius: 6px;
+            padding: 8px;
+            position: absolute;
+            z-index: 1;
+            bottom: 125%;
+            left: 50%;
+            margin-left: -100px;
+            opacity: 0;
+            transition: opacity 0.3s;
+            font-size: 0.75rem;
+        }
+    </style>
+</head>
+<body class="bg-gray-100">
+    <div class="flex h-screen">
+        <!-- Sidebar -->
+        <div class="w-64 bg-gradient-to-b from-gray-50 to-gray-100 shadow-xl min-h-screen flex flex-col">
+            <!-- Logo Section -->
+            <div class="p-6 border-b border-gray-200 flex items-center space-x-3">
+                <i class="fas fa-book text-2xl text-blue-600"></i>
+                <span class="text-xl font-bold text-gray-800">BookSy Admin</span>
+            </div>
+
+            <!-- Navigation Links -->
+            <nav class="flex-grow py-4">
+                <ul class="space-y-1">
+                    <li>
+                        <a href="/admin/dashboard" class="sidebar-link flex items-center px-6 py-3 text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors duration-200 group">
+                            <i class="fas fa-home mr-4 text-gray-400 group-hover:text-blue-500"></i>
+                            <span class="font-medium">Dashboard</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="/admin/products" class="sidebar-link flex items-center px-6 py-3 text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors duration-200 group">
+                            <i class="fas fa-box mr-4 text-gray-400 group-hover:text-blue-500"></i>
+                            <span class="font-medium">Products</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="/admin/users" class="sidebar-link flex items-center px-6 py-3 text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors duration-200 group">
+                            <i class="fas fa-users mr-4 text-gray-400 group-hover:text-blue-500"></i>
+                            <span class="font-medium">Users</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="/admin/orders" class="sidebar-link flex items-center px-6 py-3 text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors duration-200 group">
+                            <i class="fas fa-shopping-cart mr-4 text-gray-400 group-hover:text-blue-500"></i>
+                            <span class="font-medium">Orders</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="/admin/category" class="sidebar-link flex items-center px-6 py-3 text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors duration-200 group">
+                            <i class="fas fa-tags mr-4 text-gray-400 group-hover:text-blue-500"></i>
+                            <span class="font-medium">Category</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="/admin/return-requests" class="sidebar-link flex items-center px-6 py-3 text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors duration-200 group">
+                            <i class="fas fa-undo mr-4 text-gray-400 group-hover:text-blue-500"></i>
+                            <span class="font-medium">Return Requests</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="/admin/coupons" class="sidebar-link flex items-center px-6 py-3 text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors duration-200 group">
+                            <i class="fas fa-ticket-alt mr-4 text-gray-400 group-hover:text-blue-500"></i>
+                            <span class="font-medium">Coupons</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="/admin/wallet/transactions" class="sidebar-link flex items-center px-6 py-3 text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors duration-200 group">
+                            <i class="fas fa-wallet mr-4 text-gray-400 group-hover:text-blue-500"></i>
+                            <span class="font-medium">Wallet Management</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="/admin/category-offers" class="sidebar-link flex items-center px-6 py-3 text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors duration-200 group">
+                            <i class="fas fa-gift mr-4 text-gray-400 group-hover:text-blue-500"></i>
+                            <span class="font-medium">Category Offers</span>
+                        </a>
+                    </li>
+                    <!-- Add this to your sidebar navigation -->
+                    <li>
+                        <a href="/admin/sales-report" class="sidebar-link flex items-center px-6 py-3 text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors duration-200 group">
+                            <i class="fas fa-chart-bar mr-4 text-gray-400 group-hover:text-blue-500"></i>
+                            <span class="font-medium">Sales Report</span>
+                        </a>
+                    </li>
+                </ul>
+            </nav>
+
+            <!-- Logout Section -->
+            <div class="p-6 border-t border-gray-200">
+                <a href="/admin/logout" class="flex items-center justify-center w-full py-3 bg-blue-600 text-white rounded-lg 
+                    hover:bg-blue-700 transition-colors duration-300 shadow-md">
+                    <i class="fas fa-sign-out-alt mr-3"></i>
+                    Logout
+                </a>
+            </div>
+
+            <!-- Add this script at the end of the sidebar -->
+            <script>
+                document.addEventListener('DOMContentLoaded', function() {
+                    const currentPath = window.location.pathname;
+                    const sidebarLinks = document.querySelectorAll('.sidebar-link');
+                    
+                    sidebarLinks.forEach(link => {
+                        if (link.getAttribute('href') === currentPath) {
+                            link.classList.add('bg-blue-100', 'text-blue-700');
+                            link.querySelector('i').classList.remove('text-gray-400', 'group-hover:text-blue-500');
+                            link.querySelector('i').classList.add('text-blue-600');
+                        }
+                    });
+                });
+            </script>
+        </div>
+
+        <div class="container mx-auto px-4 py-8">
+            <div class="bg-white shadow-md rounded-lg p-6">
+                <div class="flex justify-between items-center mb-6">
+                    <h1 class="text-2xl font-bold">Order Details</h1>
+                    <div class="space-x-2">
+                        <!-- Order Status Update Dropdown -->
+                        <form action="/admin/orders/status/<%= order._id %>" method="POST" class="inline-block">
+                            <div class="flex items-center">
+                                <select name="orderStatus" class="px-3 py-2 border rounded-md mr-2">
+                                    <option value="Pending" <%= order.orderStatus === 'Pending' ? 'selected' : '' %>>Pending</option>
+                                    <option value="Processing" <%= order.orderStatus === 'Processing' ? 'selected' : '' %>>Processing</option>
+                                    <option value="Shipped" <%= order.orderStatus === 'Shipped' ? 'selected' : '' %>>Shipped</option>
+                                    <option value="Delivered" <%= order.orderStatus === 'Delivered' ? 'selected' : '' %>>Delivered</option>
+                                    <option value="Returned" <%= order.orderStatus === 'Returned' ? 'selected' : '' %>>Returned</option>
+                                    <option value="Cancelled" <%= order.orderStatus === 'Cancelled' ? 'selected' : '' %>>Cancelled</option>
+                                </select>
+                                <button type="submit" class="bg-blue-500 text-white px-4 py-2 rounded-md">
+                                    Update Status
+                                </button>
+                               
+                            </div>
+                            <div id="statusError" class="hidden text-red-600 mt-2 text-sm font-medium"></div>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- Flash Messages -->
+                <% if (locals.messages && messages.error) { %>
+                    <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4" role="alert">
+                        <span class="block sm:inline"><%= messages.error %></span>
+                    </div>
+                <% } %>
+
+                <% if (locals.messages && messages.success) { %>
+                    <div class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded mb-4" role="alert">
+                        <span class="block sm:inline"><%= messages.success %></span>
+                    </div>
+                <% } %>
+
+                <!-- Order Information -->
+                <div class="grid md:grid-cols-2 gap-6">
+                    <!-- Order Summary -->
+                    <div>
+                        <h2 class="text-xl font-semibold mb-4">Order Summary</h2>
+                        <div class="space-y-2">
+                            <p><strong>Order Number:</strong> <%= order.uniqueOrderId %></p>                    
+                            <p><strong>Order Date:</strong> <%= order.createdAt.toLocaleString() %></p>
+                            <p><strong>Order Status:</strong> 
+                                <span class="
+                                    px-2 py-1 rounded-full text-xs font-semibold
+                                    <%= 
+                                        order.orderStatus === 'Pending' ? 'bg-yellow-200 text-yellow-800' : 
+                                        order.orderStatus === 'Shipped' ? 'bg-blue-200 text-blue-800' :
+                                        order.orderStatus === 'Delivered' ? 'bg-green-200 text-green-800' :
+                                        order.orderStatus === 'Cancelled' ? 'bg-red-200 text-red-800' :
+                                        order.orderStatus === 'Returned' ? 'bg-purple-200 text-purple-800' :
+                                        'bg-gray-200 text-gray-800'
+                                    %>
+                                ">
+                                    <%= order.orderStatus.replace('_', ' ') %>
+                                </span>
+                            </p>
+                            <p><strong>Total Amount:</strong> ₹<%= order.total ? order.total.toFixed(2) : '0.00' %></p>
+                        </div>
+                    </div>
+
+                    <!-- User Information -->
+                    <div>
+                        <h2 class="text-xl font-semibold mb-4">Customer Details</h2>
+                        <div class="space-y-2">
+                            <p><strong>Name:</strong> <%= order.user.name %></p>
+                            <p><strong>Email:</strong> <%= order.user.email %></p>
+                            <p><strong>Shipping Address:</strong> 
+                                <% if (order.shippingAddress) { %>
+                                    <%= order.shippingAddress.addressLine1 %>, 
+                                    <%= order.shippingAddress.addressLine2 ? order.shippingAddress.addressLine2 + ', ' : '' %>
+                                    <%= order.shippingAddress.city %>, 
+                                    <%= order.shippingAddress.state %> 
+                                    <%= order.shippingAddress.postalCode %>
+                                <% } else { %>
+                                    No shipping address available
+                                <% } %>
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Order Items -->
+                <div class="mt-8">
+                    <h2 class="text-xl font-semibold mb-4">Order Items</h2>
+                    <table class="w-full table-auto">
+                        <thead class="bg-gray-100">
+                            <tr>
+                                <th class="px-4 py-3 text-left">Product</th>
+                                <th class="px-4 py-3 text-center">Quantity</th>
+                                <th class="px-4 py-3 text-right">Price</th>
+                                <th class="px-4 py-3 text-right">Subtotal</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <% order.items.forEach(item => { %>
+                                <tr class="border-b">
+                                    <td class="px-4 py-3 flex items-center">
+                                        <% if(item.product.coverImage) { %>
+                                            <img 
+                                                src="<%= item.product.coverImage %>" 
+                                                alt="<%= item.product.title %>" 
+                                                class="w-16 h-16 object-cover mr-4"
+                                            >
+                                        <% } %>
+                                        <div>
+                                            <%= item.product.title %>
+                                            <% if(item.variant) { %>
+                                                <div class="text-sm text-gray-500">
+                                                    <%= item.variant.size ? 'Size: ' + item.variant.size : '' %>
+                                                    <%= item.variant.color ? 'Color: ' + item.variant.color : '' %>
+                                                </div>
+                                            <% } %>
+                                        </div>
+                                    </td>
+                                    <td class="px-4 py-3 text-center"><%= item.quantity %></td>
+                                    <td class="px-4 py-3 text-right">₹<%= item.price.toFixed(2) %></td>
+                                    <td class="px-4 py-3 text-right">₹<%= (item.quantity * item.price).toFixed(2) %></td>
+                                </tr>
+                            <% }); %>
+                        </tbody>
+                        <tfoot>
+                            <tr>
+                                <td colspan="3" class="text-right font-semibold px-4 py-3">Total:</td>
+                                <td class="text-right font-bold px-4 py-3">₹<%= order.total ? order.total.toFixed(2) : '0.00' %></td>
+                            </tr>
+                        </tfoot>
+                    </table>
+                </div>
+
+                <% if (order.returnRequested) { %>
+                    <div class="mt-8 bg-yellow-100 p-4 rounded-md">
+                        <h2 class="text-xl font-semibold mb-4">Return Request</h2>
+                        <form action="/admin/orders/return-verify/<%= order._id %>" method="POST">
+                            <div class="mb-4">
+                                <label class="block mb-2">Return Verification</label>
+                                <div class="space-x-4">
+                                    <button 
+                                        type="submit" 
+                                        name="returnStatus" 
+                                        value="approved" 
+                                        class="bg-green-500 text-white px-4 py-2 rounded-md"
+                                    >
+                                        Approve Return
+                                    </button>
+                                    <button 
+                                        type="submit" 
+                                        name="returnStatus" 
+                                        value="rejected" 
+                                        class="bg-red-500 text-white px-4 py-2 rounded-md"
+                                    >
+                                        Reject Return
+                                    </button>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                <% } %>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const statusSelect = document.querySelector('select[name="orderStatus"]');
+            const currentStatus = '<%= order.orderStatus %>';
+            const form = statusSelect.closest('form');
+            const errorDiv = document.getElementById('statusError');
+            
+            // Define status transition rules
+            const statusFlow = {
+                'Pending': ['Processing', 'Cancelled'],
+                'Processing': ['Shipped', 'Cancelled'],
+                'Shipped': ['Delivered', 'Cancelled'],
+                'Delivered': ['Returned'], // Once delivered, can only be returned
+                'Returned': [], // Terminal state
+                'Cancelled': [] // Terminal state
+            };
+            
+            // Disable invalid options based on current status
+            Array.from(statusSelect.options).forEach(option => {
+                if (option.value !== currentStatus && !statusFlow[currentStatus].includes(option.value)) {
+                    option.disabled = true;
+                }
+            });
+            
+            form.addEventListener('submit', function(e) {
+                const selectedStatus = statusSelect.value;
+                
+                // Validate the status transition
+                if (selectedStatus !== currentStatus && !statusFlow[currentStatus].includes(selectedStatus)) {
+                    e.preventDefault();
+                    errorDiv.textContent = `Cannot change order status from ${currentStatus} to ${selectedStatus}`;
+                    errorDiv.classList.remove('hidden');
+                    return false;
+                }
+                
+                return true;
+            });
+        });
+    </script>
+</body>
+</html>

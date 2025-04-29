@@ -1,0 +1,925 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>BookSy - Your Favorite Bookstore</title>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+       .page-gradient-bg {
+        background: linear-gradient(135deg, #f3e7d3 0%, #e6d7c3 25%, #d9c7b3 50%, #e6d7c3 75%, #f3e7d3 100%);
+    }
+    .book-card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+    }
+    .hero-section {
+      background-image: linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)), url('/api/placeholder/1200/400');
+      background-size: cover;
+      background-position: center;
+    }
+     /* Animation keyframes */
+  @keyframes fadeInUp {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  
+  @keyframes floatBook {
+    0% { transform: translateY(0) rotate(0deg); }
+    50% { transform: translateY(-10px) rotate(3deg); }
+    100% { transform: translateY(0) rotate(0deg); }
+  }
+  
+  /* Applied animations */
+  .animate-fadeInUp {
+    animation: fadeInUp 1s ease-out forwards;
+  }
+  
+  .animate-float {
+    animation: floatBook 3s ease-in-out infinite;
+  }
+  
+  /* Book styling */
+  .book-cover {
+    height: 220px;
+    width: 150px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+    transition: transform 0.3s ease;
+    border-radius: 4px;
+    overflow: hidden;
+  }
+  
+  .book-cover:hover {
+    transform: translateY(-10px) scale(1.05);
+  }
+  
+  /* Active slide */
+  .hero-slide.active {
+    opacity: 1;
+    z-index: 10;
+  }
+  
+  /* Active indicator */
+  .slide-indicator.active {
+    opacity: 1;
+    width: 24px;
+  }
+  @keyframes gradient-shift {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+  }
+  
+  .animate-gradient-shift {
+    background-size: 200% 200%;
+    animation: gradient-shift 10s ease infinite;
+  }
+  </style>
+</head>
+<body class="bg-gray-50">
+
+<!-- Navbar -->
+<!-- Navbar -->
+<nav class="bg-gradient-to-r from-[#C3A18B] to-[#A7886D] shadow-lg py-6 sticky top-0 z-50">
+    <div class="container mx-auto px-4">
+      <div class="flex justify-between items-center">
+        <!-- Logo -->
+        <div class="flex items-center">
+          <a href="/" class="flex items-center space-x-2 group">
+            <i class="fas fa-book-open text-amber-200 text-2xl group-hover:text-white transition-colors duration-300"></i>
+            <span class="text-white text-2xl font-extrabold tracking-wider group-hover:text-amber-200 transition-colors duration-300">BookSy</span>
+          </a>
+        </div>
+  
+        <!-- Desktop Navigation -->
+        <div class="hidden md:flex items-center space-x-8">
+          <a href="/" class="text-white hover:text-amber-200 transition-colors duration-300 font-medium relative group">
+            Home
+            <span class="absolute -bottom-1 left-0 w-0 h-0.5 bg-amber-200 group-hover:w-full transition-all duration-300"></span>
+          </a>
+          <a href="/products" class="text-white hover:text-amber-200 transition-colors duration-300 font-medium relative group">
+            Books
+            <span class="absolute -bottom-1 left-0 w-0 h-0.5 bg-amber-200 group-hover:w-full transition-all duration-300"></span>
+          </a>
+          <a href="/about" class="text-white hover:text-amber-200 transition-colors duration-300 font-medium relative group">
+            About
+            <span class="absolute -bottom-1 left-0 w-0 h-0.5 bg-amber-200 group-hover:w-full transition-all duration-300"></span>
+          </a>
+          <a href="/contact" class="text-white hover:text-amber-200 transition-colors duration-300 font-medium relative group">
+            Contact
+            <span class="absolute -bottom-1 left-0 w-0 h-0.5 bg-amber-200 group-hover:w-full transition-all duration-300"></span>
+          </a>
+        </div>
+  
+        <!-- Icons and Actions -->
+        <div class="flex items-center space-x-5">
+          <!-- Wishlist -->
+          <a href="/wishlist" class="text-white hover:text-amber-200 transition-colors duration-300 text-lg flex items-center">
+            <i class="far fa-heart text-xl mr-1"></i>
+            <span class="hidden md:inline">Wishlist</span>
+          </a>
+  
+          <!-- Cart Icon -->
+          <a href="/cart" class="text-white hover:text-amber-200 transition-colors duration-300 relative group">
+            <div class="relative">
+              <i class="fa-solid fa-cart-shopping text-xl"></i>
+              <span class="absolute -top-2 -right-2 bg-amber-200 text-[#AB8462] text-xs font-bold rounded-full h-5 w-5 flex items-center justify-center group-hover:bg-white transition-colors duration-300">
+                <%= locals.cartCount || 0 %>
+              </span>
+            </div>
+          </a>
+  
+          <!-- Profile/Sign In -->
+          <% if (locals.session && session.userId) { %>
+            <div class="relative group">
+              <button class="text-white hover:text-amber-200 transition-colors duration-300 focus:outline-none flex items-center">
+                <% if (locals.user && user.profilePicture) { %>
+                  <img src="<%= user.profilePicture %>" alt="Profile" class="w-8 h-8 rounded-full object-cover border-2 border-amber-200 hover:border-white transition-colors duration-300">
+                <% } else { %>
+                  <div class="w-8 h-8 rounded-full bg-amber-200 text-[#AB8462] flex items-center justify-center border-2 border-amber-200 hover:bg-white transition-colors duration-300">
+                    <i class="fa-solid fa-user"></i>
+                  </div>
+                <% } %>
+              </button>
+              <!-- Dropdown -->
+              <div class="absolute right-0 mt-2 w-64 bg-white rounded-lg shadow-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300 ease-in-out transform origin-top-right translate-y-2 group-hover:translate-y-0">
+                <div class="py-2 rounded-lg overflow-hidden">
+                  <div class="px-4 py-3 bg-[#AB8462] text-white">
+                    <% if (locals.user && user.name) { %>
+                      <p class="font-medium"><%= user.name %></p>
+                      <p class="text-sm text-gray-200 truncate"><%= user.email %></p>
+                    <% } else { %>
+                      <p class="font-medium">My Account</p>
+                    <% } %>
+                  </div>
+                  <a href="/profile" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition duration-200 flex items-center">
+                    <i class="fa-solid fa-user-circle mr-2 text-[#AB8462]"></i> My Profile
+                  </a>
+                  <a href="/orders" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition duration-200 flex items-center">
+                    <i class="fa-solid fa-shopping-bag mr-2 text-[#AB8462]"></i> My Orders
+                  </a>
+                  <a href="/addresses" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition duration-200 flex items-center">
+                    <i class="fa-solid fa-address-book mr-2 text-[#AB8462]"></i> Addresses
+                  </a>
+                  <a href="/wishlist" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition duration-200 flex items-center">
+                    <i class="fa-solid fa-heart mr-2 text-[#AB8462]"></i> Wishlist
+                  </a>
+                  <div class="border-t border-gray-200 my-1"></div>
+                  <a href="/logout" class="block px-4 py-2 text-sm text-red-600 hover:bg-red-50 transition duration-200 flex items-center">
+                    <i class="fa-solid fa-sign-out-alt mr-2"></i> Logout
+                  </a>
+                </div>
+              </div>
+            </div>
+          <% } else { %>
+            <a href="/login" class="bg-amber-200 hover:bg-white text-[#AB8462] font-medium py-2 px-4 rounded-full transition-colors duration-300 flex items-center shadow-md hover:shadow-lg">
+              <i class="fa-solid fa-sign-in-alt mr-2"></i> Sign In
+            </a>
+          <% } %>
+  
+          <!-- Mobile Menu Toggle -->
+          <button id="mobile-menu-toggle" class="md:hidden text-white hover:text-amber-200 focus:outline-none transition-colors duration-300">
+            <i class="fa-solid fa-bars text-xl"></i>
+          </button>
+        </div>
+      </div>
+    </div>
+  </nav>
+<div class="container mx-auto px-4 py-8">
+    <div id="orderErrorContainer" class="hidden mb-6">
+        <div class="bg-red-50 border border-red-400 text-red-700 px-4 py-3 rounded-lg relative flex items-center justify-between" role="alert">
+            <div>
+                <strong class="font-bold mr-2">Oops! </strong>
+                <span id="orderErrorMessage"></span>
+            </div>
+            <button id="closeErrorBtn" class="text-red-500 hover:text-red-700">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+    </div>
+    <% if (addressAdded) { %>
+        <div class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded relative mb-4" role="alert">
+            <span class="block sm:inline">Done! You have made changes in addresses</span>
+        </div>
+    <% } %>
+
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <!-- Address Section -->
+        <div class="md:col-span-2">
+            <div class="bg-white shadow-lg rounded-xl p-6 border border-gray-100">
+                <h2 class="text-2xl font-bold mb-5 text-gray-800 border-b pb-3">Shipping Address</h2>
+                
+                <div id="addressList" class="max-h-80 overflow-y-auto custom-scrollbar pr-2">
+                    <% addresses.forEach(function(address) { %>
+                        <div class="address-item mb-4 p-4 <%= address.isDefault ? 'border-green-500 bg-green-50' : 'border-gray-200' %> border rounded-lg hover:shadow-sm transition">
+                            <div class="flex items-center">
+                                <input 
+                                    type="radio" 
+                                    name="selectedAddress" 
+                                    value="<%= address._id %>" 
+                                    <%= address.isDefault ? 'checked' : '' %> 
+                                    class="mr-3 text-[#AB8462] focus:ring-[#AB8462]"
+                                    data-is-default="<%= address.isDefault ? 'true' : 'false' %>"
+                                >
+                                <label class="flex-grow">
+                                    <p class="font-semibold text-gray-800"><%= address.name %></p>
+                                    <p class="text-gray-600">
+                                        <%= address.addressLine1 %>, 
+                                        <%= address.city %>, 
+                                        <%= address.state %> - <%= address.postalCode %>
+                                    </p>
+                                    <% if (address.isDefault) { %>
+                                        <span class="text-green-600 text-sm mt-1 inline-block">
+                                            <i class="fas fa-check-circle mr-1"></i>Default Address
+                                        </span>
+                                    <% } %>
+                                </label>
+                                <div class="ml-auto">
+                                    <a href="/checkout/edit-address/<%= address._id %>" class="text-blue-600 hover:text-blue-800 mr-2">
+                                        <i class="fas fa-edit"></i>
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    <% }); %>
+                </div>
+
+                <a 
+                href="/checkout/edit-address/new" 
+                class="mt-4 block text-center bg-[#AB8462] text-white px-4 py-2 rounded-lg hover:bg-[#8C6B48] transition"
+                >
+                    <i class="fas fa-plus mr-2"></i>Add New Address
+                </a>
+                
+            </div>
+        </div>
+
+        <!-- Payment and Order Summary Column -->
+        <div class="space-y-6">
+           <!-- Payment Method -->
+            <div class="bg-white shadow-lg rounded-xl p-6 border border-gray-100">
+                <h2 class="text-2xl font-bold mb-5 text-gray-800 border-b pb-3">Payment Method</h2>
+                
+                <div class="space-y-4">
+                    <!-- Cash on Delivery -->
+                    <div class="payment-method border rounded-lg p-4 hover:bg-gray-50 transition group">
+                        <div class="flex items-center">
+                            <input 
+                                type="radio" 
+                                id="cashOnDelivery" 
+                                name="paymentMethod" 
+                                value="cashOnDelivery" 
+                                class="mr-3 text-[#AB8462] focus:ring-[#AB8462]"
+                                checked
+                            >
+                            <label for="cashOnDelivery" class="flex items-center group-hover:text-[#AB8462]">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 mr-3 text-gray-500 group-hover:text-[#AB8462]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z" />
+                                </svg>
+                                <span>Cash on Delivery</span>
+                            </label>
+                        </div>
+                    </div>
+
+                    <!-- Online Payment (Razorpay) -->
+                    <div class="payment-method border rounded-lg p-4 hover:bg-gray-50 transition group">
+                        <div class="flex items-center">
+                            <input 
+                                type="radio" 
+                                id="razorpay" 
+                                name="paymentMethod" 
+                                value="razorpay" 
+                                class="mr-3 text-[#AB8462] focus:ring-[#AB8462]"
+                            >
+                            <label for="razorpay" class="flex items-center group-hover:text-[#AB8462]">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 mr-3 text-gray-500 group-hover:text-[#AB8462]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
+                                </svg>
+                                <span>Pay Online (Razorpay)</span>
+                            </label>
+                        </div>
+                    </div>
+
+
+                    <!-- Wallet (Disabled) -->
+                   <!-- Wallet Payment -->
+<div class="payment-method border rounded-lg p-4 hover:bg-gray-50 transition group">
+    <div class="flex items-center">
+        <input 
+            type="radio" 
+            id="wallet" 
+            name="paymentMethod" 
+            value="wallet" 
+            class="mr-3 text-[#AB8462] focus:ring-[#AB8462]"
+        >
+        <label for="wallet" class="flex items-center group-hover:text-[#AB8462]">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 mr-3 text-gray-500 group-hover:text-[#AB8462]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
+            </svg>
+            <div class="flex flex-col">
+                <span>Wallet</span>
+                <span class="text-sm text-green-600">Balance: ₹<%= wallet.balance.toFixed(2) %></span>
+            </div>
+        </label>
+    </div>
+</div>
+                
+            </div>
+
+            <!-- Coupon Section - Updated with new design -->
+        <!-- Coupon Section - Updated with new design -->
+<div class="bg-white shadow-lg rounded-xl p-6 border border-gray-100">
+    <h2 class="text-2xl font-bold mb-5 text-gray-800 border-b pb-3">Have a coupon?</h2>
+    
+    <div class="mt-4 mb-6 p-4 bg-gray-50 rounded-lg">
+        <!-- Available coupons with radio buttons -->
+        <% if (eligibleCoupons && eligibleCoupons.length > 0) { %>
+            <div class="mb-4">
+                <h3 class="font-medium text-gray-700 mb-2">Available Coupons:</h3>
+                <div class="space-y-3">
+                    <% eligibleCoupons.forEach(function(coupon, index) { %>
+                        <div class="flex items-center p-3 border border-gray-200 rounded-lg hover:bg-gray-100">
+                            <input 
+                                type="radio" 
+                                name="availableCoupon" 
+                                id="coupon_<%= coupon._id %>" 
+                                value="<%= coupon.code %>" 
+                                class="form-radio h-5 w-5 text-[#AB8462] focus:ring-[#AB8462]"
+                                data-discount="<%= coupon.discount %>"
+                                data-code="<%= coupon.code %>"
+                                <%= index === 0 ? 'checked' : '' %>
+                            >
+                            <label for="coupon_<%= coupon._id %>" class="ml-3 flex flex-col cursor-pointer flex-grow">
+                                <span class="font-bold text-gray-800"><%= coupon.code %></span>
+                                <span class="text-green-600 text-sm font-medium"><%= coupon.discount %>% OFF</span>
+                                <span class="text-gray-600 text-xs">Min. Purchase: ₹<%= coupon.minAmount %></span>
+                                <% if (coupon.maxAmount !== Infinity) { %>
+                                    <span class="text-gray-600 text-xs">Max. Purchase: ₹<%= coupon.maxAmount %></span>
+                                <% } %>
+                                <span class="text-gray-600 text-xs">Valid till: <%= new Date(coupon.expirationDate).toLocaleDateString() %></span>
+                            </label>
+                            <button 
+                                type="button" 
+                                class="select-coupon-btn bg-[#AB8462] hover:bg-[#8C6B48] text-white px-3 py-1 rounded text-sm"
+                                data-code="<%= coupon.code %>"
+                            >
+                                Apply
+                            </button>
+                        </div>
+                    <% }); %>
+                </div>
+            </div>
+        <% } else { %>
+            <p class="text-gray-600 mb-3">No eligible coupons available for your order.</p>
+        <% } %>
+
+        <!-- Divider -->
+        <div class="flex items-center my-4">
+            <div class="flex-grow border-t border-gray-300"></div>
+            <span class="flex-shrink mx-4 text-gray-600">OR</span>
+            <div class="flex-grow border-t border-gray-300"></div>
+        </div>
+        
+        <!-- Manual coupon input and apply button -->
+        <div class="flex items-center">
+            <input 
+                type="text" 
+                id="couponCode" 
+                class="flex-grow rounded-l border-r-0 focus:ring-[#AB8462] focus:border-[#AB8462]" 
+                placeholder="Enter coupon code"
+            >
+            <button 
+                id="applyCouponBtn" 
+                class="bg-[#AB8462] hover:bg-[#8C6B48] text-white py-2 px-4 rounded-r"
+            >
+                Apply
+            </button>
+        </div>
+        
+        <!-- Coupon message display area -->
+        <div id="couponMessage" class="mt-2 text-sm"></div>
+        
+        <!-- Applied coupon details (hidden by default) -->
+        <div id="couponDetails" class="mt-3 bg-green-50 p-3 rounded-lg border border-green-200 hidden">
+            <div class="flex justify-between items-center">
+                <div>
+                    <span class="font-medium text-green-800">Applied: </span>
+                    <span id="appliedCouponCode" class="text-green-700 font-bold"></span>
+                    <span id="discountPercentage" class="text-green-700 ml-1"></span>
+                </div>
+                <button id="removeCouponBtn" class="text-red-600 hover:text-red-800 text-sm font-medium">
+                    Remove
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+   <!-- Order Summary -->
+<div class="bg-white shadow-lg rounded-xl p-6 border border-gray-100">
+    <h2 class="text-2xl font-bold mb-5 text-gray-800 border-b pb-3">Order Summary</h2>
+    
+    <div class="space-y-4 max-h-72 overflow-y-auto custom-scrollbar pr-2">
+        <% cart.items.forEach(function(item) { %>
+            <div class="flex justify-between items-center pb-4 border-b last:border-b-0">
+                <div class="flex items-center space-x-4">
+                    <img 
+                        src="<%= item.product.coverImage %>" 
+                        alt="<%= item.product.title %>" 
+                        class="w-20 h-24 object-cover rounded-md shadow-sm"
+                    >
+                    <div>
+                        <p class="font-semibold text-gray-800"><%= item.product.title %></p>
+                        <p class="text-gray-600 text-sm">Qty: <%= item.quantity %></p>
+                        <% if (!item.product.isActive) { %>
+                            <p class="text-red-600 text-xs font-medium">Product no longer available</p>
+                        <% } else if (item.product.stock < item.quantity) { %>
+                            <p class="text-red-600 text-xs font-medium">Insufficient stock (Available: <%= item.product.stock %>)</p>
+                        <% } %>
+                    </div>
+                </div>
+                <!-- Use the finalPrice property calculated from our best discount logic -->
+                <p class="font-bold text-gray-800">₹<%= (item.quantity * (item.product.finalPrice || item.product.discountedPrice)).toFixed(2) %></p>
+            </div>
+        <% }); %>
+    </div>
+
+    <div class="mt-4 space-y-2 text-gray-700">
+        <div class="flex justify-between">
+            <span>Subtotal</span>
+            <span id="cartTotal">₹<%= cart.totalAmount.toFixed(2) %></span>
+        </div>
+        <div class="flex justify-between text-green-600">
+            <span>Discount</span>
+            <span>-₹<%= (cart.items.reduce((total, item) => total + (item.quantity * (item.product.price - item.product.discountedPrice)), 0)).toFixed(2) %></span>
+        </div>
+        <!-- Delivery Fee row -->
+        <div class="flex justify-between text-green-600">
+            <span>Delivery Fee</span>
+            <span class="font-medium">FREE</span>
+        </div>
+        <!-- Coupon discount row (initially hidden) -->
+        <div id="discountRow" class="flex justify-between py-2 text-green-600 hidden">
+            <span>Coupon Discount</span>
+            <span id="discountAmount" class="font-medium text-green-600">-₹0.00</span>
+        </div>
+        <hr class="my-2 border-gray-200">
+        <div class="flex justify-between font-bold text-xl text-gray-900">
+            <span>Total</span>
+            <span id="finalAmount">₹<%= cart.totalAmount.toFixed(2) %></span>
+        </div>
+    </div>
+
+    <button 
+        id="placeOrderBtn" 
+        class="w-full mt-6 bg-green-500 text-white py-3 rounded-lg hover:bg-green-600 transition flex items-center justify-center"
+    >
+        <i class="fas fa-shopping-bag mr-2"></i>
+        Place Order (Cash on Delivery)
+    </button>
+</div>
+        </div>
+    </div>
+</div>
+<script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const placeOrderBtn = document.getElementById('placeOrderBtn');
+    const addressRadios = document.querySelectorAll('input[name="selectedAddress"]');
+    const paymentMethodRadios = document.querySelectorAll('input[name="paymentMethod"]');
+    const errorContainer = document.getElementById('orderErrorContainer');
+    const errorMessage = document.getElementById('orderErrorMessage');
+    const closeErrorBtn = document.getElementById('closeErrorBtn');
+    const walletRadio = document.getElementById('wallet');
+    
+    // Make walletBalance globally accessible
+    const walletBalance = <%= wallet ? wallet.balance : 0 %>;
+
+    // Original cart total without any discounts
+    const cartTotalElement = document.getElementById('cartTotal');
+    const finalAmountElement = document.getElementById('finalAmount');
+    let originalCartTotal = parseFloat(cartTotalElement.textContent.replace('₹', '').trim());
+
+    // Call this on page load to set initial COD availability
+    checkCODAvailability();
+    
+    // Update button text based on payment method
+    function updateButtonText() {
+        const selectedPaymentMethod = document.querySelector('input[name="paymentMethod"]:checked').value;
+        if (selectedPaymentMethod === 'cashOnDelivery') {
+            placeOrderBtn.innerHTML = '<i class="fas fa-shopping-bag mr-2"></i>Place Order (Cash on Delivery)';
+        } else if (selectedPaymentMethod === 'razorpay') {
+            placeOrderBtn.innerHTML = '<i class="fas fa-credit-card mr-2"></i>Pay Now with Razorpay';
+        } else if (selectedPaymentMethod === 'wallet') {
+            placeOrderBtn.innerHTML = '<i class="fas fa-wallet mr-2"></i>Pay with Wallet';
+        }
+    }
+    
+    // Add event listeners to payment method radios
+    paymentMethodRadios.forEach(radio => {
+        radio.addEventListener('change', updateButtonText);
+    });
+
+    // Function to show error message
+    function showErrorMessage(message) {
+        errorMessage.textContent = message;
+        errorContainer.classList.remove('hidden');
+    }
+
+    // Function to hide error message
+    function hideErrorMessage() {
+        errorContainer.classList.add('hidden');
+        errorMessage.textContent = '';
+    }
+
+    // Close error button event
+    if (closeErrorBtn) {
+        closeErrorBtn.addEventListener('click', hideErrorMessage);
+    }
+
+    // Initialize Razorpay payment
+    function initializeRazorpayPayment(orderData) {
+        const options = {
+            key: orderData.key,
+            amount: orderData.order.amount,
+            currency: orderData.order.currency,
+            name: "Your Store Name",
+            description: "Purchase",
+            order_id: orderData.order.id,
+            handler: function (response) {
+                // On successful payment
+                verifyPayment(response);
+            },
+            prefill: {
+                name: orderData.name,
+                email: "", // Add user's email if available
+                contact: "" // Add user's contact if available
+            },
+            theme: {
+                color: "#AB8462"
+            },
+            modal: {
+                ondismiss: function() {
+                    console.log('Checkout form closed');
+                    // Redirect to failure page when modal is dismissed
+                    window.location.href = '/order-failure';
+                }
+            }
+        };
+
+        const razorpayInstance = new Razorpay(options);
+        razorpayInstance.open();
+    }
+
+    // Verify Razorpay payment
+    function verifyPayment(response) {
+        fetch('/verify-payment', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(response)
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                window.location.href = `/order-success/${data.orderId}`;
+            } else {
+                window.location.href = `/order-failure${data.orderId ? '/' + data.orderId : ''}`;
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            window.location.href = '/order-failure';
+        });
+    }
+
+    // Check wallet balance function
+    function checkWalletBalance() {
+        const selectedPaymentMethod = document.querySelector('input[name="paymentMethod"]:checked').value;
+        if (selectedPaymentMethod === 'wallet') {
+            // Get the final amount
+            const finalAmountText = document.getElementById('finalAmount').textContent;
+            const finalAmount = parseFloat(finalAmountText.replace('₹', '').trim());
+            
+            // Check if wallet has enough balance
+            if (walletBalance < finalAmount) {
+                showErrorMessage('Insufficient wallet balance. Please choose another payment method.');
+                return false;
+            }
+        }
+        return true;
+    }
+
+
+function checkCODAvailability() {
+    const finalAmountElement = document.getElementById('finalAmount');
+    const finalAmountText = finalAmountElement.textContent;
+    const finalAmount = parseFloat(finalAmountText.replace('₹', '').trim());
+    
+    const cashOnDeliveryRadio = document.getElementById('cashOnDelivery');
+    const codPaymentMethod = cashOnDeliveryRadio.closest('.payment-method');
+    
+    // If order amount exceeds Rs 1000, disable COD option
+    if (finalAmount > 1000) {
+        cashOnDeliveryRadio.disabled = true;
+        
+        // If COD was selected, switch to another payment method
+        if (cashOnDeliveryRadio.checked) {
+            const alternativePaymentMethod = document.querySelector('input[name="paymentMethod"]:not([id="cashOnDelivery"])');
+            if (alternativePaymentMethod) {
+                alternativePaymentMethod.checked = true;
+                updateButtonText(); // Update button text
+            }
+        }
+        
+        // Add message about COD restriction
+        let codRestrictionMessage = document.getElementById('codRestrictionMessage');
+        if (!codRestrictionMessage) {
+            codRestrictionMessage = document.createElement('div');
+            codRestrictionMessage.id = 'codRestrictionMessage';
+            codRestrictionMessage.className = 'text-red-500 text-sm mt-1';
+            codRestrictionMessage.textContent = 'Cash on Delivery is not available for orders above ₹1000';
+            codPaymentMethod.appendChild(codRestrictionMessage);
+        }
+    } else {
+        // Enable COD when total is ≤ 1000
+        cashOnDeliveryRadio.disabled = false;
+        
+        // Remove restriction message if exists
+        const codRestrictionMessage = document.getElementById('codRestrictionMessage');
+        if (codRestrictionMessage) {
+            codRestrictionMessage.remove();
+        }
+    }
+}
+    placeOrderBtn.addEventListener('click', function() {
+        const selectedAddress = document.querySelector('input[name="selectedAddress"]:checked');
+        const selectedPaymentMethod = document.querySelector('input[name="paymentMethod"]:checked').value;
+        
+        if (!selectedAddress) {
+            showErrorMessage('Please select a shipping address before placing the order.');
+            return;
+        }
+
+        // Check wallet balance if wallet payment is selected
+        if (!checkWalletBalance()) {
+            return;
+        }
+
+        hideErrorMessage();
+
+        // Get coupon data from session storage if available
+        const appliedCoupon = JSON.parse(sessionStorage.getItem('appliedCoupon'));
+        const couponData = appliedCoupon ? { couponCode: appliedCoupon.code } : null;
+
+        if (selectedPaymentMethod === 'cashOnDelivery' || selectedPaymentMethod === 'wallet') {
+            // Cash on Delivery or Wallet payment flow
+            fetch('/place-order', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    addressId: selectedAddress.value,
+                    coupon: couponData,
+                    paymentMethod: selectedPaymentMethod
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    // Clear applied coupon from session storage after successful order
+                    sessionStorage.removeItem('appliedCoupon');
+                    window.location.href = `/order-success/${data.orderId}`;
+                } else {
+                    showErrorMessage(data.message || 'An unexpected error occurred');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                showErrorMessage('An error occurred while placing the order');
+            });
+        } else if (selectedPaymentMethod === 'razorpay') {
+            // Razorpay flow
+            fetch('/create-razorpay-order', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    addressId: selectedAddress.value,
+                    coupon: couponData
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    initializeRazorpayPayment(data);
+                } else {
+                    showErrorMessage(data.message || 'An unexpected error occurred');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                showErrorMessage('An error occurred while initializing payment');
+            });
+        }
+    });
+
+    // Set default address if available
+    const defaultAddressRadio = document.querySelector('input[data-is-default="true"]');
+    if (defaultAddressRadio) {
+        defaultAddressRadio.checked = true;
+    } else if (addressRadios.length > 0) {
+        addressRadios[0].checked = true;
+    }
+
+    // Initialize button text
+    updateButtonText();
+
+    // Coupon handling
+    const couponCodeInput = document.getElementById('couponCode');
+    const applyCouponBtn = document.getElementById('applyCouponBtn');
+    const couponMessage = document.getElementById('couponMessage');
+    const couponDetails = document.getElementById('couponDetails');
+    const appliedCouponCode = document.getElementById('appliedCouponCode');
+    const discountPercentage = document.getElementById('discountPercentage');
+    const removeCouponBtn = document.getElementById('removeCouponBtn');
+    const discountRow = document.getElementById('discountRow');
+    const discountAmount = document.getElementById('discountAmount');
+    const selectCouponBtns = document.querySelectorAll('.select-coupon-btn');
+    
+    // Apply coupon from the radio button selection
+    selectCouponBtns.forEach(btn => {
+        btn.addEventListener('click', async function() {
+            const code = this.getAttribute('data-code');
+            if (!code) return;
+            
+            try {
+                await applyCouponCode(code);
+            } catch (error) {
+                console.error('Error applying coupon:', error);
+                showCouponMessage('Failed to apply coupon', 'error');
+            }
+        });
+    });
+    
+    // Apply manual coupon
+    applyCouponBtn.addEventListener('click', async function() {
+        const code = couponCodeInput.value.trim();
+        if (!code) {
+            showCouponMessage('Please enter a coupon code', 'error');
+            return;
+        }
+        
+        try {
+            await applyCouponCode(code);
+        } catch (error) {
+            console.error('Error applying coupon:', error);
+            showCouponMessage('Failed to apply coupon', 'error');
+        }
+    });
+    
+    // Remove coupon
+    removeCouponBtn.addEventListener('click', async function() {
+    try {
+        const response = await fetch('/api/coupons/remove', {
+            method: 'DELETE',
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        });
+        
+        const data = await response.json();
+        
+        if (data.success) {
+            // Hide coupon details
+            couponDetails.classList.add('hidden');
+            
+            // Hide discount row
+            discountRow.classList.add('hidden');
+            
+            // Reset final amount to original cart total
+            finalAmountElement.textContent = `₹${originalCartTotal.toFixed(2)}`;
+            
+            // ✅ Check COD availability based on updated total
+            checkCODAvailability();
+            
+            // Clear input
+            couponCodeInput.value = '';
+            
+            // Show success message
+            showCouponMessage('Coupon removed successfully', 'success');
+            
+            // Clear coupon from session storage
+            sessionStorage.removeItem('appliedCoupon');
+            
+            // After 3 seconds, clear message
+            setTimeout(() => {
+                couponMessage.textContent = '';
+                couponMessage.className = 'mt-2 text-sm';
+            }, 3000);
+        } else {
+            showCouponMessage(data.message, 'error');
+        }
+    } catch (error) {
+        console.error('Error removing coupon:', error);
+        showCouponMessage('Failed to remove coupon', 'error');
+    }
+});
+
+    // Helper function to apply coupon code
+    async function applyCouponCode(code) {
+    // Get the cart total from the page (use the original total without any discounts)
+    const cartTotal = originalCartTotal;
+    
+    const response = await fetch('/api/coupons/validate', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ 
+            code: code,
+            cartTotal: cartTotal
+        }),
+    });
+    
+    const data = await response.json();
+    
+    if (data.success) {
+        // Show success message
+        showCouponMessage(`Coupon applied: ${data.coupon.discount}% off`, 'success');
+        
+        // Display coupon details
+        couponDetails.classList.remove('hidden');
+        appliedCouponCode.textContent = data.coupon.code;
+        discountPercentage.textContent = `(${data.coupon.discount}% OFF)`;
+        
+        // Show discount in order summary
+        discountRow.classList.remove('hidden');
+        
+        // Ensure we're using the exact calculated amount from the server
+        const discountAmountValue = parseFloat(data.coupon.discountAmount);
+        discountAmount.textContent = `-₹${discountAmountValue.toFixed(2)}`;
+        
+        // Update final amount with the server-calculated value
+        const finalAmount = parseFloat(data.coupon.discountedTotal);
+        finalAmountElement.textContent = `₹${finalAmount.toFixed(2)}`;
+        
+        // ✅ Check COD availability based on updated total
+        checkCODAvailability();
+        
+        // Store coupon in session storage with all necessary details
+        sessionStorage.setItem('appliedCoupon', JSON.stringify({
+            code: data.coupon.code,
+            discount: data.coupon.discount,
+            discountAmount: data.coupon.discountAmount,
+            discountedTotal: data.coupon.discountedTotal
+        }));
+        
+        // Clear input field
+        couponCodeInput.value = '';
+    } else {
+        showCouponMessage(data.message, 'error');
+    }
+}
+
+    
+    // Helper function to show coupon messages
+    function showCouponMessage(message, type) {
+        couponMessage.textContent = message;
+        couponMessage.className = 'mt-2 text-sm';
+        
+        if (type === 'success') {
+            couponMessage.classList.add('text-green-600');
+        } else if (type === 'error') {
+            couponMessage.classList.add('text-red-600');
+        }
+    }
+    
+    // Check if there's a previously applied coupon in sessionStorage
+    const savedCoupon = JSON.parse(sessionStorage.getItem('appliedCoupon'));
+    if (savedCoupon) {
+        // Display coupon details
+        couponDetails.classList.remove('hidden');
+        appliedCouponCode.textContent = savedCoupon.code;
+        discountPercentage.textContent = `(${savedCoupon.discount}% OFF)`;
+        
+        // Show discount in order summary
+        discountRow.classList.remove('hidden');
+        
+        // Make sure we display with proper formatting
+        const savedDiscountAmount = parseFloat(savedCoupon.discountAmount);
+        discountAmount.textContent = `-₹${savedDiscountAmount.toFixed(2)}`;
+        
+        // Update final amount with proper formatting
+        const savedFinalAmount = parseFloat(savedCoupon.discountedTotal);
+        finalAmountElement.textContent = `₹${savedFinalAmount.toFixed(2)}`;
+        
+        // Check COD availability based on loaded coupon
+        checkCODAvailability();
+    }
+});
+</script>
