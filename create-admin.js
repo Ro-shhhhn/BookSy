@@ -1,8 +1,9 @@
+require('dotenv').config();
 const mongoose = require('mongoose');
 const Admin = require('./models/adminuser');
 
 // Connect to MongoDB
-mongoose.connect('mongodb://localhost:27017/BookSy', { 
+mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/BookSy', { 
     useNewUrlParser: true, 
     useUnifiedTopology: true 
 })
