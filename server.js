@@ -3,7 +3,7 @@ const app = express();
 const mongoose = require('mongoose');
 const path = require("path");
 const session = require('express-session');
-const MongoStore = require('connect-mongo'); // You'll need to install this: npm install connect-mongo --save
+const MongoStore = require('connect-mongo'); 
 const cookieParser = require('cookie-parser');
 const fs = require('fs');
 const methodOverride = require('method-override');
@@ -11,12 +11,10 @@ const bodyParser = require('body-parser');
 const passport = require('passport');
 const flash = require('connect-flash');
 
-// Load environment variables first to ensure they're available
 require('dotenv').config();
 require('./config/passport');
 const cartRoutes = require('./routes/cartRoutes');
 
-// Updated MongoDB connection using environment variable with improved error handling
 mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/BookSy', {
     useNewUrlParser: true,
     useUnifiedTopology: true
