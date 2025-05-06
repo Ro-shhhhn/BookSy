@@ -234,6 +234,34 @@
                     </div>
                 </div>
 
+                <!-- Payment Information Section -->
+                <div class="mt-8">
+                    <h2 class="text-xl font-semibold mb-4">Other info</h2>
+                    <div class="bg-gray-50 p-4 rounded-lg">
+                        <div class="grid grid-cols-2 gap-4">
+                            <div>
+                                <p><strong>Payment Method:</strong> <%= order.paymentMethod %></p>
+                            
+                                  
+                               
+                            </div>
+                            <div>
+                                
+                                <!-- Coupon Information -->
+                                <% if (couponInfo) { %>
+                                    <p class="text-green-600">
+                                        <strong>Coupon Applied:</strong> <%= couponInfo.code %>
+                                        <span class="ml-2 px-2 py-1 rounded-full text-xs font-semibold bg-green-200 text-green-800">
+                                            ₹<%= couponInfo.discount.toFixed(2) %> off
+                                        </span>
+                                    </p>
+                                <% } %>
+                                
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
                 <!-- Order Items -->
                 <div class="mt-8">
                     <h2 class="text-xl font-semibold mb-4">Order Items</h2>
@@ -245,7 +273,7 @@
                                 <th class="px-4 py-3 text-right">Price</th>
                                 <th class="px-4 py-3 text-right">Discount</th>
                                 <th class="px-4 py-3 text-right">Applied Offer</th>
-                                <th class="px-4 py-3 text-right">Subtotal</th>
+                                <th class="px-4 py-3 text-right">Total(Excludes offers & coupons)</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -299,7 +327,7 @@
                         </tbody>
                         <tfoot>
                             <tr>
-                                <td colspan="5" class="text-right font-semibold px-4 py-3">Total:</td>
+                                <td colspan="5" class="text-right font-semibold px-4 py-3">SubTotal:</td>
                                 <td class="text-right font-bold px-4 py-3">₹<%= order.total ? order.total.toFixed(2) : '0.00' %></td>
                             </tr>
                         </tfoot>

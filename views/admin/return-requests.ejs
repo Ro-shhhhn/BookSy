@@ -130,9 +130,14 @@
                     <tbody>
                         <% returnRequests.forEach(request => { %>
                             <tr class="border-b">
-                                <td class="px-4 py-3"><%= request.order ? request.order.uniqueOrderId : 'N/A' %></td>                                <td class="px-4 py-3">
-                                    <%= request.user.name %><br>
-                                    <small class="text-gray-500"><%= request.user.email %></small>
+                                <td class="px-4 py-3"><%= request.order ? request.order.uniqueOrderId : 'N/A' %></td>
+                                <td class="px-4 py-3">
+                                    <% if (request.user) { %>
+                                        <%= request.user.name %><br>
+                                        <small class="text-gray-500"><%= request.user.email %></small>
+                                    <% } else { %>
+                                        <span class="text-gray-500">Unknown User</span>
+                                    <% } %>
                                 </td>
                                 <td class="px-4 py-3"><%= request.reason %></td>
                                 <td class="px-4 py-3">

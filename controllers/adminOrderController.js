@@ -224,12 +224,25 @@ exports.getOrderDetails = async (req, res) => {
             }
         }
         
-        res.render('admin/order-details', { order });
+        // Get coupon information if applied
+        let couponInfo = null;
+        if (order.couponCode) {
+            couponInfo = {
+                code: order.couponCode,
+                discount: order.discount || 0
+            };
+        }
+        
+        res.render('admin/order-details', { 
+            order,
+            couponInfo
+        });
     } catch (error) {
         console.error('Error fetching order details:', error);
         res.status(500).render('admin/error', { error: 'Failed to fetch order details' });
     }
 };
+
 exports.updateOrderStatus = async (req, res) => {
     try {
         const { orderId } = req.params;
@@ -405,13 +418,15 @@ exports.getReturnRequests = async (req, res) => {
             .limit(limit)
             .exec();
 
-            const validReturnRequests = returnRequests.filter(request => request.order !== null);
+        // Filter out return requests where order or user is null
+        const validReturnRequests = returnRequests.filter(request => 
+            request.order !== null && request.user !== null
+        );
 
-
-            res.render('admin/return-requests', { 
-                returnRequests: validReturnRequests,
-                currentPage: page,
-                totalPages: Math.ceil(totalReturnRequests / limit)
+        res.render('admin/return-requests', { 
+            returnRequests: validReturnRequests,
+            currentPage: page,
+            totalPages: Math.ceil(totalReturnRequests / limit)
         });
     } catch (error) {
         console.error('Error fetching return requests:', error);

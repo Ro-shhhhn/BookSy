@@ -1077,13 +1077,14 @@ exports.downloadExcel = async (req, res) => {
             
             // Create formatted items list for Excel
             const itemsList = order.items
-                .map(item => {
-                    const productName = typeof item.product === 'object' && item.product.title ? 
-                        item.product.title :
-                        'Unknown Product';
-                    return `${item.quantity}x ${productName}`;
-                })
-                .join(', ');
+            .map(item => {
+                // Enhanced null checking for product
+                const productName = item.product && typeof item.product === 'object' && item.product.title ? 
+                    item.product.title :
+                    'Unknown Product';
+                return `${item.quantity}x ${productName}`;
+            })
+            .join(', ');
             
             // Fill order data
             ordersSheet.getCell(`A${rowIndex}`).value = orderId;
@@ -1167,26 +1168,27 @@ exports.downloadExcel = async (req, res) => {
         orders.forEach(order => {
             if (order.items && Array.isArray(order.items)) {
                 order.items.forEach(item => {
-                    if (item.product) {
-                        // Properly handle both populated objects and IDs
+                    // Added additional null checks here
+                    if (item && item.product) {
+                        // Get the product ID safely
                         const productId = typeof item.product === 'object' && item.product._id ? 
                             item.product._id.toString() : 
-                            item.product.toString();
+                            (item.product ? item.product.toString() : 'unknown');
                         
-                        // Get product name properly
+                        // Get product details safely with null checks
                         let productName = 'Unknown Product';
                         let productAuthor = '';
                         let productPrice = 0;
                         
-                        if (typeof item.product === 'object') {
+                        if (item.product && typeof item.product === 'object') {
                             if (item.product.title) {
                                 productName = item.product.title;
-                                if (item.product.author) {
-                                    productAuthor = item.product.author;
-                                }
-                                if (item.product.price) {
-                                    productPrice = Number(item.product.price);
-                                }
+                            }
+                            if (item.product.author) {
+                                productAuthor = item.product.author;
+                            }
+                            if (item.product.price) {
+                                productPrice = Number(item.product.price);
                             }
                         }
                         
