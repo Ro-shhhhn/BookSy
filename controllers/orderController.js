@@ -81,7 +81,7 @@ exports.getOrderDetailsPage = async (req, res) => {
             shippingAddressName: order.shippingAddress?.name,
             itemsCount: order.items.length
         });
-        
+
         const processedOrder = order.toObject();
         processedOrder.totalAmount = order.total;
 

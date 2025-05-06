@@ -243,6 +243,8 @@
                                 <th class="px-4 py-3 text-left">Product</th>
                                 <th class="px-4 py-3 text-center">Quantity</th>
                                 <th class="px-4 py-3 text-right">Price</th>
+                                <th class="px-4 py-3 text-right">Discount</th>
+                                <th class="px-4 py-3 text-right">Applied Offer</th>
                                 <th class="px-4 py-3 text-right">Subtotal</th>
                             </tr>
                         </thead>
@@ -269,13 +271,35 @@
                                     </td>
                                     <td class="px-4 py-3 text-center"><%= item.quantity %></td>
                                     <td class="px-4 py-3 text-right">₹<%= item.price.toFixed(2) %></td>
+                                    <td class="px-4 py-3 text-right">
+                                        <% if (item.discountedPrice && item.discountedPrice > 0) { %>
+                                            ₹<%= item.discountedPrice.toFixed(2) %>
+                                        <% } else { %>
+                                            -
+                                        <% } %>
+                                    </td>
+                                    <td class="px-4 py-3 text-right">
+                                        <% if (item.discountedPrice && item.discountedPrice > 0) { %>
+                                            <% if (item.discountSource === 'product') { %>
+                                                <span class="px-2 py-1 rounded-full text-xs font-semibold bg-blue-200 text-blue-800">
+                                                    Product Offer
+                                                </span>
+                                            <% } else if (item.discountSource === 'category') { %>
+                                                <span class="px-2 py-1 rounded-full text-xs font-semibold bg-green-200 text-green-800">
+                                                    Category Offer
+                                                </span>
+                                            <% } %>
+                                        <% } else { %>
+                                            -
+                                        <% } %>
+                                    </td>
                                     <td class="px-4 py-3 text-right">₹<%= (item.quantity * item.price).toFixed(2) %></td>
                                 </tr>
                             <% }); %>
                         </tbody>
                         <tfoot>
                             <tr>
-                                <td colspan="3" class="text-right font-semibold px-4 py-3">Total:</td>
+                                <td colspan="5" class="text-right font-semibold px-4 py-3">Total:</td>
                                 <td class="text-right font-bold px-4 py-3">₹<%= order.total ? order.total.toFixed(2) : '0.00' %></td>
                             </tr>
                         </tfoot>

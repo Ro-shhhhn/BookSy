@@ -99,9 +99,12 @@ const validateAddress = (req, res, next) => {
         req.session.formData = req.body;
         req.session.formErrors = errors;
         
+        // Keep the original ID in the redirect URL to prevent duplication
         const isCheckout = req.originalUrl.includes('/checkout/');
+        const checkoutParam = isCheckout ? '?checkout=true' : '';
+        const returnPath = `/${isCheckout ? 'checkout/' : ''}edit-address/${id}${checkoutParam}`;
         
-        return res.redirect(`${isCheckout ? '/checkout' : ''}/edit-address/${id}`);
+        return res.redirect(returnPath);
     }
     
     delete req.session.formData;

@@ -53,7 +53,13 @@
                 <form action="/signup" method="POST" autocomplete="on">
                     <div class="mb-3">
                         <input type="text" name="name" id="name" placeholder="Name" class="w-full px-3 py-2 border border-gray-300 rounded text-sm focus:outline-none focus:ring-1 focus:ring-amber-500" value="<%= locals.formData ? formData.name : '' %>" required autocomplete="name" />
+                        <% if (locals.nameError) { %>
+                            <div class="text-red-500 text-xs mt-1"><%= locals.nameError %></div>
+                        <% } %>
                     </div>
+                    <!-- Add a helper message under the name field for user guidance -->
+                    <p class="text-xs text-gray-500 mb-3">Name should only contain letters, spaces, apostrophes, periods, and hyphens.</p>
+                    
                     <div class="mb-3">
                         <input type="email" name="email" id="email" placeholder="Email" class="w-full px-3 py-2 border border-gray-300 rounded text-sm focus:outline-none focus:ring-1 focus:ring-amber-500" value="<%= locals.formData ? formData.email : '' %>" required autocomplete="email" />
                         <% if (locals.emailError) { %>
@@ -104,6 +110,54 @@
             const type = input.type === 'password' ? 'text' : 'password';
             input.type = type;
         }
+
+        // Add this to your signup.ejs template, inside the <script> section at the bottom
+        // This provides immediate feedback to users before they submit the form
+        document.addEventListener('DOMContentLoaded', function() {
+            const nameInput = document.getElementById('name');
+            const nameError = document.createElement('div');
+            nameError.className = 'text-red-500 text-xs mt-1 hidden';
+            nameInput.parentNode.appendChild(nameError);
+            
+            nameInput.addEventListener('input', function() {
+                const name = this.value.trim();
+                let errorMessage = '';
+                
+                // Check if empty
+                if (name === '') {
+                    errorMessage = 'Name cannot be empty.';
+                }
+                // Check allowed characters
+                else if (!/^[A-Za-z\s'.-]+$/.test(name)) {
+                    errorMessage = 'Name can only contain letters, spaces, apostrophes, periods, and hyphens.';
+                }
+                // Check for consecutive spaces
+                else if (/\s\s/.test(name)) {
+                    errorMessage = 'Name should not contain consecutive spaces.';
+                }
+                // Check if too short
+                else if (name.length < 2) {
+                    errorMessage = 'Name is too short.';
+                }
+                // Check if too long
+                else if (name.length > 50) {
+                    errorMessage = 'Name is too long (maximum 50 characters).';
+                }
+                // Check if starts or ends with space
+                else if (name.startsWith(' ') || name.endsWith(' ')) {
+                    errorMessage = 'Name should not start or end with a space.';
+                }
+
+                if (errorMessage) {
+                    nameError.textContent = errorMessage;
+                    nameError.classList.remove('hidden');
+                    this.classList.add('border-red-500');
+                } else {
+                    nameError.classList.add('hidden');
+                    this.classList.remove('border-red-500');
+                }
+            });
+        });
     </script>
 </body>
 </html>

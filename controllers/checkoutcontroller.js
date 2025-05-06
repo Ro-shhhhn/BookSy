@@ -189,7 +189,6 @@ exports.renderCheckoutPage = async (req, res) => {
     }
 };
 
-
 exports.placeOrder = async (req, res) => {
     try {
         const { addressId, coupon, paymentMethod } = req.body;
@@ -487,7 +486,6 @@ exports.orderSuccessPage = async (req, res) => {
         res.redirect('/');
     }
 };
-
 exports.renderEditAddressForCheckout = async (req, res) => {
     try {
         const { id } = req.params;
@@ -515,7 +513,8 @@ exports.renderEditAddressForCheckout = async (req, res) => {
             address: formData || address || null,
             errors: formErrors,
             error: req.query.error || null,
-            fromCheckout: true  
+            fromCheckout: true,
+            addressId: id  // Pass the ID to the template
         });
     } catch (error) {
         console.error('Error loading address form for checkout:', error);

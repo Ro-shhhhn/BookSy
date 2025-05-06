@@ -159,7 +159,7 @@ exports.getOrderDetails = async (req, res) => {
             .populate('user')
             .populate({
                 path: 'items.product',
-                select: 'title images coverImage' 
+                select: 'title images coverImage price discountPrice category' 
             });
         
         // Only try to populate shippingAddress if it exists
@@ -174,6 +174,56 @@ exports.getOrderDetails = async (req, res) => {
             return res.status(404).render('admin/error', { error: 'Order not found' });
         }
 
+        // Fetch active category offers for all products in the order
+        const offerUtils = require('../utils/offerUtils');
+        const categoryIds = [...new Set(order.items
+            .filter(item => item.product && item.product.category)
+            .map(item => item.product.category.toString()))];
+        
+        const categoryOffers = {};
+        
+        // Get all relevant active category offers
+        for (const categoryId of categoryIds) {
+            const offer = await offerUtils.getActiveCategoryOffer(categoryId);
+            if (offer) {
+                categoryOffers[categoryId] = offer;
+            }
+        }
+        
+        // Add discount source info to each order item
+        for (const item of order.items) {
+            if (!item.product) continue;
+            
+            // Get original price and discount info
+            const productPrice = item.price;
+            const productDiscountPrice = item.product.discountPrice || 0;
+            
+            // Check if there was a category offer applied
+            let categoryOffer = null;
+            if (item.product.category) {
+                const categoryId = item.product.category.toString();
+                categoryOffer = categoryOffers[categoryId];
+            }
+            
+            // Calculate which offer was better and mark it
+            const productDiscount = productDiscountPrice;
+            const categoryDiscount = categoryOffer ? 
+                Math.floor(productPrice * categoryOffer.discountPercentage / 100) : 0;
+            
+            // Add discount source info
+            if (productDiscount > 0 || categoryDiscount > 0) {
+                if (categoryDiscount > productDiscount) {
+                    item.discountSource = 'category';
+                    item.discountedPrice = categoryDiscount;
+                    item.discountPercentage = categoryOffer.discountPercentage;
+                } else if (productDiscount > 0) {
+                    item.discountSource = 'product';
+                    item.discountedPrice = productDiscount;
+                    item.discountPercentage = Math.round((productDiscount / productPrice) * 100);
+                }
+            }
+        }
+        
         res.render('admin/order-details', { order });
     } catch (error) {
         console.error('Error fetching order details:', error);

@@ -1,4 +1,3 @@
-// models/addressModel.js
 const mongoose = require('mongoose');
 const { validCountries } = require('../middleware/addressValidation');
 

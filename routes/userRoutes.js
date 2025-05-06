@@ -14,6 +14,45 @@ const addressValidation = require('../middleware/addressValidation');
 const offerMiddleware = require('../middleware/offerMiddleware');
 const Wallet = require('../models/walletModel');
 
+// Name validation function
+const validateName = (name) => {
+  // Name should not be empty
+  if (!name || name.trim() === '') {
+    return { valid: false, message: 'Name cannot be empty.' };
+  }
+  
+  // Name should not contain special characters or numbers
+  // Only allow letters, spaces, and some basic punctuation 
+  const nameRegex = /^[A-Za-z\s'.-]+$/;
+  if (!nameRegex.test(name)) {
+    return { 
+      valid: false, 
+      message: 'Name can only contain letters, spaces, apostrophes, periods, and hyphens.' 
+    };
+  }
+  
+  // Name should not be too short or too long
+  if (name.length < 2) {
+    return { valid: false, message: 'Name is too short.' };
+  }
+  
+  if (name.length > 50) {
+    return { valid: false, message: 'Name is too long (maximum 50 characters).' };
+  }
+  
+  // Name should not have excessive spaces
+  if (name.includes('  ')) {
+    return { valid: false, message: 'Name should not contain consecutive spaces.' };
+  }
+  
+  // Name should not start or end with a space
+  if (name.startsWith(' ') || name.endsWith(' ')) {
+    return { valid: false, message: 'Name should not start or end with a space.' };
+  }
+  
+  return { valid: true };
+};
+
 router.get('/', (req, res) => {
     res.render('user/home', { 
         title: 'BookSy - Home',
@@ -61,7 +100,18 @@ router.post("/signup", async (req, res) => {
         const { name, email, password, confirmPassword, referralCode } = req.body;
         const normalizedEmail = email.trim().toLowerCase();
 
-        const formData = { name, normalizedEmail };
+        const formData = { name, email: normalizedEmail };
+        
+        // Validate name
+        const nameValidation = validateName(name);
+        if (!nameValidation.valid) {
+            return res.render("user/signup", { 
+                title: "Sign Up - BookSy", 
+                nameError: nameValidation.message,
+                formData,
+                referralCode
+            });
+        }
         
         const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
         if (!emailRegex.test(normalizedEmail)) {
@@ -331,7 +381,6 @@ router.post('/user/reset-password/:token', userController.resetPassword);
 router.get('/addresses', authMiddleware.isActiveUser, userController.getAddresses);
 router.get('/edit-address/:id', authMiddleware.isActiveUser, userController.getEditAddress);
 router.post('/edit-address/:id', authMiddleware.isActiveUser, addressValidation.validateAddress, userController.saveAddress);
-router.get('/delete-address/:id', authMiddleware.isActiveUser, userController.deleteAddress);
 router.get('/confirm-delete-address/:id', authMiddleware.isActiveUser, userController.confirmDeleteAddress);
 router.post('/delete-address/:id', authMiddleware.isActiveUser, userController.deleteAddress);
 

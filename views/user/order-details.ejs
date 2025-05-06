@@ -292,7 +292,28 @@
                         <div class="flex-grow">
                             <h3 class="font-bold"><%= item.product.title %></h3>
                             <p>Quantity: <%= item.quantity %></p>
-                            <p>Price: ₹<%= item.price %></p>
+                            
+                            <!-- Price display with discount info -->
+                            <p class="flex items-center">
+                                <% if (item.price !== item.discountedPrice) { %>
+                                    <span class="line-through text-gray-500 mr-2">₹<%= item.price %></span>
+                                    <span class="font-medium">₹<%= item.discountedPrice %></span>
+                                    
+                                    <!-- Added discount source info badge -->
+                                    <% if (item.discountSource && item.discountSource !== 'none') { %>
+                                        <span class="ml-2 px-2 py-1 rounded-full text-xs 
+                                            <%= item.discountSource === 'category' ? 'bg-blue-200 text-blue-800' : 'bg-green-200 text-green-800' %>">
+                                            <%= item.discountSource === 'category' ? 'Category Offer' : 'Product Offer' %>
+                                            <% if (item.discountPercentage) { %>
+                                                (<%= item.discountPercentage %>% off)
+                                            <% } %>
+                                        </span>
+                                    <% } %>
+                                <% } else { %>
+                                    <span>₹<%= item.price %></span>
+                                <% } %>
+                            </p>
+                            
                             <% if (item.returnStatus && item.returnStatus !== 'None') { %>
                                 <p class="mt-2">
                                     <span class="

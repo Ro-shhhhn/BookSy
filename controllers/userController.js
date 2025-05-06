@@ -398,17 +398,23 @@ updateProfile: async (req, res) => {
                 }
             }
             
+            // Get form data and errors from session if they exist
             const formData = req.session.formData || null;
             const formErrors = req.session.formErrors || null;
             
+            // Clear session data to prevent future issues
             delete req.session.formData;
             delete req.session.formErrors;
+            
+            const isFromCheckout = req.query.checkout === 'true';
             
             res.render('user/edit-address', {
                 title: id === 'new' ? 'Add New Address' : 'Edit Address',
                 address: formData || address || null, 
                 errors: formErrors,
-                error: req.query.error || null
+                error: req.query.error || null,
+                fromCheckout: isFromCheckout,
+                addressId: id  // Pass only the ID instead of the entire req object
             });
         } catch (error) {
             console.error('Error loading address form:', error);
@@ -424,12 +430,9 @@ updateProfile: async (req, res) => {
                 state, postalCode, country, phone, isDefault 
             } = req.body;
             
-if (!name || !addressLine1 || !city || !state || !postalCode || !phone) {
-    req.session.formData = req.body;
-    req.session.formErrors = { general: 'Please fill all required fields' };
-    return res.redirect(`/edit-address/${id}`);
-}
             const setAsDefault = isDefault === 'on';
+            const isFromCheckout = req.query.checkout === 'true';
+            const redirectBase = isFromCheckout ? '/checkout' : '/addresses';
             
             if (id === 'new') {
                 const newAddress = new Address({
@@ -454,7 +457,7 @@ if (!name || !addressLine1 || !city || !state || !postalCode || !phone) {
                     );
                 }
                 
-                return res.redirect('/addresses?message=Address added successfully');
+                return res.redirect(`${redirectBase}?message=Address added successfully`);
             } else {
                 const address = await Address.findOne({ 
                     _id: id, 
@@ -462,7 +465,7 @@ if (!name || !addressLine1 || !city || !state || !postalCode || !phone) {
                 });
                 
                 if (!address) {
-                    return res.redirect('/addresses?error=Address not found');
+                    return res.redirect(`${redirectBase}?error=Address not found`);
                 }
                 
                 address.name = name;
@@ -484,13 +487,17 @@ if (!name || !addressLine1 || !city || !state || !postalCode || !phone) {
                     );
                 }
                 
-                return res.redirect('/addresses?message=Address updated successfully');
+                return res.redirect(`${redirectBase}?message=Address updated successfully`);
             }
-        }catch (error) {
+        } catch (error) {
             console.error('Error saving address:', error);
-            req.session.formData = req.body;
+            const isFromCheckout = req.query.checkout === 'true';
+            const redirectPath = `/${isFromCheckout ? 'checkout/' : ''}edit-address/${req.params.id}`;
+            
+            req.session.formData = req.body;  
             req.session.formErrors = { general: 'Failed to save address' };
-            return res.redirect(`/edit-address/${req.params.id}`);
+            
+            return res.redirect(redirectPath);
         }
     },
     confirmDeleteAddress: async (req, res) => {
