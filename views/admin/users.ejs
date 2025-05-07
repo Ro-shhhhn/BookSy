@@ -216,14 +216,11 @@
                             <% users.forEach(user => { %>
                                 <tr class="hover:bg-gray-50">
                                     <td class="px-6 py-4 whitespace-nowrap">
-                                        <div class="w-10 h-10 rounded-full overflow-hidden bg-gray-200">
-                                            <% if (user.profileImage) { %>
-                                                <img src="/uploads/profiles/<%= user.profileImage %>" alt="<%= user.name %>" class="w-full h-full object-cover">
-                                            <% } else { %>
-                                                <div class="w-full h-full flex items-center justify-center text-white <%= user.isBlocked ? 'bg-red-500' : 'bg-green-500' %>">
-                                                    <%= user.name && user.name.length > 0 ? user.name.charAt(0).toUpperCase() : '?' %>
-                                                </div>
-                                            <% } %>
+                                        <div class="w-10 h-10 rounded-full overflow-hidden">
+                                            <!-- Remove the image tag and always use the letter avatar -->
+                                            <div class="w-full h-full flex items-center justify-center text-white <%= user.isBlocked ? 'bg-red-500' : 'bg-blue-500' %>">
+                                                <%= user.name && user.name.length > 0 ? user.name.charAt(0).toUpperCase() : '?' %>
+                                            </div>
                                         </div>
                                     </td>
                                     <td class="px-6 py-4 whitespace-nowrap">
