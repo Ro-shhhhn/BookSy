@@ -162,7 +162,7 @@ exports.getOrderDetails = async (req, res) => {
                 select: 'title images coverImage price discountPrice category' 
             });
         
-        // Only try to populate shippingAddress if it exists
+       
         if (order.shippingAddress) {
             await order.populate({
                 path: 'shippingAddress',
@@ -174,7 +174,6 @@ exports.getOrderDetails = async (req, res) => {
             return res.status(404).render('admin/error', { error: 'Order not found' });
         }
 
-        // Fetch active category offers for all products in the order
         const offerUtils = require('../utils/offerUtils');
         const categoryIds = [...new Set(order.items
             .filter(item => item.product && item.product.category)
@@ -182,7 +181,6 @@ exports.getOrderDetails = async (req, res) => {
         
         const categoryOffers = {};
         
-        // Get all relevant active category offers
         for (const categoryId of categoryIds) {
             const offer = await offerUtils.getActiveCategoryOffer(categoryId);
             if (offer) {
@@ -190,27 +188,22 @@ exports.getOrderDetails = async (req, res) => {
             }
         }
         
-        // Add discount source info to each order item
         for (const item of order.items) {
             if (!item.product) continue;
             
-            // Get original price and discount info
             const productPrice = item.price;
             const productDiscountPrice = item.product.discountPrice || 0;
             
-            // Check if there was a category offer applied
             let categoryOffer = null;
             if (item.product.category) {
                 const categoryId = item.product.category.toString();
                 categoryOffer = categoryOffers[categoryId];
             }
             
-            // Calculate which offer was better and mark it
             const productDiscount = productDiscountPrice;
             const categoryDiscount = categoryOffer ? 
                 Math.floor(productPrice * categoryOffer.discountPercentage / 100) : 0;
             
-            // Add discount source info
             if (productDiscount > 0 || categoryDiscount > 0) {
                 if (categoryDiscount > productDiscount) {
                     item.discountSource = 'category';
@@ -224,7 +217,6 @@ exports.getOrderDetails = async (req, res) => {
             }
         }
         
-        // Get coupon information if applied
         let couponInfo = null;
         if (order.couponCode) {
             couponInfo = {
@@ -248,21 +240,19 @@ exports.updateOrderStatus = async (req, res) => {
         const { orderId } = req.params;
         const { orderStatus } = req.body;
         
-        // First fetch the current order
         const order = await Order.findById(orderId);
         
         if (!order) {
             return res.status(404).json({ error: 'Order not found' });
         }
         
-        // Define valid status transitions
         const statusFlow = {
             'Pending': ['Processing', 'Cancelled'],
             'Processing': ['Shipped', 'Cancelled'],
             'Shipped': ['Delivered', 'Cancelled'],
-            'Delivered': ['Returned'], // Once delivered, can only be returned
-            'Returned': [], // Terminal state
-            'Cancelled': [] // Terminal state
+            'Delivered': ['Returned'], 
+            'Returned': [], 
+            'Cancelled': [] 
         };
         
         // Check if the transition is valid

@@ -118,62 +118,64 @@ const userController = {
         }
     },
     
-
-updateProfile: async (req, res) => {
-    try {
-        const { name, email } = req.body;
-        const userId = req.session.userId;
-        const user = await User.findById(userId);
-        
-        if (!user) {
-            return res.redirect('/login');
-        }
-        
-        if (req.file) {
-            user.profileImage = `/uploads/profiles/${req.file.filename}`;
-        }
-        
-        if (email !== user.email) {
-            const otp = Math.floor(1000 + Math.random() * 9000).toString();
+    updateProfile: async (req, res) => {
+        try {
+            const { name, email } = req.body;
+            const userId = req.session.userId;
+            const user = await User.findById(userId);
             
-            req.session.pendingEmailChange = {
-                newEmail: email,
-                currentEmail: user.email
-            };
+            if (!user) {
+                return res.redirect('/login');
+            }
             
-            await OTP.findOneAndUpdate(
-                { email },
-                { 
-                    email,
-                    otp, 
-                    expiresAt: new Date(Date.now() + 5 * 60 * 1000) // 5 minutes expiry
-                },
-                { upsert: true, new: true }
-            );
+            // Check if a file was uploaded and handle the profile image
+            if (req.file) {
+                // For disk storage, we can use this path format
+                user.profileImage = `/uploads/profiles/${req.file.filename}`;
+                console.log('Profile image updated:', user.profileImage);
+            }
             
-            await sendEmail(
-                email, 
-                'Verify Your New Email Address', 
-                `Your OTP for email verification is: ${otp}. This code will expire in 5 minutes.`
-            );
+            if (email !== user.email) {
+                const otp = Math.floor(1000 + Math.random() * 9000).toString();
+                
+                req.session.pendingEmailChange = {
+                    newEmail: email,
+                    currentEmail: user.email
+                };
+                
+                await OTP.findOneAndUpdate(
+                    { email },
+                    { 
+                        email,
+                        otp, 
+                        expiresAt: new Date(Date.now() + 5 * 60 * 1000) // 5 minutes expiry
+                    },
+                    { upsert: true, new: true }
+                );
+                
+                await sendEmail(
+                    email, 
+                    'Verify Your New Email Address', 
+                    `Your OTP for email verification is: ${otp}. This code will expire in 5 minutes.`
+                );
+                
+                user.name = name;
+                await user.save();
+                
+                return res.redirect(`/verify-email-change?email=${encodeURIComponent(email)}`);
+            }
             
             user.name = name;
             await user.save();
             
-            return res.redirect(`/verify-email-change?email=${encodeURIComponent(email)}`);
+            req.session.userName = name;
+            
+            return res.redirect('/profile?message=Profile updated successfully');
+        } catch (error) {
+            console.error('Error updating profile:', error);
+            return res.redirect('/edit-profile?error=Failed to update profile');
         }
-        
-        user.name = name;
-        await user.save();
-        
-        req.session.userName = name;
-        
-        return res.redirect('/profile?message=Profile updated successfully');
-    } catch (error) {
-        console.error('Error updating profile:', error);
-        return res.redirect('/edit-profile?error=Failed to update profile');
-    }
-},
+    },
     getVerifyEmailChange: (req, res) => {
         const { email } = req.query;
         
@@ -398,11 +400,11 @@ updateProfile: async (req, res) => {
                 }
             }
             
-            // Get form data and errors from session if they exist
+            
             const formData = req.session.formData || null;
             const formErrors = req.session.formErrors || null;
             
-            // Clear session data to prevent future issues
+            
             delete req.session.formData;
             delete req.session.formErrors;
             
@@ -414,7 +416,7 @@ updateProfile: async (req, res) => {
                 errors: formErrors,
                 error: req.query.error || null,
                 fromCheckout: isFromCheckout,
-                addressId: id  // Pass only the ID instead of the entire req object
+                addressId: id  
             });
         } catch (error) {
             console.error('Error loading address form:', error);

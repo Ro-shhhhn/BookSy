@@ -11,7 +11,7 @@ router.get('/order-success/:orderId', isLoggedIn, isActiveUser, checkoutControll
 router.get('/checkout/edit-address/:id', isLoggedIn, isActiveUser, checkoutController.renderEditAddressForCheckout);
 router.post('/checkout/edit-address/:id', isLoggedIn, isActiveUser, addressValidation.validateAddress, checkoutController.saveAddressFromCheckout);
 router.post('/checkout/set-default-address/:id', isLoggedIn, isActiveUser, checkoutController.setDefaultAddress);
-// Add these routes to your routes file
+
 router.post('/create-razorpay-order', isLoggedIn, isActiveUser, checkoutController.createRazorpayOrder);
 router.post('/verify-payment', isLoggedIn, isActiveUser, checkoutController.verifyRazorpayPayment);
 router.get('/order-failure/:orderId?', isLoggedIn, isActiveUser, checkoutController.orderFailurePage);

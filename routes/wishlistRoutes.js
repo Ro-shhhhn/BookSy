@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const wishlistController = require('../controllers/wishlistController');
-const { isLoggedIn } = require('../middleware/authMiddleware'); // Assuming you have auth middleware
+const { isLoggedIn } = require('../middleware/authMiddleware'); 
 
 router.get('/', isLoggedIn, wishlistController.getWishlist);
 

@@ -283,7 +283,6 @@ const getDailyDiscountData = async (startDate, endDate, orderStatus) => {
 
 exports.downloadPdf = async (req, res) => {
     try {
-        // Get the same data as in the sales report
         let endDate = req.query.endDate ? new Date(req.query.endDate) : new Date();
         endDate.setHours(23, 59, 59, 999);
 
@@ -294,7 +293,6 @@ exports.downloadPdf = async (req, res) => {
             startDate.setDate(startDate.getDate() - 30);
         }
 
-        // Apply the same filter logic as getSalesReport
         const filterType = req.query.filterType || 'custom';
 
         if (filterType === 'daily') {
@@ -339,12 +337,11 @@ exports.downloadPdf = async (req, res) => {
         const dailySalesData = await getDailySalesData(startDate, endDate, orderStatusFilter);
         const discountData = await getDailyDiscountData(startDate, endDate, orderStatusFilter);
 
-        // Get detailed order data - IMPORTANT: properly populate product information
         const orders = await Order.find(filter)
             .populate('user', 'email')
             .populate({
                 path: 'items.product',
-                select: 'title author price'  // Changed from 'name' to 'title author'
+                select: 'title author price'  
             })
             .sort({ createdAt: -1 });
 
@@ -356,18 +353,15 @@ exports.downloadPdf = async (req, res) => {
                 Title: 'Sales Report',
                 Author: 'Your E-commerce Store'
             },
-            bufferPages: true // Enable buffering all pages
+            bufferPages: true 
         });
 
-        // Set response headers
         const reportFileName = `sales-report-${startDate.toISOString().split('T')[0]}-to-${endDate.toISOString().split('T')[0]}.pdf`;
         res.setHeader('Content-Type', 'application/pdf');
         res.setHeader('Content-Disposition', `attachment; filename=${reportFileName}`);
 
-        // Pipe the PDF document to the response
         doc.pipe(res);
 
-        // Fix: Use a simple Rs. prefix instead of the symbol to avoid encoding issues
         const formatCurrencyForPdf = (amount) => {
             if (isNaN(amount) || amount === null || amount === undefined) {
                 return 'Rs. 0.00';
@@ -375,7 +369,6 @@ exports.downloadPdf = async (req, res) => {
             return 'Rs. ' + parseFloat(amount).toFixed(2).replace(/\d(?=(\d{3})+\.)/g, '$&,');
         };
 
-        // Add company logo placeholder
         doc.fontSize(24).fillColor('#1e3a8a').text('BookSy', { align: 'center' });
         doc.fontSize(16).fillColor('#1e3a8a').text('Sales Report', { align: 'center' });
 
@@ -398,7 +391,6 @@ exports.downloadPdf = async (req, res) => {
         const summaryTableTop = doc.y;
         const summaryColWidth = (doc.page.width - 100) / 2;
 
-        // Add summary data
         doc.fontSize(10).fillColor('#000');
 
         // Row 1
@@ -423,7 +415,6 @@ exports.downloadPdf = async (req, res) => {
 
         doc.moveDown(6);
 
-        // Add category performance section
         doc.fontSize(14).fillColor('#1e3a8a').text('Category Performance', { underline: true });
         doc.moveDown();
 
@@ -434,21 +425,19 @@ exports.downloadPdf = async (req, res) => {
         doc.text('Sales Amount', 250, categoryTableTop, { width: 200, align: 'right' });
         doc.text('Percentage', 450, categoryTableTop, { width: 100, align: 'right' });
 
-        // Add horizontal line
         doc.moveTo(50, categoryTableTop + 15)
             .lineTo(550, categoryTableTop + 15)
             .stroke('#cccccc');
 
-        // Add category data
         let categoryY = categoryTableTop + 20;
         let totalCategorySales = categoryStats.reduce((sum, cat) => sum + (cat.totalSales || 0), 0);
 
         categoryStats.forEach((category, index) => {
-            if (categoryY > 700) { // Check if we need a new page
+            if (categoryY > 700) { 
                 doc.addPage();
                 categoryY = 50;
 
-                // Re-add headers on new page
+               
                 doc.fontSize(10).fillColor('#666666');
                 doc.text('Category', 50, categoryY, { width: 200 });
                 doc.text('Sales Amount', 250, categoryY, { width: 200, align: 'right' });
@@ -483,7 +472,7 @@ exports.downloadPdf = async (req, res) => {
 
         doc.moveDown(2);
 
-        // Add recent orders section
+        
         if (orders.length > 0) {
             doc.addPage();
             doc.fontSize(14).fillColor('#1e3a8a').text('Recent Orders', { underline: true });
@@ -1202,7 +1191,7 @@ exports.downloadExcel = async (req, res) => {
                             };
                         }
                         
-                        // Make sure quantity and price are numbers
+                     
                         const quantity = Number(item.quantity) || 0;
                         const price = Number(item.price) || 0;
                         
@@ -1213,12 +1202,12 @@ exports.downloadExcel = async (req, res) => {
             }
         });
         
-        // Convert to array and sort by revenue
+     
         const topProducts = Object.values(productSales)
             .sort((a, b) => b.revenue - a.revenue)
-            .slice(0, 25); // Show top 25 products
+            .slice(0, 25); 
         
-        // Add products table headers
+       
         const productHeaders = ['Product', 'Author', 'Price', 'Quantity Sold', 'Revenue'];
         productHeaders.forEach((header, i) => {
             const col = String.fromCharCode(65 + i); // A, B, C, etc.

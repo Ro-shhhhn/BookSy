@@ -91,7 +91,7 @@ exports.addProduct = async (req, res) => {
             return res.status(400).json({ error: 'At least one image is required' });
         }
 
-        // Check if a product with the same title already exists
+        
         const existingProduct = await Product.findOne({ title: productName.trim() });
         if (existingProduct) {
             return res.status(400).json({ 
@@ -175,7 +175,7 @@ exports.getAllProducts = async (req, res) => {
                 categoryName: p.category?.name || 'Uncategorized' 
             })),
             currentSort: sortOption,
-            success: successMessage // Pass success message to template
+            success: successMessage 
         });
     } catch (error) {
         console.error('Error fetching products:', error);
@@ -371,16 +371,16 @@ exports.updateProduct = async (req, res) => {
             return res.status(400).json({ error: 'Book title is required' });
         }
         
-        // Get current product
+        
         const currentProduct = await Product.findById(productId);
         if (!currentProduct) {
             return res.status(404).json({ error: 'Product not found' });
         }
         
-        // Check for duplicate product name, excluding the current product
+        
         const existingProduct = await Product.findOne({ 
             title: productName.trim(),
-            _id: { $ne: productId } // Exclude the current product
+            _id: { $ne: productId } 
         });
         
         if (existingProduct) {
@@ -389,14 +389,14 @@ exports.updateProduct = async (req, res) => {
             });
         }
         
-        // Handle keeping existing images
+        
         let imagesToKeep = [];
         if (imageIdsToKeep) {
             const keepIndices = imageIdsToKeep.split(',').map(id => parseInt(id));
             imagesToKeep = keepIndices.map(index => currentProduct.images[index]).filter(img => img);
         }
         
-        // Process new and cropped images
+        
         let newImagePaths = [];
         if (req.files && req.files.croppedImages && req.files.croppedImages.length > 0) {
             await Promise.all(req.files.croppedImages.map(async (file) => {
@@ -412,14 +412,13 @@ exports.updateProduct = async (req, res) => {
             }));
         }
         
-        // Combine kept images and new images
+        
         const allImages = [...imagesToKeep, ...newImagePaths];
         
         if (allImages.length === 0) {
             return res.status(400).json({ error: 'At least one product image is required' });
         }
         
-        // Update product
         await Product.findByIdAndUpdate(productId, {
             title: productName.trim(),  
             category,
@@ -430,7 +429,7 @@ exports.updateProduct = async (req, res) => {
             author,
             stock: parseInt(stockCount),
             images: allImages,
-            coverImage: allImages[0] // Use first image as cover
+            coverImage: allImages[0]
         }, { runValidators: true });  
         
         res.json({ success: true });

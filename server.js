@@ -22,7 +22,6 @@ mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/BookSy', 
 .then(() => console.log("MongoDB Connected..."))
 .catch(err => {
     console.log("MongoDB Connection Error:", err);
-    // Log more details about the connection
     console.log("Connection URI:", process.env.MONGODB_URI ? "URI defined" : "URI undefined");
 });
 
@@ -40,14 +39,13 @@ app.use(cookieParser());
 app.use(methodOverride('_method'));
 app.use(flash());
 
-// Updated session configuration with MongoStore for production
 app.use(session({
     secret: process.env.SESSION_SECRET || 'your-strong-secret-key',
     resave: false,
     saveUninitialized: false,
     store: MongoStore.create({
         mongoUrl: process.env.MONGODB_URI,
-        ttl: 14 * 24 * 60 * 60, // 14 days
+        ttl: 14 * 24 * 60 * 60, 
         autoRemove: 'native'
     }),
     cookie: { 
@@ -126,7 +124,7 @@ app.use((req, res, next) => {
     next();
 });
 
-// Status endpoint for health checks
+
 app.get('/status', (req, res) => {
     res.status(200).json({ status: 'ok', mongoConnection: mongoose.connection.readyState === 1 });
 });
@@ -137,7 +135,6 @@ app.use((err, req, res, next) => {
     res.status(500).render('error', { message: 'Server error' });
 });
 
-// Updated to listen on all interfaces for Render
 const PORT = process.env.PORT || 10000;
 app.listen(PORT, '0.0.0.0', () => {
     console.log(`Server running on port ${PORT}`);

@@ -14,15 +14,14 @@ const addressValidation = require('../middleware/addressValidation');
 const offerMiddleware = require('../middleware/offerMiddleware');
 const Wallet = require('../models/walletModel');
 
-// Name validation function
+
 const validateName = (name) => {
-  // Name should not be empty
+  
   if (!name || name.trim() === '') {
     return { valid: false, message: 'Name cannot be empty.' };
   }
   
-  // Name should not contain special characters or numbers
-  // Only allow letters, spaces, and some basic punctuation 
+ 
   const nameRegex = /^[A-Za-z\s'.-]+$/;
   if (!nameRegex.test(name)) {
     return { 
@@ -31,7 +30,7 @@ const validateName = (name) => {
     };
   }
   
-  // Name should not be too short or too long
+ 
   if (name.length < 2) {
     return { valid: false, message: 'Name is too short.' };
   }
@@ -40,12 +39,12 @@ const validateName = (name) => {
     return { valid: false, message: 'Name is too long (maximum 50 characters).' };
   }
   
-  // Name should not have excessive spaces
+ 
   if (name.includes('  ')) {
     return { valid: false, message: 'Name should not contain consecutive spaces.' };
   }
   
-  // Name should not start or end with a space
+
   if (name.startsWith(' ') || name.endsWith(' ')) {
     return { valid: false, message: 'Name should not start or end with a space.' };
   }

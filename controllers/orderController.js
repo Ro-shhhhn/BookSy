@@ -169,7 +169,7 @@ exports.cancelOrderProduct = async (req, res) => {
             return res.redirect('/orders');
         }
 
-        // Updated to include "Shipped" status for cancellation
+        
         if (!['Pending', 'Processing', 'Shipped'].includes(order.orderStatus)) {
             req.flash('error', 'Order cannot be cancelled at this stage');
             return res.redirect(`/orders/${req.params.orderId}`);
