@@ -1,0 +1,89 @@
+<nav class="bg-white shadow sticky top-0 z-50">
+  <div class="container mx-auto px-4">
+    <div class="flex justify-between items-center py-4">
+      <!-- Logo -->
+      <div class="flex items-center">
+        <a href="/" class="flex items-center space-x-3">
+          <i class="fas fa-book-open text-sky-600 text-2xl"></i>
+          <span class="text-slate-800 text-2xl font-extrabold tracking-tight">BookSy</span>
+        </a>
+      </div>
+
+      <!-- Desktop Navigation -->
+      <div class="hidden md:flex items-center space-x-4">
+        <a href="/" class="text-slate-700 hover:bg-sky-600 hover:text-white px-3 py-2 rounded-md transition">Home</a>
+        <a href="/products" class="text-slate-700 hover:bg-sky-600 hover:text-white px-3 py-2 rounded-md transition">Books</a>
+        <a href="/about" class="text-slate-700 hover:bg-sky-600 hover:text-white px-3 py-2 rounded-md transition">About</a>
+        <a href="/contact" class="text-slate-700 hover:bg-sky-600 hover:text-white px-3 py-2 rounded-md transition">Contact</a>
+      </div>
+
+      <!-- Icons and Actions -->
+      <div class="flex items-center space-x-4">
+        <!-- Wishlist -->
+        <a href="/wishlist" class="text-slate-700 hover:text-sky-600 transition flex items-center">
+          <i class="far fa-heart text-lg mr-1"></i>
+          <span class="hidden md:inline">Wishlist</span>
+        </a>
+
+        <!-- Cart Icon -->
+        <a href="/cart" class="text-slate-700 hover:text-sky-600 transition relative">
+          <div class="relative">
+            <i class="fa-solid fa-cart-shopping text-lg"></i>
+            <span class="absolute -top-2 -right-2 bg-sky-600 text-white text-xs font-bold rounded-full h-5 w-5 flex items-center justify-center"><%= locals.cartCount || 0 %></span>
+          </div>
+        </a>
+
+        <!-- Profile/Sign In -->
+        <% if (locals.session && session.userId) { %>
+          <div class="relative group">
+            <button class="text-slate-700 hover:text-sky-600 transition focus:outline-none flex items-center">
+              <% if (locals.user && user.profilePicture) { %>
+                <img src="<%= user.profilePicture %>" alt="Profile" class="w-8 h-8 rounded-full object-cover border-2 border-sky-100">
+              <% } else { %>
+                <div class="w-8 h-8 rounded-full bg-sky-100 text-sky-600 flex items-center justify-center border-2 border-sky-100">
+                  <i class="fa-solid fa-user"></i>
+                </div>
+              <% } %>
+            </button>
+            <!-- Dropdown -->
+            <div class="absolute right-0 mt-2 w-64 bg-white rounded-lg shadow-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 transform origin-top-right translate-y-2 group-hover:translate-y-0">
+              <div class="py-2 rounded-lg overflow-hidden">
+                <div class="px-4 py-3 bg-sky-600 text-white rounded-t-lg">
+                  <% if (locals.user && user.name) { %>
+                    <p class="font-medium"><%= user.name %></p>
+                    <p class="text-sm truncate"><%= user.email %></p>
+                  <% } else { %>
+                    <p class="font-medium">My Account</p>
+                  <% } %>
+                </div>
+                <a href="/profile" class="block px-4 py-2 text-sm text-slate-700 hover:bg-gray-50 transition flex items-center">
+                  <i class="fa-solid fa-user-circle mr-2 text-sky-500"></i> My Profile
+                </a>
+                <a href="/orders" class="block px-4 py-2 text-sm text-slate-700 hover:bg-gray-50 transition flex items-center">
+                  <i class="fa-solid fa-shopping-bag mr-2 text-sky-500"></i> My Orders
+                </a>
+                <a href="/addresses" class="block px-4 py-2 text-sm text-slate-700 hover:bg-gray-50 transition flex items-center">
+                  <i class="fa-solid fa-address-book mr-2 text-sky-500"></i> Addresses
+                </a>
+                <a href="/wishlist" class="block px-4 py-2 text-sm text-slate-700 hover:bg-gray-50 transition flex items-center">
+                  <i class="fa-solid fa-heart mr-2 text-sky-500"></i> Wishlist
+                </a>
+                <div class="border-t border-gray-100 my-1"></div>
+                <a href="/logout" class="block px-4 py-2 text-sm text-red-600 hover:bg-gray-50 transition flex items-center">
+                  <i class="fa-solid fa-sign-out-alt mr-2"></i> Logout
+                </a>
+              </div>
+            </div>
+          </div>
+        <% } else { %>
+          <a href="/login" class="text-white bg-sky-600 hover:bg-sky-700 px-3 py-2 rounded-md font-medium transition">Sign In</a>
+        <% } %>
+
+        <!-- Mobile Menu Toggle -->
+        <button id="mobile-menu-toggle" class="md:hidden text-sky-600 hover:text-sky-700 focus:outline-none">
+          <i class="fa-solid fa-bars text-lg"></i>
+        </button>
+      </div>
+    </div>
+  </div>
+</nav>

@@ -570,7 +570,7 @@
         e.preventDefault();
         const form = e.target;
         const submitBtn = form.querySelector('button[type="submit"]');
-        const isEdit = <%= typeof isEdit !== 'undefined' && isEdit %>;
+        const isEdit = '<%= typeof isEdit !== "undefined" && isEdit %>' === 'true';
         
         if (fileCount === 0) {
             showErrorToast('At least one product image is required');

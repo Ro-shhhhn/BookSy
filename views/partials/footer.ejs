@@ -1,0 +1,74 @@
+<footer class="bg-gradient-to-r from-[#AB8462] to-[#9A7355] text-white mt-12 relative">
+  <!-- decorative wave -->
+  <div class="absolute -top-8 left-0 w-full overflow-hidden leading-[0]">
+    <svg viewBox="0 0 500 150" preserveAspectRatio="none" class="w-full h-12">
+      <path d="M0.00,49.98 C150.00,150.00 349.70,-49.98 500.00,49.98 L500.00,150.00 L0.00,150.00 Z" style="stroke: none; fill: rgba(0,0,0,0.06);"></path>
+    </svg>
+  </div>
+
+  <div class="container mx-auto px-6 py-12 relative z-10">
+    <div class="grid grid-cols-1 md:grid-cols-4 gap-8">
+      <div>
+        <a href="/" class="flex items-center gap-2 mb-4 inline-block">
+          <img src="/public/images/lib.webp" alt="BookSy" class="w-10 h-10 object-cover rounded" />
+          <span class="text-2xl font-semibold">BookSy</span>
+        </a>
+        <p class="text-sm text-white/90 mb-4">Discover, read and share a world of books. Quality reads at great prices.</p>
+
+        <form action="/subscribe" method="POST" class="flex gap-2 max-w-md">
+          <input type="email" name="email" placeholder="Your email" required class="px-3 py-2 rounded-l bg-white/10 placeholder-white/70 text-white outline-none" />
+          <button class="bg-white text-[#0B61FF] px-3 py-2 rounded-r font-semibold">Subscribe</button>
+        </form>
+      </div>
+
+      <div>
+        <h4 class="font-semibold mb-3">Explore</h4>
+        <ul class="text-sm space-y-2 text-white/90">
+          <li><a href="/" class="hover:underline">Home</a></li>
+          <li><a href="/products" class="hover:underline">Products</a></li>
+          <li><a href="/wishlist" class="hover:underline">Wishlist</a></li>
+          <li><a href="/contact" class="hover:underline">Contact Us</a></li>
+        </ul>
+      </div>
+
+      <div>
+        <h4 class="font-semibold mb-3">Your Account</h4>
+        <ul class="text-sm space-y-2 text-white/90">
+          <li><a href="/profile" class="hover:underline">Profile</a></li>
+          <li><a href="/orders" class="hover:underline">Orders</a></li>
+          <li><a href="/wallet" class="hover:underline">Wallet</a></li>
+          <li><a href="/addresses" class="hover:underline">Addresses</a></li>
+        </ul>
+      </div>
+
+      <div>
+        <h4 class="font-semibold mb-3">Help & Support</h4>
+        <ul class="text-sm space-y-2 text-white/90">
+          <li><a href="/faq" class="hover:underline">FAQ</a></li>
+          <li><a href="/shipping" class="hover:underline">Shipping</a></li>
+          <li><a href="/returns" class="hover:underline">Returns</a></li>
+          <li><a href="/terms" class="hover:underline">Terms & Privacy</a></li>
+        </ul>
+
+        <div class="mt-4 flex items-center gap-3">
+          <a href="#" class="text-white/90 hover:text-white"><i class="fa-brands fa-facebook fa-lg"></i></a>
+          <a href="#" class="text-white/90 hover:text-white"><i class="fa-brands fa-instagram fa-lg"></i></a>
+          <a href="#" class="text-white/90 hover:text-white"><i class="fa-brands fa-twitter fa-lg"></i></a>
+        </div>
+      </div>
+    </div>
+
+    <div class="mt-8 flex flex-col md:flex-row items-center justify-between gap-4">
+      <div class="text-sm text-white/80">Accepted Payments:</div>
+      <div class="flex items-center gap-3">
+        <img src="/public/images/payments/visa.png" alt="visa" class="h-6" />
+        <img src="/public/images/payments/mastercard.png" alt="mc" class="h-6" />
+        <img src="/public/images/payments/upi.png" alt="upi" class="h-6" />
+      </div>
+    </div>
+  </div>
+
+  <div class="bg-black/20 text-white/80 text-center py-3">
+    <div class="container mx-auto px-6">&copy; <%= new Date().getFullYear() %> BookSy. All rights reserved.</div>
+  </div>
+</footer>
