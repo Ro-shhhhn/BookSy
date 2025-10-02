@@ -4,7 +4,8 @@ const PDFDocument = require('pdfkit');
 const User = require('../models/user')
 const Wallet = require('../models/walletModel');
 const ReturnRequest = require('../models/returnRequestModel');
-const Coupon = require('../models/couponModel');
+const Coupon = require('../models/couponModel')
+const { removeFromWishlist } = require('./wishlistController');
 exports.getOrderListPage = async (req, res) => {
     try {
         const searchQuery = req.query.search || '';

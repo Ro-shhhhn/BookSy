@@ -128,9 +128,8 @@ const userController = {
                 return res.redirect('/login');
             }
             
-            // Check if a file was uploaded and handle the profile image
             if (req.file) {
-                // For disk storage, we can use this path format
+
                 user.profileImage = `/uploads/profiles/${req.file.filename}`;
                 console.log('Profile image updated:', user.profileImage);
             }

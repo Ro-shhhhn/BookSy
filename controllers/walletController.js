@@ -23,8 +23,7 @@ exports.getWalletPage = async (req, res) => {
         
         const totalTransactions = wallet.transactions.length;
         
-        // Fix the sorting to ensure latest transactions are at the top
-        // Use date field instead of createdAt and ensure proper date comparison
+        
         const transactions = wallet.transactions
             .sort((a, b) => new Date(b.date) - new Date(a.date))
             .slice(skip, skip + limit);

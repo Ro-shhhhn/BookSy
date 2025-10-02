@@ -2,6 +2,15 @@ require('dotenv').config();
 const mongoose = require('mongoose');
 const Admin = require('./models/adminuser');
 
+// Read admin credentials from environment variables
+const ADMIN_EMAIL = process.env.ADMIN_EMAIL;
+const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD;
+
+if (!ADMIN_EMAIL || !ADMIN_PASSWORD) {
+    console.error('ADMIN_EMAIL and ADMIN_PASSWORD must be set in the environment (or .env file). Aborting.');
+    process.exit(1);
+}
+
 // Connect to MongoDB
 mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/BookSy', { 
     useNewUrlParser: true, 
@@ -12,15 +21,15 @@ mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/BookSy', 
     
     try {
         // Check if admin already exists
-        const existingAdmin = await Admin.findOne({ email: 'roshantheadmin@gmail.com' });
+        const existingAdmin = await Admin.findOne({ email: ADMIN_EMAIL });
         
         if (existingAdmin) {
             console.log('Admin user already exists');
         } else {
-            // Create new admin
+            // Create new admin using env credentials
             const admin = new Admin({
-                email: 'roshantheadmin@gmail.com',
-                password: 'RoshanMunnu', //  hashed by presave
+                email: ADMIN_EMAIL,
+                password: ADMIN_PASSWORD, // hashed by pre-save hook in model
                 name: 'Admin User',
                 role: 'admin'
             });

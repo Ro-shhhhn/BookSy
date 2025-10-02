@@ -323,8 +323,7 @@ exports.downloadPdf = async (req, res) => {
             endDate.setHours(23, 59, 59, 999);
         }
 
-        const orderStatusFilter = req.query.orderStatus || 'all';
-        const statusFilter = orderStatusFilter !== 'all' ? { orderStatus: orderStatusFilter } : {};
+        const orderStatusFilter = req.query.orderStatus || 'all';    const statusFilter = orderStatusFilter !== 'all' ? { orderStatus: orderStatusFilter } : {};
 
         const filter = {
             createdAt: { $gte: startDate, $lte: endDate },
